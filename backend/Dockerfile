@@ -36,7 +36,7 @@ COPY . .
 ENV PATH=/root/.local/bin:$PATH
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 8000
+EXPOSE 7860
 
-# Start FastAPI with Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start FastAPI with Uvicorn on port 7860 (Hugging Face default)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
