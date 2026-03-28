@@ -1,17 +1,26 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Stage 1: Build dependencies
+FROM python:3.11-slim as builder
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python requirements
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Stage 2: Final runtime image
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install runtime system dependencies (for OpenCV/RapidOCR)
+RUN apt-get update && apt-get install -y \
+    libpq5 \
     curl \
     libgl1 \
     libglib2.0-0 \
@@ -19,15 +28,15 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code
+# Copy installed python packages from builder
+COPY --from=builder /root/.local /root/.local
 COPY . .
 
-# Expose the port the app runs on
+# Ensure scripts in .local/bin are in PATH
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+
 EXPOSE 8000
 
-# Command to run the application
+# Start FastAPI with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
