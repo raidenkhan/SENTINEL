@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { TopNav } from "@/components/dashboard/TopNav";
 import useSWR, { mutate } from "swr";
+import { motion } from "framer-motion";
 import { fetcher } from "@/lib/fetcher";
 import { FileProcessingView } from "@/components/dashboard/FileProcessingView";
 import { TrendsChart } from "@/components/dashboard/TrendsChart";
@@ -11,7 +11,6 @@ import { TopicHeatmap } from "@/components/dashboard/TopicHeatmap";
 import { BloomsDistribution } from "@/components/dashboard/BloomsDistribution";
 import { StudyAssistantChat } from "@/components/dashboard/StudyAssistantChat";
 import { CommunityInsights } from "@/components/dashboard/CommunityInsights";
-import { motion } from "framer-motion";
 
 export default function DashboardPage() {
     const [activeMobileTab, setActiveMobileTab] = useState('overview');
@@ -27,7 +26,8 @@ export default function DashboardPage() {
     // Fetch papers with user-specific fallback filters
     const { data: papers, error: papersError } = useSWR(
         `${API_URL}/api/papers?course_name=${userPrefs.major}&year=${userPrefs.level}`, 
-        fetcher
+        fetcher,
+        { dedupingInterval: 30000 } // Cache for 30 seconds
     );
     const activeCourseId = papers && papers.length > 0 ? papers[0].course_id : null;
 
@@ -38,9 +38,7 @@ export default function DashboardPage() {
     );
 
     return (
-        <div className="flex flex-col w-full min-h-full p-4 md:p-8">
-            <TopNav />
-
+        <div className="flex flex-col w-full min-h-full">
             <motion.div
                 className="flex flex-col gap-6 w-full max-w-[1800px] mx-auto pb-20"
                 initial={{ opacity: 0, y: 20 }}

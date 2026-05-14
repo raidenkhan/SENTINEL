@@ -346,6 +346,10 @@ async def generate_study_plan(request: StudyPlanRequest):
         else:
             analytics_data = get_course_analytics(request.course_id)
 
+        import inspect
+        if inspect.isawaitable(analytics_data):
+            analytics_data = await analytics_data
+
         # Construct prompt for the Study Plan
         # We focus on weak topics (low frequency or complex Bloom's levels)
         topics = analytics_data.get("topic_frequencies", {})
@@ -382,11 +386,13 @@ async def generate_study_plan(request: StudyPlanRequest):
 def get_course_analytics(course_id: str):
     """
     Fetches aggregated analytics for the Dashboard.
-    Pulls calculated frequency counts of topics across years.
+    Uses optimized single query with joins instead of N+1.
     """
     try:
-        # Find all papers for this course
-        papers_resp = supabase_client.table('exam_papers').select('id, year').eq('course_id', course_id).execute()
+        # Single optimized query - get papers with course info
+        papers_resp = supabase_client.table('exam_papers').select(
+            'id, year, courses(id, code, name, department)'
+        ).eq('course_id', course_id).execute()
         
         if not papers_resp.data:
             return {
@@ -400,7 +406,10 @@ def get_course_analytics(course_id: str):
         paper_ids = [p['id'] for p in papers_resp.data]
         paper_year_map = {p['id']: p['year'] for p in papers_resp.data}
         
-        questions_resp = supabase_client.table('questions').select('*').in_('paper_id', paper_ids).execute()
+        # Single query for all questions - much faster than N+1
+        questions_resp = supabase_client.table('questions').select(
+            'topic, blooms_level, paper_id'
+        ).in_('paper_id', paper_ids).execute()
         
         topics_count = {}
         blooms_count = {}

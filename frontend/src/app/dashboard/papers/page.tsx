@@ -3,33 +3,15 @@
 import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import { fetcher } from "@/lib/fetcher";
+import { cn } from "@/lib/utils";
 import {
-    FileText,
-    Search,
-    Trash2,
-    ExternalLink,
-    Calendar,
-    BookOpen,
-    Clock,
-    CheckCircle2,
-    Loader2,
-    AlertCircle,
-    ChevronRight,
-    Filter,
-    BarChart3
+    FileText, Search, Trash2, ExternalLink, Calendar, BookOpen, Clock, CheckCircle2,
+    Loader2, AlertCircle, ChevronRight, Filter, BarChart3, Binary, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
-
-// Removed date-fns to avoid dependency issues, using native Intl
-const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    }).format(new Date(dateString));
-};
+import { GlassCard } from "@/components/landing/GlassCard";
+import { Button } from "@/components/ui/Button";
 
 interface Paper {
     id: string;
@@ -55,14 +37,9 @@ export default function PapersPage() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this paper and all its analyzed data?")) return;
-
         try {
-            const res = await fetch(`${API_URL}/api/papers/${id}`, {
-                method: "DELETE",
-            });
-            if (res.ok) {
-                mutate(`${API_URL}/api/papers`);
-            }
+            const res = await fetch(`${API_URL}/api/papers/${id}`, { method: "DELETE" });
+            if (res.ok) mutate(`${API_URL}/api/papers`);
         } catch (err) {
             console.error("Delete failed", err);
         }
@@ -70,8 +47,8 @@ export default function PapersPage() {
 
     const filteredPapers = papers.filter((p) => {
         const matchesSearch =
-            p.courses.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.courses.code.toLowerCase().includes(searchQuery.toLowerCase());
+            p.courses?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.courses?.code.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesYear = filterYear === "All Years" || p.year.toString() === filterYear;
         return matchesSearch && matchesYear;
     });
@@ -79,69 +56,68 @@ export default function PapersPage() {
     const years = ["All Years", ...Array.from(new Set(papers.map(p => p.year.toString()))).sort().reverse()];
 
     return (
-        <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+        <div className="space-y-12">
             {/* Header Section */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-neon-crystal animate-pulse" />
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Document Vault</span>
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4">
+                <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                        <Binary className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-600 dark:text-emerald-400 uppercase">Archive Management</span>
                     </div>
-                    <h1 className="text-4xl font-black text-[var(--text-primary)] italic tracking-tighter">
-                        PAST <span className="text-neon-crystal shadow-neon-glow">PAPERS</span>
+                    <h1 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none">
+                        Document <span className="text-emerald-500 shadow-emerald">Vault</span>
                     </h1>
-                    <p className="text-[var(--text-muted)] mt-2 max-w-md">
-                        Manage your analyzed exam papers, verify processing status, and deep-dive into source documents.
+                    <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">
+                        Manage your analyzed exam neural-maps. High-fidelity OCR extraction active for all vaulted documents.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <ThemeToggle />
-                    <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-sm p-4 flex items-center gap-4">
+                    <GlassCard className="p-5 flex items-center gap-5 border-black/5 dark:border-white/5">
                         <div className="text-right">
-                            <div className="text-2xl font-black text-[var(--text-primary)] leading-none">{papers.length}</div>
-                            <div className="text-[10px] text-[var(--text-muted)] uppercase font-bold">Total Vaulted</div>
+                            <div className="text-3xl font-black text-slate-900 dark:text-white leading-none">{papers.length}</div>
+                            <div className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-black tracking-widest mt-1">Files Indexed</div>
                         </div>
-                        <div className="w-10 h-10 rounded-sm bg-neon-crystal/10 flex items-center justify-center border border-neon-crystal/20">
-                            <BookOpen className="w-5 h-5 text-neon-crystal" />
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald">
+                            <BookOpen className="w-6 h-6 text-white" />
                         </div>
-                    </div>
+                    </GlassCard>
                 </div>
             </header>
 
-            {/* Controls Bar */}
-            <section className="flex flex-col md:flex-row gap-4 items-center bg-white dark:bg-slate-900/40 p-4 rounded-sm border border-slate-800/60 backdrop-blur-md sticky top-6 z-20">
+            {/* Controls Bar (charcoal Glass) */}
+            <section className="flex flex-col md:flex-row gap-4 items-center bg-white/40 dark:bg-charcoal-900/40 p-4 rounded-2xl border border-black/5 dark:border-white/5 backdrop-blur-xl sticky top-6 z-30 shadow-sm">
                 <div className="relative flex-1 group w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-neon-crystal transition-colors" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search by course code or name..."
+                        placeholder="Search by course code or identifier..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-800/50 border border-[var(--border)] rounded-sm py-3 pl-12 pr-4 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-neon-crystal focus:border-neon-crystal transition-all placeholder:text-[var(--text-muted)] shadow-sm"
+                        className="w-full bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400"
                     />
                 </div>
 
-                <div className="flex gap-4 w-full md:w-auto">
+                <div className="flex gap-3 w-full md:w-auto">
                     <div className="relative group w-full md:w-48">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <select
                             value={filterYear}
                             onChange={(e) => setFilterYear(e.target.value)}
-                            className="w-full bg-white dark:bg-slate-800/50 border border-[var(--border)] rounded-sm py-3 pl-12 pr-8 text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-neon-crystal transition-all cursor-pointer text-[var(--text-primary)] shadow-sm"
+                            className="w-full bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-8 text-sm font-bold text-slate-900 dark:text-white appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all cursor-pointer"
                         >
-                            {years.map(y => <option key={y} value={y}>{y}</option>)}
+                            {years.map(y => <option key={y} value={y} className="bg-white dark:bg-charcoal-900">{y}</option>)}
                         </select>
                     </div>
                 </div>
             </section>
 
             {/* Papers Grid */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <AnimatePresence mode="popLayout">
                     {isLoading ? (
                         Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="h-64 rounded-sm bg-slate-800/20 border border-slate-700/30 animate-pulse" />
+                            <div key={i} className="h-64 rounded-3xl bg-slate-100 dark:bg-white/5 border border-black/5 dark:border-white/5 animate-pulse" />
                         ))
                     ) : filteredPapers.length > 0 ? (
                         filteredPapers.map((paper, index) => (
@@ -154,13 +130,12 @@ export default function PapersPage() {
                         ))
                     ) : (
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="col-span-full py-20 flex flex-col items-center justify-center text-slate-500 bg-slate-800/10 rounded-sm border border-dashed border-slate-700/50"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                            className="col-span-full py-24 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/2 rounded-3xl border-2 border-dashed border-black/5 dark:border-white/5"
                         >
-                            <FileText className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="text-lg font-medium">No papers found in the vault</p>
-                            <p className="text-sm">Try adjusting your search or upload a new exam paper.</p>
+                            <FileText className="w-16 h-16 mb-6 opacity-30" />
+                            <p className="text-xl font-black uppercase italic tracking-tighter">Vault Empty</p>
+                            <p className="text-sm font-medium mt-1">Upload an exam paper to begin neural processing.</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -177,92 +152,78 @@ function PaperCard({ paper, index, onDelete }: { paper: Paper; index: number; on
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ delay: index * 0.05 }}
-            className="group relative flex flex-row items-stretch bg-slate-900/60 border border-slate-800/60 rounded-sm p-4 hover:border-neon-crystal/30 transition-all duration-500 overflow-hidden gap-3 md:gap-4 h-[180px] md:h-[200px]"
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ delay: index * 0.03 }}
+            className="group relative h-[180px]"
         >
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neon-crystal/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-neon-crystal/10 transition-colors pointer-events-none" />
-
-            {/* Left Column - Details */}
-            <div className="flex flex-col flex-1 min-w-0 justify-between">
-                {/* Header: Status and Date */}
-                <div className="flex flex-wrap items-center justify-between xl:justify-start gap-2 mb-2">
-                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border text-[8px] md:text-[9px] font-bold uppercase tracking-wider ${isCompleted ? "bg-neon-crystal/10 border-neon-crystal/20 text-neon-crystal shadow-neon-glow" :
-                        isProcessing ? "bg-blue-500/10 border-blue-500/20 text-blue-400 animate-pulse" :
-                            "bg-red-500/10 border-red-500/20 text-red-500"
-                        }`}>
-                        {isCompleted && <CheckCircle2 className="w-2.5 h-2.5" />}
-                        {isProcessing && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
-                        {isFailed && <AlertCircle className="w-2.5 h-2.5" />}
-                        {paper.processing_status}
-                    </div>
-                    <div className="text-[9px] font-mono text-slate-500 bg-slate-800/50 px-1.5 py-1 rounded whitespace-nowrap">
-                        {Math.round((new Date().getTime() - new Date(paper.upload_date).getTime()) / (1000 * 3600 * 24))}d ago
-                    </div>
-                </div>
-
-                {/* Content: Title and Course */}
-                <div className="space-y-1 flex-1 min-h-0 flex flex-col justify-center">
-                    <h3 className="line-clamp-2 text-xs md:text-sm lg:text-base font-bold text-slate-100 group-hover:text-neon-crystal transition-colors uppercase italic tracking-tight" title={paper.courses?.name || "Unnamed Course"}>
-                        {paper.courses?.name || "Unnamed Course"}
-                    </h3>
-                    <p className="text-[9px] md:text-[10px] font-mono text-slate-400 flex items-center gap-1.5 truncate mt-1">
-                        <span className="text-neon-crystal font-black">{paper.courses?.code}</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-700 hidden sm:inline-block shrink-0" />
-                        <span className="truncate">{paper.courses?.department}</span>
-                    </p>
-                </div>
-
-                {/* Meta: Year & Sem */}
-                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-[var(--border)] shrink-0">
-                    <div className="bg-[var(--foreground)]/5 rounded-sm p-1.5 border border-transparent flex flex-col md:flex-row md:items-center gap-1">
-                        <Calendar className="w-3 h-3 text-[var(--neon-crystal)]" />
-                        <div>
-                            <div className="text-[8px] text-[var(--text-muted)] uppercase leading-none hidden md:block mb-0.5">Year</div>
-                            <div className="text-[10px] md:text-xs font-bold text-[var(--text-primary)]">{paper.year}</div>
+            <div className="h-full flex flex-col p-4 border border-[var(--border)] bg-[var(--card-bg)] hover:border-emerald-500/30 transition-colors">
+                <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className={cn(
+                            "flex items-center gap-2 px-2 py-1 rounded text-[10px] font-medium",
+                            isCompleted ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" :
+                            isProcessing ? "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-500" :
+                            "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-500"
+                        )}>
+                            {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                            {isProcessing && <Loader2 className="w-3 h-3 animate-spin" />}
+                            {isFailed && <AlertCircle className="w-3 h-3" />}
+                            <span className="hidden sm:inline">{paper.processing_status}</span>
+                        </div>
+                        <div className="text-[9px] font-mono text-[var(--text-muted)]">
+                           {paper.id.split('-')[0].toUpperCase()}
                         </div>
                     </div>
-                    <div className="bg-[var(--foreground)]/5 rounded-sm p-1.5 border border-transparent flex flex-col md:flex-row md:items-center gap-1">
-                        <Clock className="w-3 h-3 text-[var(--neon-crystal)]" />
-                        <div>
-                            <div className="text-[8px] text-[var(--text-muted)] uppercase leading-none hidden md:block mb-0.5">Sem</div>
-                            <div className="text-[10px] md:text-xs font-bold text-[var(--text-primary)]">{paper.semester}</div>
+
+                    <div className="space-y-1 mt-3">
+                        <h3 className="line-clamp-1 text-sm font-semibold text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
+                            {paper.courses?.name || "Unknown Course"}
+                        </h3>
+                        <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
+                            <span className="font-medium text-emerald-600 dark:text-emerald-500">{paper.courses?.code || "UNKN"}</span>
+                            <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
+                            <span className="truncate">{paper.courses?.department || "General"}</span>
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-[var(--border)]">
+                        <div className="flex items-center gap-2">
+                             <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+                             <span className="text-[11px] font-medium text-[var(--text-primary)]">{paper.year}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                             <span className="text-[11px] font-medium text-[var(--text-primary)]">Sem {paper.semester}</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Right Column - Actions */}
-            <div className="flex flex-col justify-between items-end border-l border-slate-800/60 pl-3 md:pl-4 w-[65px] md:w-[90px] shrink-0 relative z-10">
-                <button
-                    onClick={() => window.open(paper.file_url, '_blank')}
-                    className="w-full flex-1 flex flex-col items-center justify-center gap-1 bg-neon-crystal/10 hover:bg-neon-crystal hover:text-black border border-neon-crystal/20 text-neon-crystal rounded-sm p-1 md:p-2 transition-all"
-                    title="View PDF"
-                >
-                    <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
-                    <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-wider mt-0.5">View</span>
-                </button>
-                
-                <Link href={`/dashboard/papers/${paper.id}`} className="w-full flex-1 mt-2">
-                    <button 
-                        className="w-full h-full flex flex-col items-center justify-center gap-1 bg-slate-800/40 hover:bg-slate-700 hover:text-neon-crystal border border-[var(--border)] text-slate-400 rounded-sm p-1 md:p-2 transition-all"
-                        title="Deep Dive Analytics"
+                {/* Actions */}
+                <div className="absolute right-0 top-0 bottom-0 w-12 flex flex-col justify-center items-center py-3 border-l border-[var(--border)] bg-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={() => window.open(paper.file_url, '_blank')}
+                        className="w-8 h-8 flex items-center justify-center text-[var(--text-muted)] hover:text-emerald-500 transition-colors"
+                        title="View PDF"
                     >
-                        <BarChart3 className="w-3 h-3 md:w-4 md:h-4" />
-                        <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-wider mt-0.5">Dive</span>
+                        <ExternalLink className="w-4 h-4" />
                     </button>
-                </Link>
+                    
+                    <Link href={`/dashboard/papers/${paper.id}`} className="mt-2">
+                        <button className="w-8 h-8 flex items-center justify-center bg-emerald-500 text-white rounded hover:bg-emerald-600 transition-colors">
+                            <BarChart3 className="w-4 h-4" />
+                        </button>
+                    </Link>
 
-                <button
-                    onClick={onDelete}
-                    className="w-full flex items-center justify-center p-1 md:p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-transparent hover:border-red-400 rounded-sm transition-all group/trash mt-2 h-[30px] md:h-[40px] shrink-0"
-                    title="Delete Paper"
-                >
-                    <Trash2 className="w-3 h-3 md:w-4 md:h-4 group-hover/trash:rotate-12 transition-transform" />
-                </button>
+                    <button
+                        onClick={onDelete}
+                        className="w-8 h-8 mt-2 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors"
+                        title="Delete"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

@@ -20,12 +20,14 @@ export const GlassCard = ({ children, className, blur = "md", onClick }: GlassCa
         <div
             onClick={onClick}
             className={cn(
-                "bg-[var(--card-bg)] border-[var(--border)] shadow-2xl overflow-hidden active:scale-[0.99] transition-all rounded-[var(--radius)]",
+                "bg-[var(--card-bg)] border border-[var(--border)] rounded overflow-hidden",
                 blurs[blur],
                 className
             )}
         >
-            {children}
+            <div className="relative z-10 w-full h-full">
+                {children}
+            </div>
         </div>
     );
 };

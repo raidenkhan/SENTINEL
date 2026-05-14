@@ -4,27 +4,16 @@ import { useEffect, useState, use } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import {
-    ChevronLeft,
-    BookOpen,
-    Calendar,
-    Clock,
-    FileText,
-    Activity,
-    GraduationCap,
-    BrainCircuit,
-    CheckCircle2,
-    AlertCircle,
-    ChevronRight,
-    Play,
-    Send,
-    Loader2,
-    ArrowLeft,
-    ChevronDown,
-    Image as ImageIcon
+    ChevronLeft, BookOpen, Calendar, Clock, FileText, Activity, GraduationCap,
+    BrainCircuit, CheckCircle2, AlertCircle, ChevronRight, Play, Send, Loader2,
+    ArrowLeft, ChevronDown, Image as ImageIcon, Binary, Sparkles, Zap, Cpu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { GlassCard } from "@/components/landing/GlassCard";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface Question {
     id: string;
@@ -71,8 +60,8 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ paper_id: id })
             });
-            const data = await res.json();
-            setStudyPlan(data.plan);
+            const resData = await res.json();
+            setStudyPlan(resData.plan);
         } catch (e) {
             console.error(e);
         } finally {
@@ -108,202 +97,190 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[#020617]">
-                <Loader2 className="w-10 h-10 text-neon-crystal animate-spin" />
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Activity className="w-10 h-10 text-emerald-500 animate-spin" />
             </div>
         );
     }
 
-    if (!data) return <div className="p-10 text-white">Paper not found or connection error.</div>;
+    if (!data) return <div className="p-10 text-[var(--text-primary)]">Neural data not found.</div>;
 
     const topicData = Object.entries(data.stats.topic_distribution).map(([name, value]) => ({ name, value }));
     const bloomsData = Object.entries(data.stats.blooms_distribution).map(([name, value]) => ({ name, value }));
-    const COLORS = ['#39FF14', '#2563EB', '#D9FF00', '#F59E0B', '#EF4444', '#8B5CF6'];
+    const COLORS = ['#10b981', '#6366f1', '#f59e0b', '#8b5cf6', '#ef4444', '#3b82f6'];
 
     return (
-        <div className="flex flex-col h-full bg-[#020617] text-slate-200 overflow-hidden relative">
+        <div className="flex flex-col h-screen -m-8 overflow-hidden bg-[var(--background)] transition-colors duration-500">
+            {/* Study Plan Modal (Obsidian Sheet) */}
             <AnimatePresence>
                 {studyPlan && (
                     <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 dark:bg-obsidian-950/80 backdrop-blur-xl"
                     >
-                        <motion.div 
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            className="bg-slate-900 border border-slate-800 rounded-sm w-full max-w-3xl max-h-[80vh] overflow-y-auto p-10 relative custom-scrollbar shadow-2xl"
-                        >
-                            <button 
-                                onClick={() => setStudyPlan(null)}
-                                className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
-                            >
-                                <ChevronDown className="w-6 h-6 rotate-180" />
+                        <GlassCard className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-12 relative bg-white/95 dark:bg-obsidian-900/90 rounded-[2.5rem]">
+                            <button onClick={() => setStudyPlan(null)} className="absolute top-8 right-8 text-slate-400 hover:text-emerald-500 transition-colors p-2">
+                                <ChevronDown className="w-8 h-8 rotate-180" />
                             </button>
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 rounded-sm bg-neon-crystal/10 border border-neon-crystal/20 flex items-center justify-center">
-                                    <BrainCircuit className="w-6 h-6 text-neon-crystal" />
+                            <div className="flex items-center gap-5 mb-10">
+                                <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-emerald">
+                                    <BrainCircuit className="w-8 h-8 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">PAPER <span className="text-neon-crystal">STRATEGY</span></h2>
-                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">SENTINEL Intelligence Core v4.0</p>
+                                    <h2 className="text-3xl font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">PAPER_ADVISORY</h2>
+                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-widest mt-1">Intelligence Core Active</p>
                                 </div>
                             </div>
-                            <div className="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed space-y-4">
-                                {studyPlan.split('\n').map((line, i) => (
-                                    <p key={i}>{line}</p>
-                                ))}
+                            <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                                {studyPlan.split('\n').map((line, i) => <p key={i} className="mb-4">{line}</p>)}
                             </div>
-                            <button 
-                                onClick={() => setStudyPlan(null)}
-                                className="w-full py-4 mt-8 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase italic tracking-widest rounded-sm transition-colors"
-                            >
-                                CLOSE ADVISORY
-                            </button>
-                        </motion.div>
+                            <Button onClick={() => setStudyPlan(null)} className="w-full h-14 mt-10 rounded-2xl font-black">CLOSE SESSION</Button>
+                        </GlassCard>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Horizontal Breadcrumb Header */}
-            <nav className="flex items-center justify-between px-8 py-4 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md z-30">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard/papers" className="p-2 hover:bg-slate-800 rounded-sm transition-colors group">
-                        <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-neon-crystal" />
+            {/* Premium Header/Navigation */}
+            <nav className="flex items-center justify-between px-10 py-6 border-b border-black/5 dark:border-white/5 bg-[var(--nav-bg)] backdrop-blur-3xl z-40">
+                <div className="flex items-center gap-6">
+                    <Link href="/dashboard/papers" className="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-black/5 dark:hover:border-white/10 group">
+                        <ChevronLeft className="w-5 h-5 text-slate-500 group-hover:text-emerald-500" />
                     </Link>
-                    <div className="h-6 w-px bg-slate-800" />
+                    <div className="h-10 w-px bg-black/5 dark:bg-white/10" />
                     <div className="flex flex-col">
-                        <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                        <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             <span>{data.paper.courses.code}</span>
                             <ChevronRight className="w-2 h-2" />
-                            <span>{data.paper.year}</span>
-                            <ChevronRight className="w-2 h-2" />
-                            <span className="text-neon-crystal">{data.paper.semester}</span>
+                            <span className="text-emerald-500">{data.paper.year} SCAN</span>
                         </div>
-                        <h1 className="text-lg font-black text-white italic tracking-tight uppercase leading-none mt-0.5">
+                        <h1 className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none mt-1">
                             {data.paper.courses.name}
                         </h1>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <button 
+                    <Button 
                         onClick={handleGenerateStudyPlan}
                         disabled={isGeneratingPlan}
-                        className="px-6 py-2.5 bg-neon-crystal text-black font-black text-[10px] uppercase italic tracking-widest rounded-sm shadow-neon-glow hover:scale-[1.05] transition-transform disabled:opacity-50"
+                        className="rounded-xl h-12 px-8 font-black text-[10px]"
                     >
-                        {isGeneratingPlan ? "GENERATING ANALYSIS..." : "GENERATE STUDY PLAN"}
-                    </button>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-neon-crystal/10 border border-neon-crystal/20 text-[10px] font-bold text-neon-crystal uppercase tracking-wider">
-                        <CheckCircle2 className="w-3 h-3" />
-                        {data.paper.processing_status}
+                        {isGeneratingPlan ? "ANALYZING..." : "GENERATE STRATEGY"}
+                    </Button>
+                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">
+                        <Zap className="w-3.5 h-3.5" />
+                        SYNCED
                     </div>
                 </div>
             </nav>
 
-            {/* Split Content Area */}
             <div className="flex flex-1 overflow-hidden relative">
-                {/* Left Side: Question List (Wider) */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar scroll-smooth">
-                    <div className="max-w-4xl mx-auto space-y-4">
-                        <div className="flex items-center justify-between mb-4 px-2">
-                            <h2 className="text-xl font-black italic text-white tracking-tighter">UNITS <span className="text-neon-crystal">HUB</span></h2>
-                            <div className="flex gap-2">
-                                <div className="px-2 py-1 bg-slate-800/40 rounded-sm border border-slate-700/50 text-[10px] text-slate-500 uppercase font-mono">
-                                    Sort: Difficulty
-                                </div>
+                {/* Scrollable Question Feed */}
+                <main className="flex-1 overflow-y-auto p-10 custom-scrollbar scroll-smooth">
+                    <div className="max-w-4xl mx-auto space-y-10">
+                        <div className="flex items-center justify-between pb-4 border-b border-black/5 dark:border-white/5">
+                            <div>
+                                <h2 className="text-2xl font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">UNITS_HUB</h2>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Found {data.questions.length} logical entities</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
+                        <div className="grid grid-cols-1 gap-6 pb-20">
                             {data.questions.map((q, i) => (
                                 <motion.button
                                     key={q.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.03 }}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
                                     onClick={() => {
                                         setSelectedQuestion(q);
                                         setGradingResult(null);
                                         setUserAnswer("");
                                     }}
-                                    className={`group relative text-left p-4 rounded-sm border transition-all duration-300 flex items-start gap-5 ${selectedQuestion?.id === q.id 
-                                        ? "bg-neon-crystal/10 border-neon-crystal/40 shadow-neon-glow-sm" 
-                                        : "bg-slate-900/40 border-slate-800/60 hover:border-slate-700"
-                                    }`}
+                                    className="w-full text-left focus:outline-none"
                                 >
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-sm bg-slate-800/50 border border-slate-700/50 flex flex-col items-center justify-center group-hover:bg-neon-crystal/10 group-hover:border-neon-crystal/20 transition-colors">
-                                        <span className="text-[10px] font-bold text-slate-500 leading-none mb-1">UNIT</span>
-                                        <span className="text-sm font-black text-white leading-none">{q.question_number}</span>
-                                    </div>
-
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[9px] font-bold uppercase tracking-widest text-neon-crystal bg-neon-crystal/10 px-1.5 py-0.5 rounded-sm">
-                                                {q.blooms_level}
-                                            </span>
-                                            {q.is_calculation_heavy && (
-                                                <span className="text-[9px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-sm">
-                                                    CALCULATION
-                                                </span>
-                                            )}
-                                            {q.diagram_url && (
-                                                <span className="text-[9px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-sm flex items-center gap-1">
-                                                    <ImageIcon className="w-2 h-2" />
-                                                    DIAGRAM
-                                                </span>
-                                            )}
-                                            <span className="text-[9px] font-mono text-slate-600 uppercase ml-auto">{q.topic}</span>
+                                    <GlassCard className={cn(
+                                        "p-6 flex items-start gap-6 border-black/5 dark:border-white/10 group hover:border-emerald-500/30 transition-all duration-300",
+                                        selectedQuestion?.id === q.id ? "bg-emerald-500/10 border-emerald-500/40" : ""
+                                    )}>
+                                        <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/10 flex flex-col items-center justify-center transition-all group-hover:scale-105 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20">
+                                            <span className="text-[9px] font-black text-slate-400 group-hover:text-emerald-500 leading-none mb-1">UNIT</span>
+                                            <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{q.question_number}</span>
                                         </div>
-                                        <p className="text-sm text-slate-300 italic line-clamp-2 leading-relaxed">
-                                            "{q.raw_text}"
-                                        </p>
-                                    </div>
-                                    <ChevronRight className={`flex-shrink-0 w-4 h-4 text-slate-700 mt-4 transition-transform ${selectedQuestion?.id === q.id ? "rotate-90 text-neon-crystal" : "group-hover:translate-x-1"}`} />
+
+                                        <div className="flex-1 space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                                                    {q.blooms_level}
+                                                </span>
+                                                {q.is_calculation_heavy && (
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded-full border border-indigo-500/20">
+                                                        CALCULATION
+                                                    </span>
+                                                )}
+                                                <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-600 uppercase ml-auto">{q.topic}</span>
+                                            </div>
+                                            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 italic line-clamp-3 leading-relaxed">
+                                                "{q.raw_text}"
+                                            </p>
+                                        </div>
+                                        <ChevronRight className={cn(
+                                            "flex-shrink-0 w-5 h-5 text-slate-400 mt-6 transition-all",
+                                            selectedQuestion?.id === q.id ? "rotate-90 text-emerald-500 scale-110" : "group-hover:translate-x-1 group-hover:text-emerald-500"
+                                        )} />
+                                    </GlassCard>
                                 </motion.button>
                             ))}
                         </div>
                     </div>
                 </main>
 
-                {/* Right Side: Quick Analytics Pane (Fixed/Persistent on Large Screens) */}
-                <aside className="hidden lg:flex flex-col w-96 border-l border-slate-800/60 bg-slate-900/20 p-8 space-y-8 overflow-y-auto custom-scrollbar">
+                {/* Right Side: Quick Analytics Pane */}
+                <aside className="hidden lg:flex flex-col w-[380px] border-l border-black/5 dark:border-white/5 bg-[var(--nav-bg)] p-10 space-y-12 overflow-y-auto custom-scrollbar">
                     <section>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 rounded-sm bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                <GraduationCap className="w-4 h-4 text-blue-400" />
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-indigo-500/5">
+                                <GraduationCap className="w-5 h-5 text-indigo-500" />
                             </div>
-                            <h3 className="text-sm font-bold text-white uppercase tracking-tighter">Bloom's Matrix</h3>
+                            <div>
+                                <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Bloom's Matrix</h3>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Cognitive Distribution</p>
+                            </div>
                         </div>
-                        <div className="h-48 relative">
+                        <div className="h-56 relative bg-slate-50 dark:bg-white/2 rounded-[2rem] border border-black/5 dark:border-white/5 p-4 flex items-center justify-center">
                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={bloomsData} innerRadius={50} outerRadius={65} paddingAngle={4} dataKey="value">
+                                    <Pie data={bloomsData} innerRadius={60} outerRadius={80} paddingAngle={4} dataKey="value">
                                         {bloomsData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                                     </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: 'rgba(2,2,3,0.95)', border: 'none', borderRadius: '16px', fontSize: '10px', backdropFilter: 'blur(10px)' }}
+                                        itemStyle={{ color: '#fff', fontWeight: '900' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
                     </section>
 
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-8 h-8 rounded-sm bg-neon-crystal/10 flex items-center justify-center border border-neon-crystal/20">
-                                <BrainCircuit className="w-4 h-4 text-neon-crystal" />
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-emerald">
+                                <BrainCircuit className="w-5 h-5 text-emerald-500" />
                             </div>
-                            <h3 className="text-sm font-bold text-white uppercase tracking-tighter">Core Concepts</h3>
+                            <div>
+                                <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Knowledge Density</h3>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Topic Saturation</p>
+                            </div>
                         </div>
-                        <div className="space-y-4">
-                            {topicData.slice(0, 4).map((topic, i) => (
-                                <div key={topic.name} className="space-y-1.5">
-                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                                        <span className="truncate max-w-[140px]">{topic.name}</span>
-                                        <span className="text-neon-crystal">{topic.value}</span>
+                        <div className="space-y-6">
+                            {topicData.slice(0, 5).map((topic, i) => (
+                                <div key={topic.name} className="space-y-2">
+                                    <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">
+                                        <span className="truncate max-w-[180px]">{topic.name}</span>
+                                        <span className="text-emerald-500">{topic.value} UNITs</span>
                                     </div>
-                                    <div className="h-1 w-full bg-slate-800 rounded-sm overflow-hidden">
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `${(topic.value / data.stats.total_questions) * 100}%` }} className="h-full bg-neon-crystal" />
+                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${(topic.value / data.stats.total_questions) * 100}%` }} className="h-full bg-emerald-500" />
                                     </div>
                                 </div>
                             ))}
@@ -312,84 +289,113 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                 </aside>
             </div>
 
-            {/* AI Practice Overlay - remains full screen lab but triggered by selection */}
+            {/* NEURAL LAB OVERLAY (The Side Panel) */}
             <AnimatePresence>
                 {selectedQuestion && (
                     <>
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedQuestion(null)} className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md z-[60]" />
-                        <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 200 }} className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-[#0f172a] border-l border-white/5 z-[70] flex flex-col shadow-2xl">
-                            <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-sm bg-neon-crystal/10 flex items-center justify-center border border-neon-crystal/30">
-                                        <GraduationCap className="w-6 h-6 text-neon-crystal" />
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+                            onClick={() => setSelectedQuestion(null)} 
+                            className="fixed inset-0 bg-black/60 dark:bg-obsidian-950/80 backdrop-blur-xl z-[60]" 
+                        />
+                        <motion.div 
+                            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} 
+                            transition={{ type: "spring", damping: 30, stiffness: 200 }} 
+                            className="fixed top-0 right-0 w-full md:w-[680px] h-full bg-white dark:bg-obsidian-900 border-l border-black/5 dark:border-white/10 z-[70] flex flex-col shadow-24 overflow-hidden"
+                        >
+                            {/* Scanning Header */}
+                            <div className="p-8 border-b border-black/5 dark:border-white/5 flex items-center justify-between relative bg-slate-50 dark:bg-white/2">
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/20 overflow-hidden">
+                                    <motion.div 
+                                        animate={{ x: ["-100%", "100%"] }} 
+                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                        className="h-full w-40 bg-emerald-500 shadow-emerald" 
+                                    />
+                                </div>
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-emerald group">
+                                        <GraduationCap className="w-8 h-8 text-white transition-transform group-hover:scale-110" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-black italic text-white tracking-tighter">SENTINEL <span className="text-neon-crystal underline decoration-neon-crystal decoration-2 underline-offset-8">LABS</span></h2>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">AI Peer Assessment Active</p>
+                                        <h2 className="text-3xl font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">SENTINEL_LABS</h2>
+                                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest mt-1">Peer Assessment Logic Active</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedQuestion(null)} className="p-3 hover:bg-white/5 rounded-full transition-colors text-slate-500 hover:text-white">
-                                    <ChevronRight className="w-6 h-6" />
+                                <button onClick={() => setSelectedQuestion(null)} className="p-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl transition-all">
+                                    <ChevronRight className="w-8 h-8 text-slate-400" />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-                                <section className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-2 py-0.5 border-l-2 border-neon-crystal">Question Target</div>
-                                        <span className="text-[10px] font-mono text-neon-crystal/50">ID: {selectedQuestion.question_number}</span>
+                            <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+                                        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Question Source</h3>
                                     </div>
                                     {selectedQuestion.diagram_url && (
-                                        <div className="mb-6 rounded-sm overflow-hidden border border-slate-700 bg-black/40 p-2">
-                                            <img 
-                                                src={selectedQuestion.diagram_url} 
-                                                alt={`Diagram for ${selectedQuestion.question_number}`}
-                                                className="w-full h-auto object-contain max-h-[300px] hover:scale-[1.5] transition-transform duration-500 cursor-zoom-in"
-                                            />
-                                            <div className="text-[9px] text-slate-500 mt-2 text-center uppercase font-bold tracking-widest">
-                                                Diagram Source: Sentinel Asset Hub
+                                        <GlassCard className="mb-6 rounded-3xl overflow-hidden border-black/5 dark:border-white/10 bg-slate-50 dark:bg-black/40 p-4 group">
+                                             <div className="relative">
+                                                <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
+                                                <img 
+                                                    src={selectedQuestion.diagram_url} 
+                                                    alt={`Unit ${selectedQuestion.question_number}`}
+                                                    className="w-full h-auto object-contain max-h-[350px] relative z-0 transition-all duration-700 group-hover:scale-[1.05]"
+                                                />
+                                             </div>
+                                            <div className="text-[10px] text-slate-500 font-black mt-4 text-center uppercase tracking-widest opacity-60">
+                                                SCAN_SOURCE: SECURE_ASSET_HUB
                                             </div>
-                                        </div>
+                                        </GlassCard>
                                     )}
-                                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-sm italic text-sm text-slate-300 leading-relaxed shadow-inner">
+                                    <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-[2rem] italic text-base text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium">
                                         "{selectedQuestion.raw_text}"
                                     </div>
                                 </section>
 
-                                <section className="space-y-4">
-                                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Your Attempt</div>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                                        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Your Neural Input</h3>
+                                    </div>
                                     <textarea 
                                         value={userAnswer}
                                         onChange={(e) => setUserAnswer(e.target.value)}
-                                        placeholder="Formulate your answer here using course keywords..."
-                                        className="w-full h-48 bg-slate-900 border border-white/5 rounded-sm p-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-neon-crystal transition-all resize-none shadow-2xl placeholder:text-slate-700"
+                                        placeholder="Establish your answer pattern here..."
+                                        className="w-full h-56 bg-slate-50 dark:bg-white/2 border border-black/5 dark:border-white/5 rounded-[2rem] p-8 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium placeholder:text-slate-400"
                                     />
-                                    <button 
+                                    <Button 
                                         onClick={handleGrade}
                                         disabled={isGrading || !userAnswer.trim()}
-                                        className="w-full py-5 bg-neon-crystal/10 hover:bg-neon-crystal text-neon-crystal hover:text-black border border-neon-crystal/20 rounded-sm font-black italic text-sm tracking-widest uppercase transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-95"
+                                        className="w-full h-16 rounded-[1.5rem] font-black text-base shadow-emerald"
                                     >
                                         {isGrading ? (
-                                            <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            <div className="flex items-center gap-3">
+                                                <Loader2 className="w-6 h-6 animate-spin" />
                                                 DECRYPTING PERFORMANCE...
-                                            </>
+                                            </div>
                                         ) : (
-                                            <>
-                                                <Send className="w-5 h-5" />
-                                                SUBMIT ASSESSMENT
-                                            </>
+                                            <div className="flex items-center gap-3">
+                                                <Send className="w-6 h-6" />
+                                                SUBMIT FOR ANALYSIS
+                                            </div>
                                         )}
-                                    </button>
+                                    </Button>
                                 </section>
 
                                 {gradingResult && (
-                                    <motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 bg-transparent border border-neon-crystal/20 p-8 rounded-sm relative overflow-hidden ring-1 ring-white/5">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                                            <div className="w-14 h-14 bg-neon-crystal text-black rounded-sm flex items-center justify-center font-black text-xl shadow-neon-glow">AI</div>
+                                    <motion.section 
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+                                        animate={{ opacity: 1, scale: 1, y: 0 }} 
+                                        className="bg-emerald-500/5 dark:bg-emerald-500/2 border border-emerald-500/20 p-10 rounded-[2.5rem] relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                                            <Cpu className="w-20 h-20 text-emerald-500" />
                                         </div>
-                                        <div className="text-[10px] font-bold text-neon-crystal uppercase tracking-widest mb-6">Evaluation Feedback</div>
-                                        <div className="text-sm text-slate-300 leading-loose whitespace-pre-wrap font-medium">
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <Sparkles className="w-5 h-5 text-emerald-500" />
+                                            <h3 className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">AI Performance Feedback</h3>
+                                        </div>
+                                        <div className="text-base text-slate-700 dark:text-slate-300 leading-loose whitespace-pre-wrap font-medium">
                                             {typeof gradingResult === 'string' ? gradingResult : JSON.stringify(gradingResult, null, 2)}
                                         </div>
                                     </motion.section>
@@ -399,20 +405,6 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                     </>
                 )}
             </AnimatePresence>
-        </div>
-    );
-}
-
-function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-    return (
-        <div className="bg-slate-800/40 rounded-sm p-4 border border-slate-700/50 flex items-center gap-4 min-w-[120px]">
-            <div className="w-10 h-10 rounded-sm bg-neon-crystal/10 flex items-center justify-center border border-neon-crystal/20">
-                <Icon className="w-5 h-5 text-neon-crystal" />
-            </div>
-            <div>
-                <div className="text-xl font-black text-white leading-none">{value}</div>
-                <div className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">{label}</div>
-            </div>
         </div>
     );
 }

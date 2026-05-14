@@ -130,7 +130,7 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
             </div>
 
             {/* Waveform / Scanning Animation - Right Side */}
-            <div className="w-full md:w-2/3 h-64 md:h-auto rounded-sm border border-[var(--foreground)]/5 bg-[var(--card-bg)]/40 relative flex items-center justify-center overflow-hidden z-10 backdrop-blur-md shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="w-full md:w-2/3 h-64 md:h-auto rounded-sm border border-[var(--foreground)]/5 bg-[var(--card-bg)]/40 relative flex items-center justify-center overflow-hidden z-10 backdrop-blur-md shadow-[inset_0_0_50px_var(--shadow-color)]">
                 {/* ECG Line */}
                 <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
                     <defs>

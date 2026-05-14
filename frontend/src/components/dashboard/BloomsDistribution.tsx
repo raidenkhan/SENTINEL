@@ -4,12 +4,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { useMemo } from "react";
 
 const COLORS = [
-    "#39FF14", // neon-crystal
-    "#2563EB", // neon-blue
-    "#7c3aed", // violet-600
-    "#db2777", // pink-600
-    "#EAB308", // yellow-500
-    "#EF4444", // red-500
+    "#10b981", // emerald-neon
+    "#6366f1", // indigo-neon
+    "#8b5cf6", // violet-500
+    "#f43f5e", // rose-500
+    "#f59e0b", // amber-500
+    "#3b82f6", // blue-500
 ];
 
 export function BloomsDistribution({ data }: { data?: Record<string, number> }) {
@@ -27,7 +27,7 @@ export function BloomsDistribution({ data }: { data?: Record<string, number> }) 
     return (
         <div className="glass-card p-4 md:p-8 flex flex-col h-full relative overflow-hidden">
             <div className="flex items-center gap-2 mb-8 z-10">
-                <div className="w-3 h-3 rounded-full bg-neon-blue" />
+                <div className="w-3 h-3 rounded-full bg-indigo-neon shadow-indigo-500/40" />
                 <h2 className="text-xl font-bold text-[var(--text-primary)]">Cognitive Complexity</h2>
             </div>
 
@@ -56,8 +56,14 @@ export function BloomsDistribution({ data }: { data?: Record<string, number> }) 
                             ))}
                         </Pie>
                         <Tooltip
-                            contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                            itemStyle={{ color: 'var(--text-primary)' }}
+                            contentStyle={{ 
+                                backgroundColor: 'var(--card-bg)', 
+                                borderColor: 'var(--border)', 
+                                borderRadius: '12px', 
+                                backdropFilter: 'blur(10px)' 
+                            }}
+                            itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
+                            labelStyle={{ color: 'var(--text-primary)' }}
                         />
                         <Legend
                             verticalAlign="bottom"

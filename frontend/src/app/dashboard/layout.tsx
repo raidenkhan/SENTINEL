@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { TopNav } from "@/components/dashboard/TopNav";
 
 export default function DashboardLayout({
     children,
@@ -13,9 +14,12 @@ export default function DashboardLayout({
             {/* Sidebar is permanent in the layout */}
             <Sidebar />
 
-            {/* Main content area gets the scrollbar */}
-            <main className="flex-1 relative z-10 overflow-y-auto custom-scrollbar">
-                {children}
+            {/* Main content area */}
+            <main className="flex-1 relative z-10 overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col">
+                <div className="p-4 md:p-8">
+                    <TopNav />
+                    {children}
+                </div>
             </main>
         </div>
     );
