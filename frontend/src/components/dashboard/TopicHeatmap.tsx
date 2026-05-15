@@ -22,13 +22,23 @@ export function TopicHeatmap({ data: propData, years: propYears }: HeatmapProps)
     const maxTotal = Math.max(...topicTotals.map(t => t.total), 1);
 
     return (
-        <div className="glass-card p-4 md:p-6 flex flex-col h-full min-h-[300px]">
-            <div className="flex items-center gap-2 mb-6">
+        <div className="glass-card p-4 md:p-6 flex flex-col h-full min-h-[300px]" style={{
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--card-bg) 50%, rgba(16, 185, 129, 0.04) 100%)",
+            borderColor: "rgba(16, 185, 129, 0.15)",
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06), inset 0 0 30px -10px rgba(16, 185, 129, 0.2), 0 20px 40px -10px var(--shadow-color)"
+        }}>
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+                background: "radial-gradient(ellipse 100% 80% at 50% -20%, rgba(16, 185, 129, 0.08) 0%, transparent 60%)"
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.4) 50%, transparent 100%)"
+            }} />
+            <div className="flex items-center gap-2 mb-6 z-20">
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
                 <h2 className="text-lg font-semibold text-[var(--text-primary)]">Topic Frequency</h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto z-20 relative">
                 {topicTotals.length === 0 ? (
                     <div className="text-center py-8 text-[var(--text-muted)] text-sm">
                         Upload exam papers to see topic analysis

@@ -37,10 +37,20 @@ export function HighYieldTopics({ insights }: HighYieldProps) {
     const topConfidence = processedTopics.length > 0 ? processedTopics[0].confidence : 0;
 
     return (
-        <div className="glass-card p-4 md:p-8 flex flex-col h-full">
-            <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6">High Yield Topics</h2>
+        <div className="glass-card p-4 md:p-8 flex flex-col h-full" style={{
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, var(--card-bg) 50%, rgba(99, 102, 241, 0.04) 100%)",
+            borderColor: "rgba(16, 185, 129, 0.12)",
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06), inset 0 0 40px -15px rgba(16, 185, 129, 0.2), 0 20px 40px -10px var(--shadow-color)"
+        }}>
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+                background: "radial-gradient(ellipse 100% 70% at 50% -20%, rgba(16, 185, 129, 0.05) 0%, transparent 60%)"
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.35) 50%, transparent 100%)"
+            }} />
+            <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6 z-10 relative">High Yield Topics</h2>
 
-            <div className="flex flex-col gap-4 flex-1">
+            <div className="flex flex-col gap-4 flex-1 z-10 relative">
                 {processedTopics.length === 0 ? (
                     <div className="text-center py-10 text-[var(--text-muted)] text-sm italic">
                         No topic data available yet.
@@ -65,7 +75,7 @@ export function HighYieldTopics({ insights }: HighYieldProps) {
                 )))}
             </div>
 
-            <div className="mt-8 pt-8 border-t border-[var(--foreground)]/10">
+            <div className="mt-8 pt-8 border-t border-[var(--foreground)]/10 z-10 relative">
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2 font-mono">Top Confidence Metric</p>
                 <div className="flex items-end gap-2 mb-4">
                     <span className="text-3xl font-black text-neon-crystal">{topConfidence.toFixed(1)}%</span>

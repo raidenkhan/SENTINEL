@@ -12,7 +12,17 @@ export function TrendsChart({ data: propData }: TrendsChartProps) {
     const chartData = propData || [];
 
     return (
-        <div className="glass-card p-4 md:p-8 flex flex-col h-full relative overflow-hidden group">
+        <div className="glass-card p-4 md:p-8 flex flex-col h-full relative overflow-hidden group" style={{
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, var(--card-bg) 50%, rgba(16, 185, 129, 0.03) 100%)",
+            borderColor: "rgba(16, 185, 129, 0.12)",
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06), inset 0 0 40px -15px rgba(16, 185, 129, 0.15), 0 20px 40px -10px var(--shadow-color)"
+        }}>
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+                background: "radial-gradient(ellipse 100% 70% at 50% -20%, rgba(16, 185, 129, 0.06) 0%, transparent 60%)"
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.35) 50%, transparent 100%)"
+            }} />
             <div className="flex items-center gap-2 mb-8 z-10">
                 <div className="w-3 h-3 rounded-full bg-emerald-neon shadow-emerald" />
                 <h2 className="text-xl font-bold text-[var(--text-primary)]">Frequency Patterns</h2>

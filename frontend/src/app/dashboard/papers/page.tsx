@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 import {
     FileText, Search, Trash2, ExternalLink, Calendar, BookOpen, Clock, CheckCircle2,
     Loader2, AlertCircle, ChevronRight, Filter, BarChart3, Binary, Sparkles
@@ -21,6 +22,7 @@ interface Paper {
     file_url: string;
     processing_status: string;
     upload_date: string;
+    user_id: string | null;
     courses: {
         name: string;
         code: string;
@@ -31,14 +33,28 @@ interface Paper {
 export default function PapersPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterYear, setFilterYear] = useState<string>("All Years");
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     const { data: papers = [], isLoading } = useSWR<Paper[]>(`${API_URL}/api/papers`, fetcher);
+
+    useEffect(() => {
+        async function loadUser() {
+            const { data: { user } } = await supabase.auth.getUser();
+            setCurrentUserId(user?.id || null);
+        }
+        loadUser();
+    }, []);
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this paper and all its analyzed data?")) return;
         try {
             const res = await fetch(`${API_URL}/api/papers/${id}`, { method: "DELETE" });
+            if (res.status === 403) {
+                const data = await res.json();
+                alert(data.detail || "You can only delete papers you uploaded.");
+                return;
+            }
             if (res.ok) mutate(`${API_URL}/api/papers`);
         } catch (err) {
             console.error("Delete failed", err);
@@ -126,6 +142,7 @@ export default function PapersPage() {
                                 paper={paper}
                                 index={index}
                                 onDelete={() => handleDelete(paper.id)}
+                                isOwner={currentUserId !== null && paper.user_id === currentUserId}
                             />
                         ))
                     ) : (
@@ -144,7 +161,7 @@ export default function PapersPage() {
     );
 }
 
-function PaperCard({ paper, index, onDelete }: { paper: Paper; index: number; onDelete: () => void }) {
+function PaperCard({ paper, index, onDelete, isOwner }: { paper: Paper; index: number; onDelete: () => void; isOwner: boolean }) {
     const isCompleted = paper.processing_status === "completed";
     const isProcessing = paper.processing_status === "processing" || paper.processing_status === "pending";
     const isFailed = paper.processing_status === "failed";
@@ -216,13 +233,15 @@ function PaperCard({ paper, index, onDelete }: { paper: Paper; index: number; on
                         </button>
                     </Link>
 
-                    <button
-                        onClick={onDelete}
-                        className="w-8 h-8 mt-2 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors"
-                        title="Delete"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isOwner && (
+                        <button
+                            onClick={onDelete}
+                            className="w-8 h-8 mt-2 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors"
+                            title="Delete (Owner only)"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
         </motion.div>

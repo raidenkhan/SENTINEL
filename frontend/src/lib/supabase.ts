@@ -1,16 +1,23 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-let supabaseInstance: SupabaseClient | null = null;
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("❌ Missing Supabase env vars:", {
+    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl ? "✓" : "✗",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey ? "✓" : "✗",
+  });
+}
 
 function createSupabaseClient(): SupabaseClient {
   if (!supabaseUrl || !supabaseAnonKey) {
-    return createClient("https://placeholder.supabase.co", "placeholder") as SupabaseClient;
+    throw new Error(`Missing environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set. Current values: URL="${supabaseUrl}", KEY="${supabaseAnonKey ? "set" : "missing"}"`);
   }
   return createClient(supabaseUrl, supabaseAnonKey);
 }
+
+let supabaseInstance: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient {
   if (!supabaseInstance) {

@@ -25,7 +25,17 @@ export function BloomsDistribution({ data }: { data?: Record<string, number> }) 
     }, [data]);
 
     return (
-        <div className="glass-card p-4 md:p-8 flex flex-col h-full relative overflow-hidden">
+        <div className="glass-card p-4 md:p-8 flex flex-col h-full relative overflow-hidden" style={{
+            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, var(--card-bg) 50%, rgba(99, 102, 241, 0.04) 100%)",
+            borderColor: "rgba(99, 102, 241, 0.15)",
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.06), inset 0 0 30px -10px rgba(99, 102, 241, 0.2), 0 20px 40px -10px var(--shadow-color)"
+        }}>
+            <div className="absolute inset-0 pointer-events-none z-0" style={{
+                background: "radial-gradient(ellipse 100% 80% at 50% -20%, rgba(99, 102, 241, 0.08) 0%, transparent 60%)"
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.4) 50%, transparent 100%)"
+            }} />
             <div className="flex items-center gap-2 mb-8 z-10">
                 <div className="w-3 h-3 rounded-full bg-indigo-neon shadow-indigo-500/40" />
                 <h2 className="text-xl font-bold text-[var(--text-primary)]">Cognitive Complexity</h2>

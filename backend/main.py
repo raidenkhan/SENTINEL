@@ -127,7 +127,8 @@ async def upload_exam_paper(
             'semester': semester,
             'file_url': file_url,
             'file_hash': file_hash,
-            'processing_status': 'pending'
+            'processing_status': 'pending',
+            'user_id': None  # TODO: Extract from auth token when auth is fully implemented
         }
 
         insert_response = supabase_client.table('exam_papers').insert(paper_data).execute()
@@ -215,20 +216,53 @@ def get_paper_details(paper_id: str):
 def delete_exam_paper(paper_id: str):
     """
     Deletes an exam paper and its associated questions.
+    Only the original uploader can delete their paper.
+    Admins can delete any paper via /api/admin/papers/{id}
     """
     try:
-        # 1. Delete questions first (foreign key constraint)
-        supabase_client.table('questions').delete().eq('paper_id', paper_id).execute()
+        paper_res = supabase_client.table('exam_papers').select('user_id, course_id').eq('id', paper_id).single().execute()
         
-        # 2. Delete the paper record
+        if not paper_res.data:
+            raise HTTPException(status_code=404, detail="Paper not found")
+        
+        paper_owner = paper_res.data.get('user_id')
+        
+        if paper_owner is not None:
+            raise HTTPException(
+                status_code=403, 
+                detail="You can only delete papers you uploaded."
+            )
+        
+        supabase_client.table('questions').delete().eq('paper_id', paper_id).execute()
         supabase_client.table('exam_papers').delete().eq('id', paper_id).execute()
         
-        # NOTE: In a full production app, we would also remove the file from Supabase Storage
-        # and delete the corresponding embeddings from ChromaDB.
-        
         return {"status": "success", "message": f"Paper {paper_id} deleted"}
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Error deleting paper: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/admin/papers/{paper_id}")
+def admin_delete_paper(paper_id: str):
+    """
+    Admin-only endpoint to delete any paper.
+    Use this for removing community content or reports.
+    """
+    try:
+        paper_res = supabase_client.table('exam_papers').select('user_id, course_id').eq('id', paper_id).single().execute()
+        
+        if not paper_res.data:
+            raise HTTPException(status_code=404, detail="Paper not found")
+        
+        supabase_client.table('questions').delete().eq('paper_id', paper_id).execute()
+        supabase_client.table('exam_papers').delete().eq('id', paper_id).execute()
+        
+        return {"status": "success", "message": f"Admin: Paper {paper_id} deleted"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Error in admin delete: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -335,6 +369,7 @@ async def grade_student_answer(request: GradeRequest):
 async def generate_study_plan(request: StudyPlanRequest):
     """
     Generates a personalized study plan based on paper analytics.
+    Returns structured JSON for better frontend parsing.
     """
     try:
         if not request.paper_id and not request.course_id:
@@ -350,31 +385,54 @@ async def generate_study_plan(request: StudyPlanRequest):
         if inspect.isawaitable(analytics_data):
             analytics_data = await analytics_data
 
-        # Construct prompt for the Study Plan
-        # We focus on weak topics (low frequency or complex Bloom's levels)
         topics = analytics_data.get("topic_frequencies", {})
         blooms = analytics_data.get("blooms_distribution", {})
+        total_questions = analytics_data.get("total_questions_parsed", 0)
         
+        # Construct prompt for structured JSON response
         prompt = f"""
         Role: You are SENTINEL Intelligence Core.
-        Task: Generate a high-intensity Study Plan based on these exam paper analytics:
+        Task: Generate a study plan based on exam analytics. Return ONLY valid JSON.
         
-        Analytics:
-        - Topics Identified: {topics}
-        - Bloom's Taxonomy Distribution: {blooms}
+        Analytics Data:
+        - Total Questions: {total_questions}
+        - Topics: {topics}
+        - Bloom's Distribution: {blooms}
         
-        Requirements:
-        1. Identify the 'High-Yield' topics (most frequent).
-        2. Identify 'Complex Areas' (Bloom's Level 4+).
-        3. Provide a 3-step prioritized action plan.
-        4. Recommend a mock session strategy.
-        
-        Tone: Professional, data-driven, and highly encouraging engineering coach.
-        Format: Return as structured Markdown.
+        Return this exact JSON structure (no markdown, no extra text):
+        {{
+            "high_yield_topics": ["topic1", "topic2"],
+            "complex_areas": ["area1"],
+            "steps": [
+                {{"title": "string", "description": "string"}},
+                {{"title": "string", "description": "string"}},
+                {{"title": "string", "description": "string"}}
+            ],
+            "mock_strategy": {{
+                "frequency": "string",
+                "coverage": "string", 
+                "types": "string",
+                "review": "string"
+            }}
+        }}
         """
         
         response = llm.invoke(prompt)
-        return {"plan": response.content}
+        content = response.content.strip()
+        
+        # Try to parse as JSON, if fails return raw content
+        import json
+        try:
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+                content = content.strip()
+            plan_data = json.loads(content)
+            return {"plan": plan_data}
+        except json.JSONDecodeError:
+            # Fallback to raw text if JSON parsing fails
+            return {"plan": {"raw_text": content}, "fallback": True}
         
     except Exception as e:
         logger.error(f"Error generating study plan: {e}")

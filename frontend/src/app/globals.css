@@ -45,10 +45,47 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-2xl border rounded-[var(--radius)];
+    @apply backdrop-blur-2xl border rounded-[var(--radius)] relative overflow-hidden;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--card-glow-start), 0.15) 0%,
+      var(--card-bg) 50%,
+      rgba(var(--card-glow-end), 0.08) 100%
+    );
     box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.06),
+      inset 0 0 60px -20px rgba(var(--card-inner-glow), 0.4),
       0 20px 40px -10px var(--shadow-color);
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(var(--card-glow-color), 0.08) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(var(--card-top-glow), 0.4) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
   }
 
   .bento-grid {
@@ -100,7 +137,7 @@
   --input: #1E1E1E;
   --ring: #10b981;
   --radius: 4px;
-  --card-bg: rgba(13, 13, 15, 0.7);
+  --card-bg: rgba(13, 13, 15, 0.8);
   --card-hover-bg: rgba(30, 30, 30, 0.9);
   --hero-bg: hsl(0 0% 8%);
   --nav-button: hsl(0 0% 18%);
@@ -111,6 +148,13 @@
   --nav-bg: rgba(5, 5, 5, 0.85);
   --text-muted: #9BA3AF;
   --text-primary: #E0E0E0;
+  /* Bento glow CSS vars */
+  --card-glow-color: 16 185 129;
+  --card-glow-start: 16 185 129;
+  --card-glow-end: 99 102 241;
+  --card-inner-glow: 16 185 129;
+  --card-top-glow: 16 185 129;
+  --card-glow-intensity: 0.12;
 }
 
 /* Light mode */
@@ -130,7 +174,7 @@
   --input: #e2e8f0;
   --ring: #059669;
   --radius: 4px;
-  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-bg: rgba(255, 255, 255, 0.95);
   --card-hover-bg: rgba(255, 255, 255, 1);
   --hero-bg: hsl(0 0% 98%);
   --nav-button: hsl(0 0% 95%);
@@ -141,6 +185,13 @@
   --nav-bg: rgba(255, 255, 255, 0.95);
   --text-muted: #475569;
   --text-primary: #0f172a;
+  /* Light mode bento glow - subtle warm tint */
+  --card-glow-color: 16 185 129;
+  --card-glow-start: 16 185 129;
+  --card-glow-end: 99 102 241;
+  --card-inner-glow: 16 185 129;
+  --card-top-glow: 16 185 129;
+  --card-glow-intensity: 0.08;
 }
 
 @keyframes float {

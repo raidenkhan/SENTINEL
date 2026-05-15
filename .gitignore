@@ -11,6 +11,17 @@ __pycache__/
 .vscode/
 .idea/
 
+# Skip skills directory
+skills/
+
+# Skip root-level documentation and config files
+README.md
+SENTINEL-EXAM_Architecture.md
+SENTINEL-EXAM_Project_Report.docx
+SENTINEL-EXAM_Project_Report.md
+humanwritingprompt.md
+*.cx*
+
 # Backend folders that should be handled by backend/.gitignore
 # but included here for safety
 backend/venv/
