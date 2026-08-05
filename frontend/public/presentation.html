@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SENTINEL-EXAM — Final Year Project Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:'base',themeVariables:{background:'#FFFFFF',primaryColor:'#A41E1E',primaryBorderColor:'#A41E1E',primaryTextColor:'#1A1A1A',lineColor:'#8B91A0',secondaryColor:'#F0F5FF',tertiaryColor:'#F4F5F7',fontFamily:'Inter,sans-serif',fontSize:'16px',edgeLabelBackground:'#FFFFFF'}});</script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   SENTINEL PRESENTATION — ACADEMIC LIGHT
+   Inspired by MIT 6.UAR style
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:          #F4F5F7;
+  --surface:     #FFFFFF;
+  --surface-alt: #E9ECF1;
+  --border:      #C9CED6;
+  --border-hl:   #A8B2C4;
+  --accent:      #A41E1E;
+  --accent-soft: #C94A4A;
+  --accent-glow: rgba(164,30,30,0.08);
+  --accent-muted:rgba(164,30,30,0.04);
+  --blue:        #0F4D92;
+  --blue-soft:   #2E6FB8;
+  --blue-muted:  rgba(15,77,146,0.06);
+  --blue-light:  #C7D9EB;
+  --gold:        #E8B400;
+  --success:     #1F7A4D;
+  --success-bg:  rgba(31,122,77,0.08);
+  --text:        #1A1A1A;
+  --text-muted:  #4A4F58;
+  --text-faint:  #8B91A0;
+
+  --font-heading: 'Source Serif 4', Georgia, serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'JetBrains Mono', monospace;
+
+  /* Increased font sizes for screen visibility */
+  --display: clamp(2.8rem, 5vw, 4.8rem);
+  --h1:  clamp(2.2rem, 3.8vw, 3.4rem);
+  --h2:  clamp(1.6rem, 2.6vw, 2.4rem);
+  --h3:  clamp(1.3rem, 2vw, 1.9rem);
+  --body: clamp(1.1rem, 1.5vw, 1.6rem);
+  --sm:  clamp(0.95rem, 1.2vw, 1.3rem);
+  --xs:  clamp(0.8rem, 1vw, 1.05rem);
+  --tiny: clamp(0.7rem, 0.8vw, 0.85rem);
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: var(--font-body); color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════ FIXED CANVAS VIEWER ══════ */
+.viewer { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; position: relative; background: var(--bg); }
+.slides-wrapper { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 1920px; height: 1080px; overflow-y: scroll; overflow-x: hidden; scroll-behavior: smooth; transform-origin: top center; }
+@media (max-aspect-ratio: 1920/1080) { .slides-wrapper { width: 100vw; height: calc(100vw * 1080 / 1920); top: 50%; left: 0; transform: translateY(-50%); } }
+@media (min-aspect-ratio: 1920/1080) { .slides-wrapper { height: 100vh; width: calc(100vh * 1920 / 1080); } }
+.slides-wrapper::-webkit-scrollbar { width: 5px; }
+.slides-wrapper::-webkit-scrollbar-track { background: transparent; }
+.slides-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ══════ SLIDE BASE ══════ */
+.slide { width: 1920px; height: 1080px; scroll-snap-align: start; position: relative; overflow: hidden; flex-shrink: 0; background: var(--bg); }
+.slide > * { position: relative; z-index: 5; }
+
+/* ══════ HEADER SYSTEM ══════ */
+.slide-header { position: absolute; left: 120px; top: 60px; width: 1680px; display: flex; align-items: center; gap: 20px; z-index: 10; }
+.slide-accent { width: 6px; height: 32px; background: var(--accent); flex-shrink: 0; }
+.slide-label { font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; font-weight: 500; }
+.slide-context { font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.18em; color: var(--text-faint); margin-left: auto; }
+
+/* ══════ TYPOGRAPHY ══════ */
+.display { font-family: var(--font-heading); font-size: var(--display); font-weight: 700; color: var(--text); line-height: 1.08; letter-spacing: -0.02em; }
+h1, .h1 { font-family: var(--font-heading); font-size: var(--h1); font-weight: 700; color: var(--text); line-height: 1.12; letter-spacing: -0.01em; }
+h2, .h2 { font-family: var(--font-heading); font-size: var(--h2); font-weight: 700; color: var(--text); line-height: 1.15; }
+h3, .h3 { font-family: var(--font-heading); font-size: var(--h3); font-weight: 700; color: var(--text); line-height: 1.2; }
+h4, .h4 { font-family: var(--font-body); font-size: var(--body); font-weight: 700; color: var(--text); line-height: 1.25; }
+p, .body { font-size: var(--body); color: var(--text-muted); line-height: 1.55; }
+.sm { font-size: var(--sm); color: var(--text-muted); line-height: 1.5; }
+.xs { font-size: var(--xs); color: var(--text-muted); line-height: 1.4; }
+.mono { font-family: var(--font-mono); font-size: var(--xs); color: var(--text-muted); }
+.kicker { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+.badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-muted); border: 1px solid rgba(164,30,30,0.15); padding: 6px 16px; font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft); font-weight: 600; }
+.badge-dot { width: 7px; height: 7px; background: var(--accent); flex-shrink: 0; }
+
+/* ══════ CARDS ══════ */
+.card { min-width:0; background: var(--surface); border: 1px solid var(--border); transition: all 0.25s var(--ease); overflow-wrap: break-word; word-wrap: break-word; }
+.card:hover { border-color: var(--border-hl); }
+.card-bordered { border-left: 6px solid var(--accent); }
+.card-blue { border-left: 6px solid var(--blue); }
+.card-accent { background: var(--accent-muted); border: 1px solid rgba(164,30,30,0.12); }
+.card-dark { background: var(--text); color: var(--bg); }
+.card-dark p, .card-dark .sm, .card-dark .xs { color: #C7D3E6; }
+.card-dark h4 { color: var(--bg); }
+
+.data-card { min-width:0; padding: 20px 24px; border-left: 6px solid var(--accent); overflow-wrap: break-word; }
+.data-card .data-label { font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-soft); }
+.data-card .data-num { font-family: var(--font-heading); font-size: 48px; font-weight: 700; color: var(--text); line-height: 1; margin-top: 4px; }
+.data-card .data-desc { font-size: var(--sm); color: var(--text-muted); line-height: 1.5; margin-top: 6px; }
+
+/* ══════ DECISION CARD (dark sidebar) ══════ */
+.decision-card { min-width:0; background: var(--text); border-radius: 4px; overflow-wrap: break-word; }
+.decision-card .dc-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.28em; color: var(--gold); text-transform: uppercase; }
+.decision-card .dc-chose { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--success); text-transform: uppercase; }
+.decision-card .dc-rejected { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: #E8786A; text-transform: uppercase; }
+.decision-card .dc-value { font-family: var(--font-body); font-weight: 600; font-size: var(--sm); color: var(--bg); line-height: 1.3; }
+.decision-card .dc-desc { font-family: var(--font-body); font-weight: 400; font-size: var(--xs); color: #A8B6CC; line-height: 1.35; }
+.decision-card .dc-divider { height: 1px; background: rgba(255,255,255,0.15); }
+
+/* ══════ TABLE ══════ */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); }
+.table-header { display: grid; gap: 12px; align-items: center; padding: 10px 20px; border-bottom: 2px solid var(--border); font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-soft); font-weight: 600; }
+.table-row { display: grid; gap: 12px; align-items: baseline; padding: 10px 20px; border-bottom: 1px solid var(--surface-alt); font-size: var(--sm); color: var(--text); line-height: 1.4; overflow-wrap: break-word; }
+.table-row:last-child { border-bottom: none; }
+
+/* ══════ LISTS ══════ */
+.ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.ul li { display: flex; align-items: flex-start; gap: 12px; font-size: var(--sm); color: var(--text); line-height: 1.4; }
+.ul li::before { content: '▸'; color: var(--accent); font-size: 0.7em; margin-top: 0.08em; flex-shrink: 0; }
+.contrib { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.contrib li { display: flex; align-items: flex-start; gap: 18px; font-size: var(--sm); color: var(--text); line-height: 1.4; }
+.contrib-num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: var(--accent); color: var(--bg); font-family: var(--font-heading); font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.contrib-num-blue { background: var(--blue); }
+
+/* ══════ AGENDA ══════ */
+.agenda-entry { display: grid; grid-template-columns: 55px 140px 1fr 140px; gap: 20px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--surface-alt); }
+.agenda-entry:last-child { border-bottom: none; }
+.agenda-num { font-family: var(--font-heading); font-size: 28px; color: var(--accent); font-weight: 700; }
+.agenda-section { font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-soft); }
+.agenda-title { font-family: var(--font-heading); font-weight: 700; font-size: var(--h4); color: var(--text); line-height: 1.25; }
+.agenda-desc { font-size: var(--sm); color: var(--text-muted); margin-top: 3px; }
+.agenda-time { font-family: var(--font-mono); font-size: var(--xs); color: var(--text-faint); text-align: right; }
+
+/* ══════ PIPELINE FLOW ══════ */
+.pipeline-stage { flex: 1; min-width:0; padding: 14px 10px; text-align: center; background: var(--surface); border: 1px solid var(--border); overflow-wrap: break-word; }
+.pipeline-stage h4 { color: var(--accent); font-size: clamp(0.85rem, 1vw, 1.1rem); margin-bottom: 2px; }
+.pipeline-stage p { font-size: clamp(0.7rem, 0.75vw, 0.85rem); white-space: normal; }
+.pipeline-arrow { font-size: 28px; color: var(--text-faint); flex: 0 0 28px; display: flex; align-items: center; justify-content: center; }
+.pipeline-stage-accent { background: var(--text); border-color: var(--accent); }
+.pipeline-stage-accent h4 { color: var(--gold); }
+.pipeline-stage-accent p { color: #C7D3E6; }
+
+/* ══════ MERMAID ══════ */
+.mermaid-wrap { width:100%; height:100%; position:relative; background:var(--surface); border:1px solid var(--border); padding:12px; overflow:hidden; }
+.mermaid-wrap svg { max-width:100%; height:auto; display:block; margin:0 auto; }
+
+/* ══════ PROGRESS ══════ */
+.progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; }
+.progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s var(--ease); }
+.nav-dots { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+.nav-dot { width: 10px; height: 10px; border: 2px solid var(--border); background: transparent; cursor: pointer; transition: all 0.25s var(--ease); padding: 0; border-radius: 50%; }
+.nav-dot:hover { border-color: var(--accent-soft); }
+.nav-dot.active { background: var(--accent); border-color: var(--accent); }
+.slide-counter { position: fixed; bottom: 20px; right: 20px; font-family: var(--font-mono); font-size: var(--xs); color: var(--text-faint); z-index: 9999; letter-spacing: 0.05em; background: rgba(244,245,247,0.85); padding: 4px 12px; border: 1px solid var(--border); }
+.kb-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: var(--tiny); color: var(--text-faint); background: rgba(244,245,247,0.85); backdrop-filter: blur(10px); padding: 5px 14px; border: 1px solid var(--border); z-index: 9999; pointer-events: none; white-space: nowrap; }
+.btn-pptx { position:fixed; bottom:20px; right:80px; z-index:9999; background:var(--accent); color:var(--bg); border:none; padding:6px 16px; font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.1em; cursor:pointer; transition:all 0.25s var(--ease); white-space:nowrap; }
+.btn-pptx:hover { background:var(--accent-soft); transform:translateY(-1px); }
+.btn-pptx svg { display:inline; vertical-align:middle; margin-right:6px; }
+
+/* ══════ FOOTER ══════ */
+.footer-cite { position: absolute; left: 120px; bottom: 36px; width: 1680px; font-family: var(--font-mono); font-size: var(--tiny); color: var(--text-faint); letter-spacing: 0.04em; z-index: 10; border-top: 1px solid var(--border); padding-top: 10px; }
+
+/* ══════ META GRID ══════ */
+.meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; border-top: 1px solid var(--border); padding-top: 20px; }
+.meta-label { font-family: var(--font-mono); font-size: var(--tiny); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-soft); }
+.meta-value { font-family: var(--font-heading); font-weight: 600; font-size: var(--h4); color: var(--text); margin-top: 4px; }
+
+/* ══════ CHART ══════ */
+.chart-wrap { width: 100%; height: 100%; position: relative; }
+.chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+/* ══════ LAYOUT ══════ */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.f1 { flex: 1; min-width: 0; min-height: 0; }
+.jcc { justify-content: center; }
+.jcsb { justify-content: space-between; }
+.aic { align-items: center; }
+.aifs { align-items: flex-start; }
+.gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; } .gap-24 { gap: 24px; } .gap-32 { gap: 32px; }
+
+/* ══════ REVEAL ══════ */
+.r{opacity:0;transform:translateY(28px);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease)}
+.rl{opacity:0;transform:translateX(-30px);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease)}
+.rr{opacity:0;transform:translateX(30px);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease)}
+.slide.v .r,.slide.v .rl,.slide.v .rr{opacity:1;transform:none}
+.d1{transition-delay:0.06s}.d2{transition-delay:0.12s}.d3{transition-delay:0.18s}.d4{transition-delay:0.24s}.d5{transition-delay:0.30s}.d6{transition-delay:0.36s}.d7{transition-delay:0.42s}.d8{transition-delay:0.48s}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.15s !important; }
+  .r, .rl, .rr { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
+<nav class="nav-dots" id="nav"></nav>
+<div class="slide-counter" id="counter">01 / 17</div>
+<div class="kb-hint">&#8593; &#8595; &#8592; &#8594; navigate  &middot;  Home / End to jump</div>
+<button class="btn-pptx" onclick="exportPPTX()" title="Download as PowerPoint">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+  Export PPTX
+</button>
+
+<div class="viewer">
+<div class="slides-wrapper" id="wrapper">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 1 — COVER -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="0" style="background:radial-gradient(ellipse 1200px 700px at 78% 22%, rgba(164,30,30,0.08), transparent 60%), linear-gradient(180deg, #F4F5F7 0%, #EDEFF2 100%);">
+  <!-- Left rail -->
+  <div style="position:absolute; left:0; top:0; width:120px; height:1080px; background:var(--accent); z-index:5;"></div>
+  <div style="position:absolute; left:40px; top:900px; width:40px; height:160px; z-index:10; writing-mode:vertical-rl; transform:rotate(180deg);">
+    <div style="font-family:var(--font-mono); font-size:14px; letter-spacing:0.32em; color:var(--bg); text-transform:uppercase;">SENTINEL-EXAM &middot; 2026</div>
+  </div>
+
+  <!-- Top line -->
+  <div style="position:absolute; left:160px; top:60px; width:1700px; display:flex; justify-content:space-between; z-index:10;">
+    <div style="font-family:var(--font-mono); font-size:14px; letter-spacing:0.28em; color:var(--accent); text-transform:uppercase;">BSc. Computer Engineering &middot; Project Defense</div>
+    <div style="font-family:var(--font-mono); font-size:14px; letter-spacing:0.20em; color:var(--text-faint);">KNUST &middot; June 2026</div>
+  </div>
+
+  <!-- Title -->
+  <div style="position:absolute; left:160px; top:240px; width:1640px; z-index:10;">
+    <div style="font-family:var(--font-mono); font-size:15px; letter-spacing:0.30em; color:var(--blue); text-transform:uppercase; margin-bottom:16px;">A claim, not a topic</div>
+    <h1 style="margin:0; font-family:var(--font-heading); font-weight:700; font-size:104px; line-height:1.05; color:var(--text); letter-spacing:-0.015em;">
+      SENTINEL-EXAM<br>
+      <span style="font-weight:400; color:var(--text-muted);">An Intelligent Automated</span><br>
+      <span style="color:var(--accent);">Past Questions Analysis System</span><br>
+      <span style="font-weight:400;">for Engineering Education</span>
+    </h1>
+  </div>
+
+  <!-- Subtitle -->
+  <div style="position:absolute; left:160px; top:720px; width:1480px; z-index:10;">
+    <p style="margin:0; font-size:24px; line-height:1.45; color:var(--text-muted);">
+      An AI-powered platform that analyzes historical examination papers, identifies topic patterns, classifies cognitive complexity via Bloom&rsquo;s Taxonomy, and provides a RAG-powered conversational study assistant &mdash; all within a <strong style="color:var(--text);">zero-cost production-grade architecture</strong>.
+    </p>
+  </div>
+
+  <!-- Meta row -->
+  <div style="position:absolute; left:160px; bottom:70px; width:1640px; z-index:10; display:flex; gap:40px;">
+    <div><div style="font-family:var(--font-mono); font-size:13px; letter-spacing:0.22em; color:var(--blue); text-transform:uppercase; margin-bottom:6px;">Student</div><div style="font-weight:600; font-size:24px; color:var(--text);">Student Name</div></div>
+    <div><div style="font-family:var(--font-mono); font-size:13px; letter-spacing:0.22em; color:var(--blue); text-transform:uppercase; margin-bottom:6px;">Supervisor</div><div style="font-weight:600; font-size:24px; color:var(--text);">Prof. Supervisor Name</div></div>
+    <div><div style="font-family:var(--font-mono); font-size:13px; letter-spacing:0.22em; color:var(--blue); text-transform:uppercase; margin-bottom:6px;">Department</div><div style="font-weight:600; font-size:24px; color:var(--text);">Computer Engineering, KNUST</div></div>
+    <div><div style="font-family:var(--font-mono); font-size:13px; letter-spacing:0.22em; color:var(--blue); text-transform:uppercase; margin-bottom:6px;">Date</div><div style="font-weight:600; font-size:24px; color:var(--text);">June 2026</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 2 — OUTLINE -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="1">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">02 &middot; Presentation Outline</div><div class="slide-context">17 slides &middot; 20 minutes</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Roadmap</div>
+    <h1 class="r d1" style="margin-top:10px;">Presentation <span style="color:var(--accent);">Roadmap</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:240px; width:1680px; z-index:10;">
+    <p class="r d2" style="font-size:22px; color:var(--text-muted);">A systematic walkthrough covering the motivation, methodology, implementation, and evaluation of SENTINEL-EXAM.</p>
+  </div>
+
+  <div style="position:absolute; left:120px; top:330px; width:1680px; z-index:10;">
+    <div class="card r d3" style="padding:0 28px;">
+      <div class="agenda-entry">
+        <div class="agenda-num">01</div>
+        <div class="agenda-section">Background</div>
+        <div><div class="agenda-title">Introduction, Problem Statement &amp; Objectives</div><div class="agenda-desc">Motivation &middot; Research gap &middot; Aims &amp; scope</div></div>
+        <div class="agenda-time">Slides 03&ndash;05 &middot; 5 min</div>
+      </div>
+      <div class="agenda-entry">
+        <div class="agenda-num">02</div>
+        <div class="agenda-section">Literature</div>
+        <div><div class="agenda-title">Literature Review</div><div class="agenda-desc">EDM &middot; Bloom&rsquo;s Taxonomy &middot; LLMs &middot; RAG systems</div></div>
+        <div class="agenda-time">Slide 06 &middot; 3 min</div>
+      </div>
+      <div class="agenda-entry">
+        <div class="agenda-num">03</div>
+        <div class="agenda-section">Methodology</div>
+        <div><div class="agenda-title">System Architecture, Design &amp; Implementation</div><div class="agenda-desc">Tech stack &middot; Pipeline &middot; Algorithms &middot; Dashboard</div></div>
+        <div class="agenda-time">Slides 07&ndash;12 &middot; 7 min</div>
+      </div>
+      <div class="agenda-entry">
+        <div class="agenda-num">04</div>
+        <div class="agenda-section">Results</div>
+        <div><div class="agenda-title">Evaluation, Conclusion &amp; Future Work</div><div class="agenda-desc">Performance &middot; Contributions &middot; Limitations &middot; Pathways</div></div>
+        <div class="agenda-time">Slides 13&ndash;17 &middot; 5 min</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite">SENTINEL-EXAM &middot; Final Year Project &middot; KNUST, 2026</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 3 — INTRODUCTION -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="2">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">03 &middot; Introduction</div><div class="slide-context">Background &amp; Context</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Setting the stage</div>
+    <h1 class="r d1" style="margin-top:10px;">Motivation &amp; <span style="color:var(--accent);">Context</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:24px;">
+    <div class="f1 flex-col gap-16">
+      <div class="card card-bordered r d2" style="padding:24px;">
+        <h4 style="color:var(--accent); margin-bottom:8px;">The Challenge</h4>
+        <p class="sm">Engineering students struggle to identify high-yield topics, cognitive complexity levels, and patterns across years of past examination papers. Current approaches rely on informal sharing among peers and anecdotal advice from senior students.</p>
+      </div>
+      <div class="card card-blue r d3" style="padding:24px;">
+        <h4 style="color:var(--blue); margin-bottom:8px;">The Opportunity</h4>
+        <p class="sm">A single engineering course may have 15&ndash;20 years of examination papers &mdash; an underutilized resource. With modern AI and ML techniques, meaningful patterns can be extracted from this corpus to transform exam preparation.</p>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-16" style="justify-content:center;">
+      <div class="card card-accent r d2" style="padding:24px; text-align:center;">
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.18em; color:var(--accent-soft); text-transform:uppercase;">Key Statistics</div>
+        <div style="display:flex; gap:20px; margin-top:16px; justify-content:center;">
+          <div><div style="font-family:var(--font-heading); font-size:44px; font-weight:700; color:var(--accent); line-height:1;">15&ndash;20</div><div class="xs">Years of papers per course</div></div>
+          <div><div style="font-family:var(--font-heading); font-size:44px; font-weight:700; color:var(--blue); line-height:1;">8&ndash;15</div><div class="xs">Questions per paper</div></div>
+          <div><div style="font-family:var(--font-heading); font-size:44px; font-weight:700; color:var(--text-muted); line-height:1;">85%+</div><div class="xs">Classification accuracy target</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Chapter 1 (Introduction).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 4 — PROBLEM STATEMENT -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="3">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">04 &middot; Problem Statement</div><div class="slide-context">Research Gap</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">The core challenge</div>
+    <h1 class="r d1" style="margin-top:10px;">Why Existing Approaches <span style="color:var(--accent);">Fall Short</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:280px; width:1680px; z-index:10; display:flex; gap:16px; flex-wrap:wrap;">
+    <div class="card r d2" style="flex:1; min-width:0; padding:16px 18px; border-left:6px solid var(--accent);">
+      <div style="font-family:var(--font-mono); font-size:28px; color:var(--accent); line-height:1; margin-bottom:4px;">01</div>
+      <h4 style="color:var(--accent); margin-bottom:4px; font-size:clamp(1rem, 1.2vw, 1.3rem);">No Systematic Topic Analysis</h4>
+      <p class="xs">Students lack quantitative data on topic frequency. Cannot prioritize study efforts based on evidence.</p>
+    </div>
+    <div class="card r d3" style="flex:1; padding:16px 18px; border-left:6px solid var(--blue);">
+      <div style="font-family:var(--font-mono); font-size:28px; color:var(--blue); line-height:1; margin-bottom:4px;">02</div>
+      <h4 style="color:var(--blue); margin-bottom:4px; font-size:clamp(1rem, 1.2vw, 1.3rem);">No Cognitive Complexity Frame</h4>
+      <p class="xs">No automated way to determine whether questions test recall, understanding, application, or higher-order analysis skills.</p>
+    </div>
+    <div class="card r d4" style="flex:1; padding:16px 18px; border-left:6px solid var(--text-muted);">
+      <div style="font-family:var(--font-mono); font-size:28px; color:var(--text-muted); line-height:1; margin-bottom:4px;">03</div>
+      <h4 style="margin-bottom:4px; font-size:clamp(1rem, 1.2vw, 1.3rem);">No Temporal Weighting</h4>
+      <p class="xs">Older papers may contain outdated topics. No mechanism for weighting recent papers more heavily.</p>
+    </div>
+    <div class="card r d5" style="flex:1; padding:16px 18px; border-left:6px solid var(--border);">
+      <div style="font-family:var(--font-mono); font-size:28px; color:var(--text-faint); line-height:1; margin-bottom:4px;">04</div>
+      <h4 style="margin-bottom:4px; font-size:clamp(1rem, 1.2vw, 1.3rem);">No Semantic Similarity Detection</h4>
+      <p class="xs">Semantically similar questions across different years cannot be identified despite different wording.</p>
+    </div>
+  </div>
+
+  <div class="card card-accent r d4" style="position:absolute; left:120px; top:660px; width:1680px; z-index:10; padding:24px 28px; text-align:center;">
+    <p style="font-size:var(--h4); color:var(--text); font-weight:600;">
+      <span style="color:var(--accent);">Research Question:</span> How can we design an intelligent system that analyzes past questions, identifies topic patterns, classifies cognitive complexity, and provides a conversational study assistant &mdash; within a zero-cost architecture?
+    </p>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 1.2 (Problem Statement).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 5 — OBJECTIVES -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="4">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">05 &middot; Objectives &amp; Scope</div><div class="slide-context">Aims &middot; Deliverables</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Project aims</div>
+    <h1 class="r d1" style="margin-top:10px;">Objectives &amp; <span style="color:var(--accent);">Scope</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:860px; z-index:10;">
+    <div class="card r d2" style="padding:28px;">
+      <h3 style="color:var(--accent); margin-bottom:18px;">Primary Objectives</h3>
+      <ol class="contrib" style="gap:10px;">
+        <li><span class="contrib-num">1</span>Process both native PDFs and scanned PDFs with &gt;85% OCR accuracy</li>
+        <li><span class="contrib-num">2</span>Map extracted questions to syllabus topics using LLM-powered semantic analysis</li>
+        <li><span class="contrib-num">3</span>Implement weighted frequency analysis with exponential decay for temporal trends</li>
+        <li><span class="contrib-num">4</span>Classify questions according to Bloom&rsquo;s Taxonomy (6 cognitive levels)</li>
+        <li><span class="contrib-num">5</span>Provide interactive visualization dashboard with heatmaps, trends, and charts</li>
+        <li><span class="contrib-num">6</span>Implement a RAG-powered chat interface for conversational querying</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Decision Card -->
+  <div style="position:absolute; left:1020px; top:270px; width:780px; z-index:10;">
+    <div class="card r d3" style="padding:24px;">
+      <h3 style="color:var(--blue); margin-bottom:14px;">Scope</h3>
+      <ul class="ul" style="gap:8px;">
+        <li style="font-size:var(--xs);">Engineering courses at KNUST, Faculty of Electrical &amp; Computer Engineering</li>
+        <li style="font-size:var(--xs);">PDF documents up to 10MB; courses with &ge;3 years of papers</li>
+        <li style="font-size:var(--xs);">Zero-cost deployment (Vercel + Render + Supabase + Groq)</li>
+        <li style="font-size:var(--xs);">Does <em>not</em> provide answer keys or solutions &mdash; analysis only</li>
+      </ul>
+    </div>
+
+    <div class="decision-card r d4" style="margin-top:14px; padding:20px;">
+      <div class="dc-label">Target Users</div>
+      <div style="display:flex; gap:24px; margin-top:12px;">
+        <div style="text-align:center;"><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:var(--bg); line-height:1;">3</div><div class="dc-desc" style="margin-top:4px;">Student groups</div></div>
+        <div style="text-align:center;"><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:var(--gold); line-height:1;">L</div><div class="dc-desc" style="margin-top:4px;">Lecturers</div></div>
+        <div style="text-align:center;"><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:var(--bg); line-height:1;">I</div><div class="dc-desc" style="margin-top:4px;">Institutions</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Sections 1.3&ndash;1.4.</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 6 — LITERATURE REVIEW -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="5">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">06 &middot; Literature Review</div><div class="slide-context">Related Work</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Building on existing work</div>
+    <h1 class="r d1" style="margin-top:10px;">Related <span style="color:var(--accent);">Research</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 flex-col gap-12">
+      <div class="card card-bordered r d2" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.10em; color:var(--accent-soft); margin-bottom:4px;">Educational Data Mining</div>
+        <h4 style="color:var(--accent); margin-bottom:4px;">EDM &amp; Examination Analysis</h4>
+        <p class="xs">Baker &amp; Inventado (2014); Romero &amp; Ventura (2007). Previous work focused on item analysis requiring answer keys. Our system analyzes question content independently of answers.</p>
+      </div>
+      <div class="card card-blue r d3" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.10em; color:var(--blue-soft); margin-bottom:4px;">Cognitive Classification</div>
+        <h4 style="color:var(--blue); margin-bottom:4px;">Bloom&rsquo;s Taxonomy Automation</h4>
+        <p class="xs">Bloom (1956); Anderson &amp; Krathwohl (2001). Singh &amp; Singh (2020) achieved &gt;80% NLP-based classification. Our system integrates Bloom&rsquo;s with topic extraction and temporal trends.</p>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-12">
+      <div class="card r d4" style="padding:18px 22px; border-left:6px solid var(--text-muted);">
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.10em; color:var(--text-faint); margin-bottom:4px;">Large Language Models</div>
+        <h4 style="margin-bottom:4px;">LLMs in Educational Analysis</h4>
+        <p class="xs">Kasneci et al. (2023). Our system uses Llama 3 via Groq with structured Pydantic output for reliable topic and Bloom&rsquo;s classification, with retry logic for transient failures.</p>
+      </div>
+      <div class="card r d5" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.10em; color:var(--text-faint); margin-bottom:4px;">RAG Systems</div>
+        <h4 style="margin-bottom:4px;">Retrieval-Augmented Generation</h4>
+        <p class="xs">Lewis et al. (2020); Zhong et al. (2022). Our system stores embedded questions in ChromaDB with cosine similarity threshold &gt;0.85 for semantic search + conversational Q&amp;A.</p>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-12" style="justify-content:center;">
+      <div class="decision-card r d3" style="padding:28px;">
+        <div class="dc-label">Research Gap</div>
+        <p style="font-size:var(--body); color:var(--bg); line-height:1.5; margin-top:12px;">
+          No existing system combines <strong style="color:var(--gold);">multi-format ingestion</strong>,
+          <strong style="color:#E8786A;">LLM-powered topic/Bloom&rsquo;s classification</strong>,
+          <strong style="color:#3CE3A4;">temporal decay weighting</strong>,
+          <strong style="color:#8FA7C9;">vector similarity</strong>, and a
+          <strong style="color:var(--gold);">RAG chat assistant</strong> in a unified, zero-cost architecture.
+        </p>
+        <div class="dc-divider" style="margin:16px 0 12px;"></div>
+        <div class="dc-chose">This thesis addresses</div>
+        <ul class="ul" style="margin-top:8px; gap:4px;">
+          <li style="font-size:var(--xs); color:#C7D3E6;">Unified end-to-end analysis pipeline</li>
+          <li style="font-size:var(--xs); color:#C7D3E6;">Zero-cost production deployment</li>
+          <li style="font-size:var(--xs); color:#C7D3E6;">Integration of all 6 Bloom&rsquo;s levels with temporal data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite">[1] Baker &amp; Inventado (2014) &middot; [2] Bloom (1956) &middot; [3] Kasneci et al. (2023) &middot; [4] Lewis et al. (2020) &mdash; Full citations on slide 16.</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 7 — SYSTEM ARCHITECTURE (Mermaid) -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="6">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">07 &middot; Methodology</div><div class="slide-context">System Architecture</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Architecture overview</div>
+    <h1 class="r d1" style="margin-top:10px;">Decoupled Microservices <span style="color:var(--accent);">Architecture</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:255px; width:1680px; height:730px; z-index:10;">
+    <div class="r d2" style="width:100%; height:100%; background:var(--surface); border:1px solid var(--border); padding:8px; overflow:hidden;">
+<pre class="mermaid" style="width:100%; height:100%; text-align:center; margin:0;">
+%%{init:{'theme':'base','themeVariables':{'background':'#FFFFFF','primaryColor':'#A41E1E','primaryBorderColor':'#A41E1E','primaryTextColor':'#1A1A1A','lineColor':'#6B7280','secondaryColor':'#F0F5FF','tertiaryColor':'#FFF5F5','fontFamily':'Inter, sans-serif','fontSize':'14px','edgeLabelBackground':'#FFFFFF','nodeBorder':'#D1D5DB','clusterBkg':'#F9FAFB','clusterBorder':'#E5E7EB'}}}%%
+graph LR
+  subgraph FE["Frontend Layer"]
+    A["Next.js 14+ (App Router)"]
+    B["Tailwind + Shadcn/ui"]
+    C["Recharts + Framer Motion"]
+    D["Supabase Auth Client"]
+  end
+  subgraph BE["Backend Layer"]
+    E["FastAPI (Async Python)"]
+    F["PyMuPDF + EasyOCR"]
+    G["LangChain + Groq Llama 3"]
+    H["ChromaDB + pgvector"]
+  end
+  subgraph DI["Data &amp; Infrastructure"]
+    I["Supabase PostgreSQL"]
+    J["Supabase Storage"]
+    K["MD5 Hash Dedup"]
+  end
+  A --> E
+  E --> F
+  F --> G
+  G --> H
+  E --> I
+  A -.-> D
+  D -.-> I
+  E --> J
+  E --> K
+  K --> J
+  H -.->|"cosine &gt;0.85"| I
+  style A fill:#FFF5F5,stroke:#A41E1E,color:#1A1A1A
+  style B fill:#FFF5F5,stroke:#A41E1E,color:#1A1A1A
+  style C fill:#FFF5F5,stroke:#A41E1E,color:#1A1A1A
+  style D fill:#FFF5F5,stroke:#A41E1E,color:#1A1A1A
+  style E fill:#F0F5FF,stroke:#0F4D92,color:#1A1A1A
+  style F fill:#F0F5FF,stroke:#0F4D92,color:#1A1A1A
+  style G fill:#F0F5FF,stroke:#0F4D92,color:#1A1A1A
+  style H fill:#F0F5FF,stroke:#0F4D92,color:#1A1A1A
+  style I fill:#F4F5F7,stroke:#6B7280,color:#1A1A1A
+  style J fill:#F4F5F7,stroke:#6B7280,color:#1A1A1A
+  style K fill:#F4F5F7,stroke:#6B7280,color:#1A1A1A
+</pre>
+    </div>
+  </div>
+
+  <!-- Legend bar -->
+  <div style="position:absolute; left:120px; top:940px; width:1680px; z-index:10; display:flex; gap:12px; align-items:center;">
+    <div style="display:flex; align-items:center; gap:8px;"><span style="width:14px;height:14px;background:#FFF5F5;border:2px solid #A41E1E;display:inline-block;"></span><span class="xs" style="color:var(--text-muted);">Frontend</span></div>
+    <div style="display:flex; align-items:center; gap:8px;"><span style="width:14px;height:14px;background:#F0F5FF;border:2px solid #0F4D92;display:inline-block;"></span><span class="xs" style="color:var(--text-muted);">Backend</span></div>
+    <div style="display:flex; align-items:center; gap:8px;"><span style="width:14px;height:14px;background:#F4F5F7;border:2px solid #6B7280;display:inline-block;"></span><span class="xs" style="color:var(--text-muted);">Data &amp; Infra</span></div>
+    <div style="margin-left:auto;"><span style="font-family:var(--font-mono); font-size:clamp(0.7rem,0.75vw,0.85rem); color:var(--success); font-weight:600;">$0 / month &middot; Vercel + Render + Supabase + Groq</span></div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 3.1 (System Architecture) &middot; Section 4.1 (Technology Stack).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 8 — PROCESSING PIPELINE -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="7">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">08 &middot; Methodology</div><div class="slide-context">Processing Pipeline</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">From upload to insights</div>
+    <h1 class="r d1" style="margin-top:10px;">Document Processing <span style="color:var(--accent);">Pipeline</span></h1>
+  </div>
+
+  <!-- Pipeline flow -->
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10;">
+    <div class="card r d2" style="padding:24px;">
+      <div style="display:flex; gap:4px; align-items:center;">
+        <div class="pipeline-stage"><h4>Upload PDF</h4><p>MD5 hash validation</p></div>
+        <div class="pipeline-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B91A0" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="pipeline-stage"><h4 style="color:var(--blue);">Text Extraction</h4><p>PyMuPDF &middot; EasyOCR</p></div>
+        <div class="pipeline-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B91A0" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="pipeline-stage"><h4 style="color:var(--text-muted);">LLM Analysis</h4><p>Groq &middot; Llama 3</p></div>
+        <div class="pipeline-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B91A0" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="pipeline-stage"><h4 style="color:var(--text-muted);">Vector Indexing</h4><p>ChromaDB embeddings</p></div>
+        <div class="pipeline-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B91A0" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="pipeline-stage pipeline-stage-accent"><h4>Dashboard + Chat</h4><p>Analytics &amp; RAG</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; left:120px; top:430px; width:1680px; z-index:10; display:flex; gap:16px; margin-top:20px;">
+    <div style="display:flex; gap:16px; width:100%; margin-top:20px;">
+      <div class="f1 card card-bordered r d3" style="padding:18px 22px;">
+        <h4 style="color:var(--accent); margin-bottom:6px;">PDF Upload &amp; Validation</h4>
+        <p class="xs">File format validation, MD5 hash for duplicate detection, upload to Supabase Storage, create DB record with <em>pending</em> status.</p>
+      </div>
+      <div class="f1 card card-blue r d4" style="padding:18px 22px;">
+        <h4 style="color:var(--blue); margin-bottom:6px;">Text Extraction</h4>
+        <p class="xs">Native PDFs &rarr; PyMuPDF direct extraction. Scanned PDFs &rarr; pdf2image + OpenCV preprocessing + EasyOCR. Post-processing removes headers/footers.</p>
+      </div>
+      <div class="f1 card r d5" style="padding:18px 22px;">
+        <h4 style="margin-bottom:6px;">LLM Analysis</h4>
+        <p class="xs">Llama 3 via LangChain with structured Pydantic output: topic, sub-topic, Bloom&rsquo;s level, weight, keywords, and calculation-heavy flag.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics bar -->
+  <div class="card card-accent r d4" style="position:absolute; left:120px; top:660px; width:1680px; z-index:10; padding:18px 24px;">
+    <div style="display:flex; gap:40px; align-items:center; justify-content:center;">
+      <div><span style="font-family:var(--font-heading); font-weight:700; font-size:36px; color:var(--accent);">&lt;30s</span><span class="xs" style="display:block; text-align:center;">Processing time</span></div>
+      <div style="width:1px; height:40px; background:rgba(164,30,30,0.15);"></div>
+      <div><span style="font-family:var(--font-heading); font-weight:700; font-size:36px; color:var(--blue);">85%+</span><span class="xs" style="display:block; text-align:center;">OCR accuracy</span></div>
+      <div style="width:1px; height:40px; background:rgba(164,30,30,0.15);"></div>
+      <div><span style="font-family:var(--font-heading); font-weight:700; font-size:36px; color:var(--text-muted);">6 levels</span><span class="xs" style="display:block; text-align:center;">Bloom&rsquo;s Taxonomy</span></div>
+      <div style="width:1px; height:40px; background:rgba(164,30,30,0.15);"></div>
+      <div><span style="font-family:var(--font-heading); font-weight:700; font-size:36px; color:var(--success);">$0</span><span class="xs" style="display:block; text-align:center;">Infrastructure cost</span></div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Sections 3.2&ndash;3.4 (Methodology).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 9 — WEIGHTED DECAY -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="8">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">09 &middot; Methodology</div><div class="slide-context">Weighted Decay Algorithm</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Temporal importance scoring</div>
+    <h1 class="r d1" style="margin-top:10px;">Weighted Decay <span style="color:var(--accent);">Algorithm</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:24px;">
+    <div class="f1 flex-col gap-16">
+      <div class="card card-bordered r d2" style="padding:24px;">
+        <h4 style="color:var(--accent); margin-bottom:12px;">Mathematical Model</h4>
+        <div style="font-family:'Georgia',serif; font-size:var(--h3); color:var(--text); line-height:2; text-align:center;">
+          <div>Importance Score = &Sigma; (Frequency &times; e<sup>&minus;&lambda;t</sup>)</div>
+        </div>
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--surface-alt);">
+          <p class="xs">Where: <strong style="color:var(--text);">Frequency</strong> = occurrences of a topic &middot; <strong style="color:var(--text);">t</strong> = paper age in years &middot; <strong style="color:var(--text);">&lambda;</strong> = decay constant (0.3, suggested)</p>
+        </div>
+      </div>
+      <div class="card card-blue r d3" style="padding:20px 24px;">
+        <h4 style="color:var(--blue); margin-bottom:8px;">Why This Matters</h4>
+        <p class="sm">Recent papers weighted more heavily to account for curriculum changes. A topic from 2024 receives full weight (e<sup>0</sup> = 1.0), while one from 2021 receives e<sup>&minus;0.9</sup> &asymp; 0.41.</p>
+      </div>
+    </div>
+
+    <div class="f1 r d4" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="card" style="padding:20px;">
+        <h4 style="margin-bottom:10px;">Example Calculation (&lambda; = 0.3)</h4>
+        <div class="table-wrap">
+          <div class="table-header" style="grid-template-columns:1fr 1fr 1fr 1fr;">Year Frequency Weight Score</div>
+          <div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr;"><span style="color:var(--accent); font-weight:600;">2024</span><span>5</span><span>e<sup>0</sup></span><span style="color:var(--accent); font-weight:600;">5.00</span></div>
+          <div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr;"><span style="color:var(--blue); font-weight:600;">2023</span><span>4</span><span>e<sup>&minus;0.3</sup></span><span style="color:var(--blue); font-weight:600;">2.96</span></div>
+          <div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr;"><span style="color:var(--text-muted);">2022</span><span>6</span><span>e<sup>&minus;0.6</sup></span><span style="color:var(--text-muted); font-weight:600;">3.29</span></div>
+          <div class="table-row" style="grid-template-columns:1fr 1fr 1fr 1fr; border:none;"><span style="color:var(--text-faint);">2021</span><span>3</span><span>e<sup>&minus;0.9</sup></span><span style="color:var(--text-faint); font-weight:600;">1.22</span></div>
+        </div>
+        <div style="margin-top:12px; padding:12px; background:var(--accent-muted); border:1px solid rgba(164,30,30,0.1); text-align:center;">
+          <span style="font-family:var(--font-heading); font-size:28px; font-weight:700; color:var(--accent);">Total: 12.47</span>
+          <span class="xs" style="display:block; margin-top:2px;">Weighted importance score</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 3.3 (Weighted Decay Algorithm).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 10 — BLOOM'S TAXONOMY -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="9">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">10 &middot; Methodology</div><div class="slide-context">Bloom&rsquo;s Taxonomy Classification</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Cognitive complexity analysis</div>
+    <h1 class="r d1" style="margin-top:10px;">Bloom&rsquo;s Taxonomy <span style="color:var(--accent);">Classification</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:260px; width:1680px; height:680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 flex-col gap-8">
+      <div class="card r d2" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px; border-left:6px solid var(--accent);">
+        <div style="font-family:var(--font-mono); font-size:14px; color:var(--accent); font-weight:700; min-width:32px; flex-shrink:0;">L1</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem); color:var(--accent);">Remember</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Define, List, Recall, Name, State, Identify</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=0.3</div>
+      </div>
+      <div class="card r d3" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px; border-left:6px solid var(--accent-soft);">
+        <div style="font-family:var(--font-mono); font-size:14px; color:var(--accent-soft); font-weight:700; min-width:32px; flex-shrink:0;">L2</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem); color:var(--accent-soft);">Understand</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Explain, Describe, Summarize, Interpret, Compare</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=0.3</div>
+      </div>
+      <div class="card r d4" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px; border-left:6px solid var(--text);">
+        <div style="font-family:var(--font-mono); font-size:14px; color:var(--text); font-weight:700; min-width:32px; flex-shrink:0;">L3</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem);">Apply</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Calculate, Demonstrate, Solve, Use, Implement</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=0.6</div>
+      </div>
+      <div class="card r d5" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px; border-left:6px solid var(--blue);">
+        <div style="font-family:var(--font-mono); font-size:14px; color:var(--blue); font-weight:700; min-width:32px; flex-shrink:0;">L4</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem); color:var(--blue);">Analyze</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Compare, Examine, Differentiate, Investigate</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=0.6</div>
+      </div>
+      <div class="card r d6" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px;">
+        <div style="font-family:var(--font-mono); font-size:14px; font-weight:700; min-width:32px; flex-shrink:0;">L5</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem);">Evaluate</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Critique, Justify, Assess, Recommend, Argue</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=1.0</div>
+      </div>
+      <div class="card r d7" style="min-width:0; padding:8px 14px; display:flex; align-items:center; gap:10px;">
+        <div style="font-family:var(--font-mono); font-size:14px; font-weight:700; min-width:32px; flex-shrink:0;">L6</div>
+        <div style="min-width:0; flex:1;"><div style="font-weight:700; font-size:clamp(0.85rem,1vw,1.05rem);">Create</div><div class="xs" style="font-size:clamp(0.75rem,0.8vw,0.9rem);">Design, Construct, Develop, Formulate, Propose</div></div>
+        <div style="font-family:var(--font-mono); font-size:var(--tiny); color:var(--text-faint); flex-shrink:0;">w=1.0</div>
+      </div>
+    </div>
+    <div class="f1 card r d3" style="padding:20px;">
+      <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.18em; color:var(--accent-soft); text-transform:uppercase;">Typical Distribution</div>
+      <div class="chart-wrap" style="height:88%; margin-top:8px;"><canvas id="c1"></canvas></div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 3.4 (Bloom&rsquo;s Taxonomy Classification).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 11 — DASHBOARD & RAG -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="10">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">11 &middot; Implementation</div><div class="slide-context">Dashboard &amp; RAG Chat</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">User-facing features</div>
+    <h1 class="r d1" style="margin-top:10px;">Dashboard &amp; <span style="color:var(--accent);">RAG Assistant</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:24px;">
+    <div class="f1 flex-col gap-16">
+      <div class="card card-bordered r d2" style="padding:24px; flex:1;">
+        <h4 style="color:var(--accent); margin-bottom:12px;">Analytics Dashboard</h4>
+        <ul class="ul" style="gap:8px;">
+          <li style="font-size:var(--sm);"><strong>Topic Frequency Heatmap</strong> &mdash; Grid showing topic occurrence by year with intensity coloring</li>
+          <li style="font-size:var(--sm);"><strong>Trend Line Charts</strong> &mdash; Topic frequency over time with decay weighting applied</li>
+          <li style="font-size:var(--sm);"><strong>Bloom&rsquo;s Distribution</strong> &mdash; Pie/bar chart of question complexity levels</li>
+          <li style="font-size:var(--sm);"><strong>High-Yield Topics</strong> &mdash; Ranked list with prediction confidence scores</li>
+        </ul>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-16">
+      <div class="card card-blue r d3" style="padding:24px; flex:1;">
+        <h4 style="color:var(--blue); margin-bottom:12px;">RAG Study Assistant</h4>
+        <ul class="ul" style="gap:8px;">
+          <li style="font-size:var(--sm);">Semantic search over all embedded questions using ChromaDB</li>
+          <li style="font-size:var(--sm);">Retrieved top-4 relevant questions as context for LLM</li>
+          <li style="font-size:var(--sm);">Conversational responses grounded in specific past questions</li>
+          <li style="font-size:var(--sm);">Example: <em>&ldquo;How does this course usually test Thevenin&rsquo;s Theorem?&rdquo;</em></li>
+        </ul>
+      </div>
+      <div class="decision-card r d4" style="padding:18px 22px;">
+        <div class="dc-label">Vector Similarity Detection</div>
+        <p style="font-size:var(--xs); color:#C7D3E6; margin-top:10px; line-height:1.5;">
+          Each question embedded using sentence-transformers (all-MiniLM-L6-v2) &rarr; 384-dimensional vector. Cosine similarity threshold &gt;0.85 identifies semantically similar questions across years, even with different wording.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; left:120px; top:700px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 card r d4" style="padding:12px 18px; display:flex; align-items:center; gap:10px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span style="font-size:var(--sm); color:var(--text);"><strong>Responsive Design:</strong> Desktop and tablet viewports supported via Tailwind CSS</span>
+    </div>
+    <div class="f1 card r d5" style="padding:12px 18px; display:flex; align-items:center; gap:10px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span style="font-size:var(--sm); color:var(--text);"><strong>Real-time:</strong> SWR deduplication &middot; 60s analytics caching &middot; Background processing</span>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Sections 3.5&ndash;3.7.</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 12 — DECISION: TECH STACK -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="11">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">12 &middot; Engineering Decisions</div><div class="slide-context">Technology Choices</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Zero-cost production grade</div>
+    <h1 class="r d1" style="margin-top:10px;">Technology <span style="color:var(--accent);">Stack</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 card r d2" style="padding:20px;">
+      <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.18em; color:var(--accent); text-transform:uppercase;">Frontend</div>
+      <div class="table-wrap" style="margin-top:12px;">
+        <div class="table-header" style="grid-template-columns:1fr 1.5fr;">Component Technology</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--accent-soft);">Framework</span>Next.js 14+ (App Router)</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--accent-soft);">UI</span>Tailwind CSS &middot; Shadcn/ui</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--accent-soft);">Charts</span>Recharts</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr; border:none;"><span style="color:var(--accent-soft);">Deployment</span>Vercel (Hobby Tier)</div>
+      </div>
+    </div>
+    <div class="f1 card r d3" style="padding:20px;">
+      <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.18em; color:var(--blue); text-transform:uppercase;">Backend &amp; AI</div>
+      <div class="table-wrap" style="margin-top:12px;">
+        <div class="table-header" style="grid-template-columns:1fr 1.5fr;">Component Technology</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--blue-soft);">API</span>FastAPI (Python)</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--blue-soft);">OCR</span>PyMuPDF + EasyOCR</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--blue-soft);">LLM</span>Groq Cloud (Llama 3 70B)</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr; border:none;"><span style="color:var(--blue-soft);">Vector DB</span>ChromaDB + pgvector</div>
+      </div>
+    </div>
+    <div class="f1 card r d4" style="padding:20px;">
+      <div style="font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.18em; text-transform:uppercase;">Data &amp; Infra</div>
+      <div class="table-wrap" style="margin-top:12px;">
+        <div class="table-header" style="grid-template-columns:1fr 1.5fr;">Component Technology</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--text-faint);">Database</span>Supabase (PostgreSQL)</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--text-faint);">Storage</span>Supabase Storage</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr;"><span style="color:var(--text-faint);">Backend Host</span>Render.com (Free)</div>
+        <div class="table-row" style="grid-template-columns:1fr 1.5fr; border:none;"><span style="color:var(--text-faint);">Cost</span><span style="color:var(--success); font-weight:600;">$0 / month</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decision card -->
+  <div class="decision-card r d4" style="position:absolute; left:120px; top:780px; width:1680px; z-index:10; padding:16px 24px;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <div class="dc-label" style="white-space:nowrap;">Engineering Decision</div>
+      <div class="dc-divider" style="flex:1;"></div>
+      <div class="dc-chose">Chose</div>
+      <div class="dc-value" style="font-size:var(--sm);">Zero-cost stack: Vercel + Render + Supabase + Groq</div>
+      <div class="dc-rejected">Rejected</div>
+      <div class="dc-desc">AWS/GCP/Azure &mdash; would incur &ge;$200/mo infrastructure costs</div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 4.1 (Technology Stack Selection).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 13 — RESULTS -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="12">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">13 &middot; Results</div><div class="slide-context">Performance Evaluation</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">System validation</div>
+    <h1 class="r d1" style="margin-top:10px;">Performance <span style="color:var(--accent);">Evaluation</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 flex-col gap-12">
+      <div class="data-card r d2" style="border-left-color:var(--accent);">
+        <div class="data-label">Processing Speed</div>
+        <div class="data-num" style="font-size:40px;">10&ndash;30s</div>
+        <div class="data-desc" style="font-size:var(--xs);">Native PDFs: 10&ndash;15s &middot; Scanned PDFs: 20&ndash;30s &middot; Target: &lt;30s <span style="color:var(--success); font-weight:600;">&check;</span></div>
+      </div>
+      <div class="data-card r d3" style="border-left-color:var(--blue);">
+        <div class="data-label">OCR Accuracy</div>
+        <div class="data-num" style="font-size:40px;">100% / 85%+</div>
+        <div class="data-desc" style="font-size:var(--xs);">Native PDFs: near-perfect &middot; Scanned: 85%+ with OpenCV preprocessing</div>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-12">
+      <div class="data-card r d4" style="border-left-color:var(--text-muted);">
+        <div class="data-label">Query Response</div>
+        <div class="data-num" style="font-size:40px;">&lt;2s</div>
+        <div class="data-desc" style="font-size:var(--xs);">Dashboard analytics with PostgreSQL optimization and 60s caching</div>
+      </div>
+      <div class="data-card r d5" style="border-left-color:var(--success);">
+        <div class="data-label">Classification Accuracy</div>
+        <div class="data-num" style="font-size:40px;">85%+</div>
+        <div class="data-desc" style="font-size:var(--xs);">Topic classification via manual verification of ground truth dataset</div>
+      </div>
+    </div>
+    <div class="f1 flex-col gap-12" style="justify-content:center;">
+      <div class="decision-card r d3" style="padding:20px;">
+        <div class="dc-label">Scalability</div>
+        <div style="display:flex; gap:20px; margin-top:14px;">
+          <div><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:var(--bg);">50</div><div class="dc-desc">Concurrent uploads</div></div>
+          <div><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:var(--gold);">500+</div><div class="dc-desc">Papers per course</div></div>
+          <div><div style="font-family:var(--font-heading); font-size:32px; font-weight:700; color:#8FA7C9;">14K</div><div class="dc-desc">LLM req/day free tier</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation checks -->
+  <div style="position:absolute; left:120px; top:680px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 card r d4" style="padding:12px 16px; display:flex; align-items:center; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="xs">Zero-cost deployment validated: Vercel + Render + Supabase + Groq</span>
+    </div>
+    <div class="f1 card r d5" style="padding:12px 16px; display:flex; align-items:center; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="xs">Hybrid OCR validated: PyMuPDF for native, EasyOCR for scanned PDFs</span>
+    </div>
+    <div class="f1 card r d6" style="padding:12px 16px; display:flex; align-items:center; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="xs">RAG chat validated: ChromaDB + Groq Llama 3 integration</span>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Chapter 6 (Results and Discussion).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 14 — LIMITATIONS -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="13">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">14 &middot; Discussion</div><div class="slide-context">Limitations &amp; Challenges</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Honest assessment</div>
+    <h1 class="r d1" style="margin-top:10px;">Limitations &amp; <span style="color:var(--accent);">Challenges</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; z-index:10; display:flex; gap:16px;">
+    <div class="f1 card r d2" style="padding:22px; display:flex; flex-direction:column;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" style="margin-bottom:10px;"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h4 style="color:var(--accent); margin-bottom:6px;">OCR Quality Dependence</h4>
+      <p class="xs" style="flex:1;">Accuracy depends heavily on scan quality. Poor-quality scans with noise, skew, or faded text may fall below the 85% target.</p>
+      <div class="xs" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--surface-alt); color:var(--text-faint);">Mitigation: Improved OpenCV preprocessing</div>
+    </div>
+    <div class="f1 card r d3" style="padding:22px; display:flex; flex-direction:column;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" style="margin-bottom:10px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <h4 style="color:var(--blue); margin-bottom:6px;">LLM API Dependency</h4>
+      <p class="xs" style="flex:1;">System depends on Groq Cloud API availability. Rate limits or service disruptions would impact core analysis functionality.</p>
+      <div class="xs" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--surface-alt); color:var(--text-faint);">Mitigation: Local LLM alternatives, response caching</div>
+    </div>
+    <div class="f1 card r d4" style="padding:22px; display:flex; flex-direction:column;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" style="margin-bottom:10px;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <h4 style="margin-bottom:6px;">Syllabus Dependency</h4>
+      <p class="xs" style="flex:1;">Topic classification accuracy depends on quality of syllabus topics provided. Poorly defined syllabi receive less accurate classifications.</p>
+      <div class="xs" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--surface-alt); color:var(--text-faint);">Mitigation: Structured topic input, LLM fallback</div>
+    </div>
+    <div class="f1 card r d5" style="padding:22px; display:flex; flex-direction:column;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="1.8" stroke-linecap="round" style="margin-bottom:10px;"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      <h4 style="margin-bottom:6px;">Fixed Decay Constant</h4>
+      <p class="xs" style="flex:1;">Weighted decay uses &lambda; = 0.3 that may not be optimal for all courses. Stable curricula might benefit from lower constants.</p>
+      <div class="xs" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--surface-alt); color:var(--text-faint);">Mitigation: Configurable decay parameter</div>
+    </div>
+  </div>
+
+  <div class="card card-accent r d4" style="position:absolute; left:120px; top:720px; width:1680px; z-index:10; padding:16px 20px; text-align:center;">
+    <p class="sm" style="color:var(--text);">These limitations inform the <strong>future work</strong> directions outlined in the next slide.</p>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Section 6.5 (Limitations and Challenges).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 15 — CONCLUSION & FUTURE WORK -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="14">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">15 &middot; Conclusion</div><div class="slide-context">Contributions &amp; Future Work</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Summary &amp; outlook</div>
+    <h1 class="r d1" style="margin-top:10px;">Contributions &amp; <span style="color:var(--accent);">Future Work</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:270px; width:1680px; height:650px; z-index:10; display:flex; gap:20px;">
+    <div class="f1 card r d2" style="padding:28px;">
+      <h3 style="color:var(--accent); margin-bottom:18px;">Key Contributions</h3>
+      <ol class="contrib" style="gap:10px;">
+        <li><span class="contrib-num">1</span>End-to-end system combining multi-format ingestion, LLM analysis, vector search, and interactive dashboards</li>
+        <li><span class="contrib-num">2</span>Weighted decay algorithm for temporal trend analysis that accounts for curriculum changes</li>
+        <li><span class="contrib-num">3</span>Zero-cost production-grade architecture using Vercel, Render, Supabase, and Groq Cloud</li>
+        <li><span class="contrib-num">4</span>Automated Bloom&rsquo;s Taxonomy classification integrated with topic extraction and trend analysis</li>
+        <li><span class="contrib-num">5</span>RAG-powered study assistant enabling conversational querying of examination patterns</li>
+      </ol>
+    </div>
+    <div class="f1 card r d3" style="padding:28px;">
+      <h3 style="color:var(--blue); margin-bottom:18px;">Future Enhancements</h3>
+      <ul class="ul" style="gap:12px;">
+        <li style="font-size:var(--body);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span><strong>Automated Answer Grading</strong> &mdash; Extend RAG framework for formative assessment</span>
+        </li>
+        <li style="font-size:var(--body);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <span><strong>Personalized Study Plans</strong> &mdash; ML-based recommendations based on identified weak areas</span>
+        </li>
+        <li style="font-size:var(--body);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="7.5 4.21 12 6.5 16.5 4.21"/></svg>
+          <span><strong>Mobile Application</strong> &mdash; React Native for improved accessibility during exam prep</span>
+        </li>
+        <li style="font-size:var(--body);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          <span><strong>Professor Dashboard</strong> &mdash; Enhanced analytics for question difficulty and coverage balance</span>
+        </li>
+        <li style="font-size:var(--body);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span><strong>Local LLM Deployment</strong> &mdash; Reduce API dependency and improve reliability at scale</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-cite">Source: SENTINEL-EXAM Project Report &middot; Chapter 7 (Conclusion and Future Work).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 16 — REFERENCES -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="15">
+  <div class="slide-header"><div class="slide-accent"></div><div class="slide-label">16 &middot; References</div><div class="slide-context">Citations</div></div>
+  <div style="position:absolute; left:120px; top:140px; width:1680px; z-index:10;">
+    <div class="kicker r">Scholarly sources</div>
+    <h1 class="r d1" style="margin-top:10px;">Key <span style="color:var(--accent);">References</span></h1>
+  </div>
+
+  <div style="position:absolute; left:120px; top:260px; width:1680px; z-index:10;">
+    <div class="table-wrap">
+      <div class="table-header" style="grid-template-columns:45px 1fr 260px;"># Citation Topic</div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[1]</div><div>Anderson, L. W. &amp; Krathwohl, D. R. (2001). <em>A taxonomy for learning, teaching, and assessing.</em> Longman.</div><div class="xs" style="color:var(--text-faint);">Bloom&rsquo;s revised</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[2]</div><div>Baker, R. S. &amp; Inventado, P. S. (2014). Educational data mining. In <em>Learning analytics</em> (pp. 61&ndash;75). Springer.</div><div class="xs" style="color:var(--text-faint);">EDM foundations</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[3]</div><div>Bloom, B. S. (1956). <em>Taxonomy of educational objectives.</em> Longmans, Green.</div><div class="xs" style="color:var(--text-faint);">Taxonomy original</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[4]</div><div>Kasneci, E. et al. (2023). ChatGPT and the future of education. <em>Computers &amp; Education</em>, 104, 104618.</div><div class="xs" style="color:var(--text-faint);">LLMs in education</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[5]</div><div>Lewis, P. et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. <em>NeurIPS</em>, 33.</div><div class="xs" style="color:var(--text-faint);">RAG framework</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[6]</div><div>Romero, C. &amp; Ventura, S. (2007). Educational data mining: A survey. <em>Expert Systems with Applications</em>, 33(1).</div><div class="xs" style="color:var(--text-faint);">EDM survey</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[7]</div><div>Singh, P. &amp; Singh, S. (2020). Automated classification of questions based on Bloom&rsquo;s taxonomy using NLP. <em>JITE</em>, 19.</div><div class="xs" style="color:var(--text-faint);">Bloom&rsquo;s automation</div></div>
+      <div class="table-row" style="grid-template-columns:45px 1fr 260px; border:none;"><div style="font-family:var(--font-mono); color:var(--accent-soft);">[8]</div><div>Zhong, Q. et al. (2022). A RAG-based chatbot for educational question answering. <em>Proc. EDM 2022</em>.</div><div class="xs" style="color:var(--text-faint);">Educational RAG</div></div>
+    </div>
+  </div>
+
+  <div class="footer-cite">Full bibliography available in the project report (Chapter 8).</div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE 17 — THANK YOU -->
+<!-- ════════════════════════════════════════════ -->
+<section class="slide" data-i="16">
+  <!-- Left accent rail -->
+  <div style="position:absolute; left:0; top:0; width:120px; height:1080px; background:var(--accent); z-index:5;"></div>
+  <div style="position:absolute; left:40px; top:900px; width:40px; height:160px; z-index:10; writing-mode:vertical-rl; transform:rotate(180deg);">
+    <div style="font-family:var(--font-mono); font-size:14px; letter-spacing:0.32em; color:var(--bg); text-transform:uppercase;">SENTINEL-EXAM &middot; Q&amp;A</div>
+  </div>
+
+  <div style="position:absolute; left:160px; top:60px; z-index:10;">
+    <span style="display:inline-flex; align-items:center; gap:8px; background:var(--accent-muted); border:1px solid rgba(164,30,30,0.15); padding:6px 16px; font-family:var(--font-mono); font-size:var(--tiny); letter-spacing:0.14em; color:var(--accent-soft);"><span style="width:7px; height:7px; background:var(--accent); flex-shrink:0;"></span> Final Year Project Defense</span>
+  </div>
+
+  <div style="position:absolute; left:160px; top:220px; z-index:10;">
+    <div style="font-family:var(--font-mono); font-size:15px; letter-spacing:0.30em; color:var(--blue); text-transform:uppercase;">Thank you</div>
+  </div>
+
+  <div style="position:absolute; left:160px; top:280px; width:1640px; z-index:10;">
+    <h1 style="font-family:var(--font-heading); font-weight:700; font-size:120px; line-height:1.05; color:var(--text); letter-spacing:-0.025em;">Questions?</h1>
+  </div>
+
+  <div style="position:absolute; left:160px; top:440px; width:1200px; z-index:10;">
+    <p style="font-size:24px; color:var(--text-muted); line-height:1.5;">
+      Thank you for your attention. I welcome your questions and look forward to a productive discussion about the methodology, implementation, and future directions of the SENTINEL-EXAM project.
+    </p>
+  </div>
+
+  <!-- Contact footer -->
+  <div style="position:absolute; left:160px; bottom:70px; width:1640px; z-index:10;">
+    <div style="border-top:1px solid var(--border); padding-top:24px;">
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:40px;">
+        <div>
+          <div class="meta-label">Project</div>
+          <div style="font-family:var(--font-heading); font-weight:600; font-size:var(--h4); color:var(--text); margin-top:6px; line-height:1.35;">
+            SENTINEL-EXAM<br>
+            <span style="font-family:var(--font-mono); font-size:13px; color:var(--accent-soft);">AI-Powered Exam Analytics</span>
+          </div>
+        </div>
+        <div>
+          <div class="meta-label">Supervisor</div>
+          <div style="font-family:var(--font-heading); font-weight:600; font-size:var(--h4); color:var(--text); margin-top:6px; line-height:1.35;">
+            Prof. Supervisor Name<br>
+            <span style="font-family:var(--font-mono); font-size:13px; color:var(--text-faint);">Dept. of Computer Engineering</span>
+          </div>
+        </div>
+        <div>
+          <div class="meta-label">Contact</div>
+          <div style="font-family:var(--font-heading); font-weight:600; font-size:var(--h4); color:var(--text); margin-top:6px; line-height:1.35;">
+            Student Name<br>
+            <span style="font-family:var(--font-mono); font-size:13px; color:var(--text-faint);">student@st.knust.edu.gh</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-cite" style="left:160px; width:1640px;">SENTINEL-EXAM &middot; An Intelligent Automated Past Questions Analysis System for Engineering Education &middot; KNUST, 2026</div>
+</section>
+
+</div><!-- /slides-wrapper -->
+</div><!-- /viewer -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const wrapper = document.getElementById('wrapper');
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const nav = document.getElementById('nav');
+  const pf = document.getElementById('pf');
+  const counter = document.getElementById('counter');
+
+  // Build nav dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('button');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Slide ' + (i + 1));
+    d.addEventListener('click', () => { slides[i].scrollIntoView({ behavior: 'smooth' }); });
+    nav.appendChild(d);
+  }
+  const dots = nav.querySelectorAll('.nav-dot');
+
+  // Fit to viewport
+  function fitSlide() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const scale = Math.min(vw / 1920, vh / 1080);
+    wrapper.style.transform = `translateX(-50%) scale(${scale})`;
+    wrapper.style.transformOrigin = 'top center';
+    const offsetY = (vh - 1080 * scale) / 2;
+    wrapper.style.marginTop = offsetY > 0 ? offsetY + 'px' : '0';
+  }
+  fitSlide();
+  window.addEventListener('resize', fitSlide);
+
+  // Intersection Observer
+  const obs = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        const slide = entry.target;
+        slides.forEach(s => s.classList.remove('v'));
+        slide.classList.add('v');
+        const idx = parseInt(slide.dataset.i);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        pf.style.width = ((idx + 1) / total * 100) + '%';
+        counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(total);
+      } else {
+        entry.target.classList.remove('v');
+      }
+    }
+  }, { threshold: 0.3 });
+
+  slides[0].classList.add('v');
+  slides.forEach(s => obs.observe(s));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    const cur = document.querySelector('.slide.v');
+    if (!cur) return;
+    const idx = parseInt(cur.dataset.i);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      if (idx < total - 1) slides[idx + 1].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (idx > 0) slides[idx - 1].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'Home') { e.preventDefault(); slides[0].scrollIntoView({ behavior: 'smooth' }); }
+    else if (e.key === 'End') { e.preventDefault(); slides[total - 1].scrollIntoView({ behavior: 'smooth' }); }
+  });
+
+  // Wheel navigation
+  let wheelLocked = false;
+  wrapper.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (wheelLocked) return;
+    const delta = Math.sign(e.deltaY);
+    if (delta === 0) return;
+    const cur = document.querySelector('.slide.v');
+    if (!cur) return;
+    const idx = parseInt(cur.dataset.i);
+    const next = idx + (delta > 0 ? 1 : -1);
+    if (next < 0 || next >= total) return;
+    wheelLocked = true;
+    slides[next].scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => { wheelLocked = false; }, 500);
+  }, { passive: false });
+
+  // Render Mermaid diagrams
+  mermaid.run({ querySelector: '.mermaid' }).catch(() => {});
+
+  // Bloom's Distribution Doughnut Chart
+  const ctx = document.getElementById('c1');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
+        datasets: [{
+          data: [25, 20, 22, 18, 10, 5],
+          backgroundColor: ['#A41E1E', '#C94A4A', '#E8786A', '#8B91A0', '#4A4F58', '#C9CED6'],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { boxWidth: 12, padding: 10, font: { size: 12, weight: '500' }, color: '#1A1A1A' }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+
+<script>
+function exportPPTX() {
+  var pres = new PptxGenJS();
+  pres.defineLayout({ name: 'CUSTOM', width: 13.333, height: 7.5 });
+  var C = {accent:'A41E1E',blue:'0F4D92',text:'1A1A1A',muted:'4A4F58',faint:'8B91A0',bg:'F4F5F7',surface:'FFFFFF',gold:'E8B400',success:'1F7A4D',border:'C9CED6'};
+  var HF='Source Serif Pro',BF='Inter',MF='IBM Plex Mono';
+  var S=pres.ShapeType;
+
+  function sH(s,num,label,ctx){
+    s.addShape(S.rect,{x:0.6,y:0.3,w:0.08,h:0.35,fill:{color:C.accent}});
+    s.addText(num+' / '+label,{x:0.85,y:0.3,w:6,h:0.35,fontSize:9,fontFace:MF,color:C.accent});
+    if(ctx) s.addText(ctx,{x:8,y:0.3,w:4.5,h:0.35,fontSize:9,fontFace:MF,color:C.faint,align:'right'});
+  }
+  function ttl(s,kicker,plainTitle,accentWord){
+    if(kicker) s.addText(kicker,{x:0.6,y:0.8,w:8,h:0.3,fontSize:9,fontFace:MF,color:C.accent});
+    if(accentWord){
+      s.addText([{text:plainTitle+' ',options:{fontSize:28,fontFace:HF,bold:true,color:C.text}},{text:accentWord,options:{fontSize:28,fontFace:HF,bold:true,color:C.accent}}],{x:0.6,y:1.1,w:12,h:0.65,valign:'bottom'});
+    } else {
+      s.addText(plainTitle,{x:0.6,y:1.1,w:12,h:0.65,fontSize:28,fontFace:HF,color:C.text,bold:true,valign:'bottom'});
+    }
+  }
+  function ft(s,txt){
+    s.addShape(S.rect,{x:0.6,y:7.0,w:12,h:0.01,fill:{color:C.border}});
+    s.addText(txt,{x:0.6,y:7.05,w:12,h:0.3,fontSize:7,fontFace:MF,color:C.faint});
+  }
+  function card(s,x,y,w,h,bc){
+    s.addShape(S.rect,{x:x,y:y,w:w,h:h,fill:{color:C.surface},line:{color:C.border,width:0.5}});
+    if(bc) s.addShape(S.rect,{x:x,y:y,w:0.06,h:h,fill:{color:bc}});
+  }
+  function dc(s,x,y,w,h){
+    s.addShape(S.rect,{x:x,y:y,w:w,h:h,fill:{color:C.text},line:{color:C.text,width:0.5}});
+  }
+  function dcl(s,x,y,label){s.addText(label,{x:x+0.15,y:y+0.12,w:4,h:0.25,fontSize:7,fontFace:MF,color:C.gold});}
+
+  function txt(s,x,y,w,h,text,opts){
+    var o={x:x,y:y,w:w,h:h,fontSize:12,fontFace:BF,color:C.text,valign:'top',wrap:true};
+    for(var k in opts) o[k]=opts[k];
+    s.addText(text,o);
+  }
+  function tbold(s,x,y,w,h,text,clr){s.addText(text,{x:x,y:y,w:w,h:h,fontSize:13,fontFace:BF,bold:true,color:clr||C.accent});}
+  function bulletList(s,x,y,w,items,clr){
+    var txt = '';
+    for(var i=0;i<items.length;i++){
+      txt += '  '+items[i]+'\\n';
+    }
+    s.addText(txt,{x:x,y:y,w:w,h:items.length*0.35+0.2,fontSize:10,fontFace:BF,color:clr||C.text,lineSpacingMultiple:1.2,valign:'top'});
+  }
+
+  // ========== SLIDE 1: COVER ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    s.addShape(S.rect,{x:0,y:0,w:0.6,h:7.5,fill:{color:C.accent}});
+    s.addText('BSc. Computer Engineering - Project Defense',{x:0.85,y:0.3,w:7,h:0.3,fontSize:9,fontFace:MF,color:C.accent});
+    s.addText('KNUST - June 2026',{x:7.5,y:0.3,w:5,h:0.3,fontSize:9,fontFace:MF,color:C.faint,align:'right'});
+    s.addText('A claim, not a topic',{x:0.85,y:1.0,w:6,h:0.3,fontSize:10,fontFace:MF,color:C.blue});
+    s.addText([
+      {text:'SENTINEL-EXAM',options:{fontSize:40,bold:true,fontFace:HF,color:C.text}},
+      {text:'\\nAn Intelligent Automated',options:{fontSize:30,fontFace:HF,color:C.muted}},
+      {text:'\\nPast Questions Analysis System',options:{fontSize:34,fontFace:HF,color:C.accent}},
+      {text:'\\nfor Engineering Education',options:{fontSize:30,fontFace:HF,color:C.muted}},
+    ],{x:0.85,y:1.5,w:11.5,h:4,lineSpacingMultiple:1.1,valign:'top'});
+    s.addText('An AI-powered platform that analyzes historical examination papers, identifies topic patterns, classifies cognitive complexity via Bloom\\'s Taxonomy, and provides a RAG-powered conversational study assistant - all within a zero-cost production-grade architecture.',{x:0.85,y:5.3,w:11.5,h:0.8,fontSize:11,fontFace:BF,color:C.muted,lineSpacingMultiple:1.2});
+    var yi=6.35;
+    s.addText('STUDENT',{x:0.85,y:yi,w:2.5,h:0.2,fontSize:6,fontFace:MF,color:C.blue});s.addText('Student Name',{x:0.85,y:yi+0.22,w:2.5,h:0.35,fontSize:13,fontFace:HF,bold:true,color:C.text});
+    s.addText('SUPERVISOR',{x:3.8,y:yi,w:2.5,h:0.2,fontSize:6,fontFace:MF,color:C.blue});s.addText('Prof. Supervisor Name',{x:3.8,y:yi+0.22,w:2.5,h:0.35,fontSize:13,fontFace:HF,bold:true,color:C.text});
+    s.addText('DEPARTMENT',{x:6.8,y:yi,w:3,h:0.2,fontSize:6,fontFace:MF,color:C.blue});s.addText('Computer Engineering, KNUST',{x:6.8,y:yi+0.22,w:3,h:0.35,fontSize:13,fontFace:HF,bold:true,color:C.text});
+    s.addText('DATE',{x:10.5,y:yi,w:2,h:0.2,fontSize:6,fontFace:MF,color:C.blue});s.addText('June 2026',{x:10.5,y:yi+0.22,w:2,h:0.35,fontSize:13,fontFace:HF,bold:true,color:C.text});
+  })();
+
+  // ========== SLIDE 2: OUTLINE ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'02','Presentation Outline','17 slides, 20 minutes');
+    ttl(s,'Roadmap','Presentation','Roadmap');
+    txt(s,0.6,1.6,12,0.35,'A systematic walkthrough covering the motivation, methodology, implementation, and evaluation of SENTINEL-EXAM.',{fontSize:12,color:C.muted});
+    var rows=[
+      [{text:'',options:{fontSize:6,fontFace:MF}}],
+      [{text:'01',options:{fontSize:18,fontFace:HF,bold:true,color:C.accent,align:'center'}},{text:'BACKGROUND',options:{fontSize:7,fontFace:MF,color:C.accent}},{text:'Introduction, Problem Statement and Objectives\\nMotivation, Research gap, Aims and scope',options:{fontSize:11,fontFace:BF,color:C.text}},{text:'Slides 03-05\\n5 min',options:{fontSize:8,fontFace:MF,color:C.faint,align:'right'}}],
+      [{text:'02',options:{fontSize:18,fontFace:HF,bold:true,color:C.accent,align:'center'}},{text:'LITERATURE',options:{fontSize:7,fontFace:MF,color:C.accent}},{text:'Literature Review\\nEDM, Bloom Taxonomy, LLMs, RAG systems',options:{fontSize:11,fontFace:BF,color:C.text}},{text:'Slide 06\\n3 min',options:{fontSize:8,fontFace:MF,color:C.faint,align:'right'}}],
+      [{text:'03',options:{fontSize:18,fontFace:HF,bold:true,color:C.accent,align:'center'}},{text:'METHODOLOGY',options:{fontSize:7,fontFace:MF,color:C.accent}},{text:'System Architecture, Design and Implementation\\nTech stack, Pipeline, Algorithms, Dashboard',options:{fontSize:11,fontFace:BF,color:C.text}},{text:'Slides 07-12\\n7 min',options:{fontSize:8,fontFace:MF,color:C.faint,align:'right'}}],
+      [{text:'04',options:{fontSize:18,fontFace:HF,bold:true,color:C.accent,align:'center'}},{text:'RESULTS',options:{fontSize:7,fontFace:MF,color:C.accent}},{text:'Evaluation, Conclusion and Future Work\\nPerformance, Contributions, Limitations',options:{fontSize:11,fontFace:BF,color:C.text}},{text:'Slides 13-17\\n5 min',options:{fontSize:8,fontFace:MF,color:C.faint,align:'right'}}],
+    ];
+    s.addTable(rows,{x:0.6,y:2.2,w:12,colW:[0.6,1.1,8.2,2.1],border:{type:'solid',pt:0.5,color:C.border},margin:[5,6,5,6],rowH:[0.08,0.85,0.85,0.85,0.85]});
+    ft(s,'SENTINEL-EXAM - Final Year Project - KNUST, 2026');
+  })();
+
+  // ========== SLIDE 3: INTRODUCTION ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'03','Introduction','Background and Context');
+    ttl(s,'Setting the stage','Motivation and','Context');
+    card(s,0.6,2.0,5.7,1.2,C.accent);
+    txt(s,0.85,2.1,5.2,0.25,'The Challenge',{fontSize:13,fontFace:BF,bold:true,color:C.accent});
+    txt(s,0.85,2.4,5.2,0.7,'Engineering students struggle to identify high-yield topics, cognitive complexity levels, and patterns across years of past examination papers. Current approaches rely on informal sharing among peers.',{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,0.6,3.4,5.7,0.9,C.blue);
+    txt(s,0.85,3.5,5.2,0.2,'The Opportunity',{fontSize:13,fontFace:BF,bold:true,color:C.blue});
+    txt(s,0.85,3.75,5.2,0.45,'A single engineering course may have 15-20 years of examination papers - an underutilized resource that can be mined with modern AI and ML techniques.',{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,7.0,2.0,5.7,2.3);
+    s.addText('KEY STATISTICS',{x:7.2,y:2.1,w:5,h:0.2,fontSize:7,fontFace:MF,color:C.accent});
+    s.addText('15-20',{x:7.4,y:2.4,w:1.5,h:0.5,fontSize:26,fontFace:HF,bold:true,color:C.accent,align:'center'});
+    s.addText('Years of papers\\nper course',{x:7.4,y:2.9,w:1.5,h:0.5,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    s.addText('8-15',{x:9.2,y:2.4,w:1.5,h:0.5,fontSize:26,fontFace:HF,bold:true,color:C.blue,align:'center'});
+    s.addText('Questions\\nper paper',{x:9.2,y:2.9,w:1.5,h:0.5,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    s.addText('85%+',{x:11.0,y:2.4,w:1.5,h:0.5,fontSize:26,fontFace:HF,bold:true,color:C.muted,align:'center'});
+    s.addText('Classification\\naccuracy target',{x:11.0,y:2.9,w:1.5,h:0.5,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Chapter 1 (Introduction).');
+  })();
+
+  // ========== SLIDE 4: PROBLEM STATEMENT (2x2 grid = wider cards) ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'04','Problem Statement','Research Gap');
+    ttl(s,'The core challenge','Why Existing Approaches','Fall Short');
+    var ps = [
+      ['01','No Systematic Topic Analysis','Students lack quantitative data on topic frequency across years. Cannot prioritize study efforts based on evidence.',C.accent],
+      ['02','No Cognitive Complexity Frame','No automated way to determine whether questions test recall, understanding, application, or higher-order analysis skills.',C.blue],
+      ['03','No Temporal Weighting','Older papers may contain outdated topics. No mechanism for weighting recent papers more heavily.',C.muted],
+      ['04','No Semantic Similarity','Semantically similar questions across years cannot be identified despite different wording.',C.faint],
+    ];
+    for(var i=0;i<ps.length;i++){
+      var col=i%2,row=Math.floor(i/2);
+      var x=0.6+col*6.2;
+      var y=2.0+row*1.25;
+      card(s,x,y,5.9,1.05,ps[i][3]);
+      s.addText(ps[i][0],{x:x+0.15,y:y+0.08,w:0.6,h:0.3,fontSize:16,fontFace:MF,color:ps[i][3]});
+      s.addText(ps[i][1],{x:x+0.75,y:y+0.08,w:4.8,h:0.3,fontSize:12,fontFace:BF,bold:true,color:C.text});
+      s.addText(ps[i][2],{x:x+0.15,y:y+0.42,w:5.5,h:0.55,fontSize:10,fontFace:BF,color:C.muted,lineSpacingMultiple:1.2});
+    }
+    card(s,0.6,4.8,12,0.65);
+    s.addText([{text:'Research Question: ',options:{fontSize:12,fontFace:BF,bold:true,color:C.accent}},{text:'How can we design an intelligent system that analyzes past questions, identifies topic patterns, classifies cognitive complexity, and provides a conversational study assistant - within a zero-cost architecture?',options:{fontSize:12,fontFace:BF,color:C.text}}],{x:0.85,y:4.9,w:11.5,h:0.45,valign:'middle',align:'center'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 1.2 (Problem Statement).');
+  })();
+
+  // ========== SLIDE 5: OBJECTIVES ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'05','Objectives and Scope','Aims, Deliverables');
+    ttl(s,'Project aims','Objectives and','Scope');
+    card(s,0.6,2.0,6.0,4.2);
+    tbold(s,0.85,2.1,5.5,0.3,'Primary Objectives',C.accent);
+    var obj=[
+      '1. Process both native PDFs and scanned PDFs with >85% OCR accuracy',
+      '2. Map extracted questions to syllabus topics using LLM-powered semantic analysis',
+      '3. Implement weighted frequency analysis with exponential decay for temporal trends',
+      '4. Classify questions according to Bloom Taxonomy (6 cognitive levels)',
+      '5. Provide interactive visualization dashboard with heatmaps, trends, and charts',
+      '6. Implement a RAG-powered chat interface for conversational querying',
+    ];
+    var yi=2.5;
+    for(var i=0;i<obj.length;i++){
+      s.addText(obj[i],{x:0.85,y:yi+i*0.6,w:5.5,h:0.55,fontSize:11,fontFace:BF,color:C.text,lineSpacingMultiple:1.15});
+    }
+    card(s,7.0,2.0,5.7,2.2);
+    tbold(s,7.25,2.1,5,0.3,'Scope',C.blue);
+    bulletList(s,7.25,2.5,5.2,['Engineering courses at KNUST, Faculty of Electrical and Computer Engineering','PDF documents up to 10MB; courses with 3+ years of papers','Zero-cost deployment (Vercel + Render + Supabase + Groq)','Does not provide answer keys or solutions - analysis only']);
+    dc(s,7.0,4.4,5.7,1.5);
+    dcl(s,7.0,4.4,'Target Users');
+    s.addText('S - Students  |  L - Lecturers  |  I - Institutions',{x:7.2,y:4.8,w:5.3,h:0.6,fontSize:11,fontFace:BF,color:'CCD4E0',valign:'middle'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Sections 1.3-1.4.');
+  })();
+
+  // ========== SLIDE 6: LITERATURE REVIEW ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'06','Literature Review','Related Work');
+    ttl(s,'Building on existing work','Related','Research');
+    card(s,0.6,2.0,7.5,2.2,C.accent);
+    txt(s,0.85,2.1,3.2,0.2,'Educational Data Mining',{fontSize:8,fontFace:MF,color:C.accent});
+    txt(s,0.85,2.3,7,0.2,'EDM and Examination Analysis',{fontSize:12,fontFace:BF,bold:true,color:C.accent});
+    txt(s,0.85,2.55,7,0.7,'Baker and Inventado (2014); Romero and Ventura (2007). Previous work focused on item analysis requiring answer keys. Our system analyzes question content independently of answers.',{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+    txt(s,0.85,3.3,3.2,0.2,'Cognitive Classification',{fontSize:8,fontFace:MF,color:C.blue});
+    txt(s,0.85,3.5,7,0.2,'Bloom Taxonomy Automation',{fontSize:12,fontFace:BF,bold:true,color:C.blue});
+    txt(s,0.85,3.75,7,0.35,'Bloom (1956); Anderson and Krathwohl (2001). Singh and Singh (2020) achieved >80% NLP-based classification.',{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,0.6,4.4,3.6,1.2,C.muted);
+    txt(s,0.85,4.5,3.2,0.2,'Large Language Models',{fontSize:8,fontFace:MF,color:C.muted});
+    txt(s,0.85,4.7,3.2,0.2,'LLMs in Educational Analysis',{fontSize:11,fontFace:BF,bold:true,color:C.text});
+    txt(s,0.85,4.95,3.2,0.5,'Kasneci et al. (2023). Uses Llama 3 via Groq with structured output for reliable classification.',{fontSize:9,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,4.5,4.4,3.6,1.2);
+    txt(s,4.75,4.5,3.2,0.2,'RAG Systems',{fontSize:8,fontFace:MF,color:C.muted});
+    txt(s,4.75,4.7,3.2,0.2,'Retrieval-Augmented Generation',{fontSize:11,fontFace:BF,bold:true,color:C.text});
+    txt(s,4.75,4.95,3.2,0.5,'Lewis et al. (2020); Zhong et al. (2022). ChromaDB with cosine similarity >0.85 for semantic search.',{fontSize:9,color:C.muted,lineSpacingMultiple:1.2});
+    dc(s,8.5,2.0,4.1,3.6);
+    dcl(s,8.5,2.0,'Research Gap');
+    txt(s,8.65,2.5,3.8,1.5,'No existing system combines multi-format ingestion, LLM-powered classification, temporal decay weighting, vector similarity, and a RAG chat assistant in a unified, zero-cost architecture.',{fontSize:11,color:'E8E8EE',lineSpacingMultiple:1.3});
+    ft(s,'[1] Baker and Inventado (2014) [2] Bloom (1956) [3] Kasneci et al. (2023) [4] Lewis et al. (2020)');
+  })();
+
+  // ========== SLIDE 7: ARCHITECTURE ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'07','Methodology','System Architecture');
+    ttl(s,'Architecture overview','Decoupled Microservices','Architecture');
+    var layers=[
+      {title:'Frontend',color:C.accent,items:['Next.js 14+ (App Router)','Tailwind CSS + Shadcn/ui','Recharts + Framer Motion','Supabase Auth Client']},
+      {title:'Backend',color:C.blue,items:['FastAPI (Async Python)','PyMuPDF + EasyOCR','LangChain + Groq Llama 3','ChromaDB + pgvector']},
+      {title:'Data and Infra',color:C.muted,items:['Supabase PostgreSQL','Supabase Storage','MD5 Hash Dedup']},
+    ];
+    for(var i=0;i<3;i++){
+      var x=0.6+i*4.1;
+      card(s,x,2.0,3.8,4.3);
+      s.addText(layers[i].title,{x:x+0.15,y:2.1,w:3.5,h:0.3,fontSize:11,fontFace:MF,color:layers[i].color});
+      for(var j=0;j<layers[i].items.length;j++){
+        s.addText(layers[i].items[j],{x:x+0.15,y:2.5+j*0.5,w:3.5,h:0.45,fontSize:10,fontFace:BF,color:C.text,lineSpacingMultiple:1.1});
+      }
+    }
+    s.addShape(S.rect,{x:0.6,y:6.5,w:12,h:0.01,fill:{color:C.border}});
+    s.addText('Flow: Frontend -> Backend -> Data. Auth: Supabase -> PostgreSQL. Vectors: ChromaDB -> pgvector (cosine >0.85). Cost: $0/month (Vercel + Render + Supabase + Groq).',{x:0.6,y:6.55,w:12,h:0.35,fontSize:8,fontFace:MF,color:C.faint});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 3.1 (System Architecture).');
+  })();
+
+  // ========== SLIDE 8: PROCESSING PIPELINE ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'08','Methodology','Processing Pipeline');
+    ttl(s,'From upload to insights','Document Processing','Pipeline');
+    var stages=[
+      ['Upload PDF','MD5 hash validation','C.accent'],
+      ['Text Extraction','PyMuPDF + EasyOCR','C.blue'],
+      ['LLM Analysis','Groq + Llama 3','C.text'],
+      ['Vector Indexing','ChromaDB embeddings','C.text'],
+      ['Dashboard + Chat','Analytics and RAG','C.accent'],
+    ];
+    for(var i=0;i<5;i++){
+      var x=0.6+i*2.5;
+      s.addShape(S.rect,{x:x,y:2.0,w:2.2,h:0.8,fill:{color:C.surface},line:{color:C.border,width:0.5}});
+      s.addText(stages[i][0],{x:x+0.1,y:2.05,w:2,h:0.35,fontSize:11,fontFace:BF,bold:true,color:C.accent,align:'center'});
+      s.addText(stages[i][1],{x:x+0.1,y:2.4,w:2,h:0.3,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+      if(i<4){
+        s.addText('>',{x:x+2.2,y:2.1,w:0.3,h:0.6,fontSize:12,color:C.faint,align:'center',valign:'middle'});
+      }
+    }
+    var details=[
+      ['PDF Upload and Validation','File format validation, MD5 hash for duplicate detection, upload to Supabase Storage, create DB record with pending status.',C.accent],
+      ['Text Extraction','Native PDFs -> PyMuPDF direct extraction. Scanned PDFs -> pdf2image + OpenCV preprocessing + EasyOCR.',C.blue],
+      ['LLM Analysis','Llama 3 via LangChain with structured Pydantic output: topic, sub-topic, Bloom level, weight, keywords.',C.text],
+    ];
+    for(var i=0;i<2;i++){
+      var x=0.6+i*6.2;
+      card(s,x,3.1,5.9,1.3,details[i][2]);
+      txt(s,x+0.15,3.2,5.6,0.2,details[i][0],{fontSize:11,fontFace:BF,bold:true,color:C.text});
+      txt(s,x+0.15,3.45,5.6,0.8,details[i][1],{fontSize:9,color:C.muted,lineSpacingMultiple:1.2});
+    }
+    card(s,0.6,4.6,12,1.3,details[2][2]);
+    txt(s,0.75,4.7,11.7,0.2,details[2][0],{fontSize:11,fontFace:BF,bold:true,color:C.text});
+    txt(s,0.75,4.95,11.7,0.8,details[2][1],{fontSize:9,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,0.6,6.1,12,0.7);
+    s.addText('<30s',{x:0.9,y:6.2,w:2.5,h:0.45,fontSize:24,fontFace:HF,bold:true,color:C.accent,align:'center'});
+    s.addText('Processing time',{x:0.9,y:6.55,w:2.5,h:0.2,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    s.addText('85%+',{x:3.8,y:6.2,w:2.5,h:0.45,fontSize:24,fontFace:HF,bold:true,color:C.blue,align:'center'});
+    s.addText('OCR accuracy',{x:3.8,y:6.55,w:2.5,h:0.2,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    s.addText('6 levels',{x:6.7,y:6.2,w:2.5,h:0.45,fontSize:24,fontFace:HF,bold:true,color:C.muted,align:'center'});
+    s.addText('Bloom Taxonomy',{x:6.7,y:6.55,w:2.5,h:0.2,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    s.addText('$0',{x:9.6,y:6.2,w:2.5,h:0.45,fontSize:24,fontFace:HF,bold:true,color:C.success,align:'center'});
+    s.addText('Infrastructure cost',{x:9.6,y:6.55,w:2.5,h:0.2,fontSize:9,fontFace:BF,color:C.muted,align:'center'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Sections 3.2-3.4 (Methodology).');
+  })();
+
+  // ========== SLIDE 9: WEIGHTED DECAY ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'09','Methodology','Weighted Decay Algorithm');
+    ttl(s,'Temporal importance scoring','Weighted Decay','Algorithm');
+    card(s,0.6,2.0,5.7,1.5,C.accent);
+    txt(s,0.85,2.1,5.2,0.25,'Mathematical Model',{fontSize:13,fontFace:BF,bold:true,color:C.accent});
+    txt(s,0.85,2.4,5.2,0.4,'Importance Score = Sum(Frequency x e^(-lambda x t))',{fontSize:14,fontFace:HF,bold:true,color:C.text,align:'center'});
+    txt(s,0.85,2.85,5.2,0.5,'Where: Frequency = occurrences of a topic, t = paper age in years, lambda = decay constant (0.3, suggested)',{fontSize:9,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,0.6,3.7,5.7,0.9,C.blue);
+    txt(s,0.85,3.8,5.2,0.2,'Why This Matters',{fontSize:12,fontFace:BF,bold:true,color:C.blue});
+    txt(s,0.85,4.05,5.2,0.45,'Recent papers weighted more heavily to account for curriculum changes. A topic from 2024 receives full weight (e^0 = 1.0), while one from 2021 receives e^-0.9 ~ 0.41.',{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+    card(s,6.7,2.0,6,3.0);
+    txt(s,6.95,2.1,5.5,0.25,'Example Calculation (lambda = 0.3)',{fontSize:12,fontFace:BF,bold:true,color:C.text});
+    var trows=[
+      [{text:'Year',options:{fontSize:9,fontFace:MF,bold:true,color:C.accent}},{text:'Frequency',options:{fontSize:9,fontFace:MF,bold:true,color:C.accent}},{text:'Weight',options:{fontSize:9,fontFace:MF,bold:true,color:C.accent}},{text:'Score',options:{fontSize:9,fontFace:MF,bold:true,color:C.accent}}],
+      [{text:'2024',options:{fontSize:10,fontFace:HF,bold:true,color:C.accent}},{text:'5',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'e^0',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'5.00',options:{fontSize:10,fontFace:HF,bold:true,color:C.accent}}],
+      [{text:'2023',options:{fontSize:10,fontFace:HF,bold:true,color:C.blue}},{text:'4',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'e^-0.3',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'2.96',options:{fontSize:10,fontFace:HF,bold:true,color:C.blue}}],
+      [{text:'2022',options:{fontSize:10,fontFace:HF,bold:true,color:C.muted}},{text:'6',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'e^-0.6',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'3.29',options:{fontSize:10,fontFace:HF,bold:true,color:C.muted}}],
+      [{text:'2021',options:{fontSize:10,fontFace:HF,bold:true,color:C.faint}},{text:'3',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'e^-0.9',options:{fontSize:10,fontFace:BF,color:C.text}},{text:'1.22',options:{fontSize:10,fontFace:HF,bold:true,color:C.faint}}],
+    ];
+    s.addTable(trows,{x:6.95,y:2.45,w:5.5,colW:[1.0,1.5,1.5,1.5],border:{type:'solid',pt:0.5,color:C.border},margin:[3,6,3,6]});
+    s.addShape(S.rect,{x:6.95,y:4.2,w:5.5,h:0.5,fill:{color:'FFF0F0'}});
+    s.addText('Total: 12.47',{x:6.95,y:4.22,w:5.5,h:0.45,fontSize:20,fontFace:HF,bold:true,color:C.accent,align:'center',valign:'middle'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 3.3 (Weighted Decay Algorithm).');
+  })();
+
+  // ========== SLIDE 10: BLOOM TAXONOMY ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'10','Methodology','Bloom Taxonomy');
+    ttl(s,'Cognitive complexity analysis','Bloom Taxonomy','Classification');
+    var bl=[
+      ['L1','Remember','Define, List, Recall, Name, State, Identify','w=0.3',C.accent],
+      ['L2','Understand','Explain, Describe, Summarize, Interpret, Compare','w=0.3','C94A4A'],
+      ['L3','Apply','Calculate, Demonstrate, Solve, Use, Implement','w=0.6','1A1A1A'],
+      ['L4','Analyze','Compare, Examine, Differentiate, Investigate','w=0.6',C.blue],
+      ['L5','Evaluate','Critique, Justify, Assess, Recommend, Argue','w=1.0','4A4F58'],
+      ['L6','Create','Design, Construct, Develop, Formulate, Propose','w=1.0','6B7280'],
+    ];
+    for(var i=0;i<6;i++){
+      var y=2.0+i*0.75;
+      s.addShape(S.rect,{x:0.6,y:y,w:10.5,h:0.65,fill:{color:C.surface},line:{color:C.border,width:0.5}});
+      s.addShape(S.rect,{x:0.6,y:y,w:0.06,h:0.65,fill:{color:bl[i][4]}});
+      s.addText(bl[i][0],{x:0.75,y:y+0.05,w:0.5,h:0.55,fontSize:10,fontFace:MF,bold:true,color:bl[i][4],valign:'middle'});
+      s.addText(bl[i][1],{x:1.3,y:y+0.05,w:1.5,h:0.3,fontSize:12,fontFace:BF,bold:true,color:C.text,valign:'middle'});
+      s.addText(bl[i][2],{x:1.3,y:y+0.35,w:5,h:0.25,fontSize:9,fontFace:BF,color:C.muted,valign:'top'});
+      s.addText(bl[i][3],{x:10,y:y+0.05,w:1,h:0.55,fontSize:8,fontFace:MF,color:C.faint,valign:'middle',align:'right'});
+    }
+    card(s,11.2,2.0,2.0,4.5);
+    s.addText('TYPICAL DISTRIBUTION',{x:11.6,y:2.1,w:1.6,h:0.3,fontSize:7,fontFace:MF,color:C.accent,align:'center'});
+    s.addText('Remember: 25%\\nUnderstand: 20%\\nApply: 22%\\nAnalyze: 18%\\nEvaluate: 10%\\nCreate: 5%',{x:11.6,y:2.6,w:1.6,h:2.5,fontSize:9,fontFace:BF,color:C.text,lineSpacingMultiple:1.5,align:'center'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 3.4 (Bloom Taxonomy Classification).');
+  })();
+
+  // ========== SLIDE 11: DASHBOARD and RAG ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'11','Implementation','Dashboard and RAG');
+    ttl(s,'User-facing features','Dashboard and','RAG Assistant');
+    card(s,0.6,2.0,5.7,3.2,C.accent);
+    txt(s,0.85,2.1,5.2,0.25,'Analytics Dashboard',{fontSize:13,fontFace:BF,bold:true,color:C.accent});
+    bulletList(s,0.85,2.5,5.2,['Topic Frequency Heatmap - Grid showing topic occurrence by year with intensity coloring','Trend Line Charts - Topic frequency over time with decay weighting applied','Bloom Distribution - Pie/bar chart of question complexity levels','High-Yield Topics - Ranked list with prediction confidence scores']);
+    card(s,6.7,2.0,5.9,2.0,C.blue);
+    txt(s,7.0,2.1,5.3,0.25,'RAG Study Assistant',{fontSize:13,fontFace:BF,bold:true,color:C.blue});
+    bulletList(s,7.0,2.5,5.3,['Semantic search over all embedded questions using ChromaDB','Retrieved top-4 relevant questions as context for LLM','Conversational responses grounded in specific past questions','Example: How does this course usually test Thevenin Theorem?']);
+    dc(s,6.7,4.2,5.9,1.0);
+    dcl(s,6.7,4.2,'Vector Similarity Detection');
+    txt(s,6.9,4.5,5.4,0.6,'Each question embedded using sentence-transformers (all-MiniLM-L6-v2) -> 384-dimensional vector. Cosine similarity threshold >0.85 identifies semantically similar questions.',{fontSize:9,color:'C7D3E6',lineSpacingMultiple:1.2});
+    var badges=['Responsive Design: Desktop and tablet viewports supported via Tailwind CSS','Real-time: SWR deduplication, 60s analytics caching, Background processing'];
+    for(var i=0;i<2;i++){
+      card(s,0.6+i*6.1,5.5,5.7,0.55);
+      txt(s,0.85+i*6.1,5.6,5.2,0.35,'  '+badges[i],{fontSize:10,color:C.text,valign:'middle'});
+    }
+    ft(s,'Source: SENTINEL-EXAM Project Report - Sections 3.5-3.7.');
+  })();
+
+  // ========== SLIDE 12: TECH STACK ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'12','Engineering Decisions','Technology Choices');
+    ttl(s,'Zero-cost production grade','Technology','Stack');
+    var stacks=[
+      {title:'FRONTEND',color:C.accent,rows:[['Framework','Next.js 14+ (App Router)'],['UI','Tailwind CSS + Shadcn/ui'],['Charts','Recharts'],['Deployment','Vercel (Hobby Tier)']]},
+      {title:'BACKEND and AI',color:C.blue,rows:[['API','FastAPI (Python)'],['OCR','PyMuPDF + EasyOCR'],['LLM','Groq Cloud (Llama 3 70B)'],['Vector DB','ChromaDB + pgvector']]},
+      {title:'DATA and INFRA',color:C.text,rows:[['Database','Supabase (PostgreSQL)'],['Storage','Supabase Storage'],['Backend Host','Render.com (Free)'],['Cost','$0 / month']]},
+    ];
+    for(var i=0;i<2;i++){
+      var x=0.6+i*6.2;
+      card(s,x,2.0,5.9,4.0);
+      s.addText(stacks[i].title,{x:x+0.15,y:2.1,w:5.6,h:0.3,fontSize:9,fontFace:MF,color:stacks[i].color});
+      var srows=[[{text:'Component',options:{fontSize:8,fontFace:MF,bold:true,color:C.accent}},{text:'Technology',options:{fontSize:8,fontFace:MF,bold:true,color:C.accent}}]];
+      for(var j=0;j<stacks[i].rows.length;j++){
+        srows.push([{text:stacks[i].rows[j][0],options:{fontSize:9,fontFace:MF,color:C.muted}},{text:stacks[i].rows[j][1],options:{fontSize:9,fontFace:BF,color:C.text}}]);
+      }
+      s.addTable(srows,{x:x+0.15,y:2.5,w:5.6,colW:[1.8,3.8],border:{type:'solid',pt:0.5,color:C.border},margin:[2,4,2,4]});
+    }
+    card(s,0.6,6.2,12,1.3);
+    s.addText(stacks[2].title,{x:0.75,y:6.3,w:11.7,h:0.25,fontSize:7,fontFace:MF,color:C.text});
+    var srows3=[[{text:'Component',options:{fontSize:7,fontFace:MF,bold:true,color:C.accent}},{text:'Technology',options:{fontSize:7,fontFace:MF,bold:true,color:C.accent}}]];
+    for(var j=0;j<stacks[2].rows.length;j++){
+      srows3.push([{text:stacks[2].rows[j][0],options:{fontSize:7,fontFace:MF,color:C.muted}},{text:stacks[2].rows[j][1],options:{fontSize:7,fontFace:BF,color:C.text}}]);
+    }
+    s.addTable(srows3,{x:0.75,y:6.5,w:11.7,colW:[2.5,9.2],border:{type:'solid',pt:0.5,color:C.border},margin:[1,2,1,2]});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 4.1 (Technology Stack Selection).');
+  })();
+
+  // ========== SLIDE 13: RESULTS ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'13','Results','Performance Evaluation');
+    ttl(s,'System validation','Performance','Evaluation');
+    var metrics=[
+      ['Processing Speed','10-30s','Native PDFs: 10-15s | Scanned PDFs: 20-30s | Target: <30s',C.accent],
+      ['OCR Accuracy','100% / 85%+','Native PDFs: near-perfect | Scanned: 85%+ with OpenCV preprocessing',C.blue],
+      ['Query Response','<2s','Dashboard analytics with PostgreSQL optimization and 60s caching',C.muted],
+      ['Classification','85%+','Topic classification via manual verification of ground truth dataset',C.success],
+    ];
+    for(var i=0;i<4;i++){
+      var x=0.6+(i%2)*6.2;
+      var y=2.0+Math.floor(i/2)*1.3;
+      s.addShape(S.rect,{x:x,y:y,w:5.9,h:1.1,fill:{color:C.surface},line:{color:C.border,width:0.5}});
+      s.addShape(S.rect,{x:x,y:y,w:0.06,h:1.1,fill:{color:metrics[i][3]}});
+      s.addText(metrics[i][0],{x:x+0.2,y:y+0.05,w:3,h:0.2,fontSize:8,fontFace:MF,color:metrics[i][3]});
+      s.addText(metrics[i][1],{x:x+0.2,y:y+0.25,w:2.5,h:0.45,fontSize:24,fontFace:HF,bold:true,color:C.text});
+      s.addText(metrics[i][2],{x:x+0.2,y:y+0.75,w:5.5,h:0.3,fontSize:9,fontFace:BF,color:C.muted,lineSpacingMultiple:1.2});
+    }
+    dc(s,0.6,4.9,12,1.0);
+    dcl(s,0.6,4.9,'Scalability');
+    s.addText('50 concurrent uploads | 500+ papers per course | 14K LLM req/day free tier',{x:0.85,y:5.2,w:11.5,h:0.5,fontSize:11,fontFace:BF,color:'E8E8EE',valign:'middle',align:'center'});
+    var checks=['Zero-cost deployment validated: Vercel + Render + Supabase + Groq','Hybrid OCR validated: PyMuPDF for native, EasyOCR for scanned PDFs','RAG chat validated: ChromaDB + Groq Llama 3 integration'];
+    for(var i=0;i<2;i++){
+      var x=0.6+i*6.2;
+      card(s,x,6.1,5.9,0.6);
+      txt(s,x+0.15,6.2,5.5,0.4,'OK '+checks[i],{fontSize:9,color:C.text,valign:'middle'});
+    }
+    card(s,0.6,6.75,12,0.3);
+    txt(s,0.75,6.8,11.5,0.2,'OK '+checks[2],{fontSize:9,color:C.text,valign:'middle'});
+    ft(s,'Source: SENTINEL-EXAM Project Report - Chapter 6 (Results and Discussion).');
+  })();
+
+  // ========== SLIDE 14: LIMITATIONS ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'14','Discussion','Limitations and Challenges');
+    ttl(s,'Honest assessment','Limitations and','Challenges');
+    var lims=[
+      ['OCR Quality Dependence','Accuracy depends heavily on scan quality. Poor-quality scans with noise, skew, or faded text may fall below the 85% target.','Mitigation: Improved OpenCV preprocessing',C.accent],
+      ['LLM API Dependency','System depends on Groq Cloud API availability. Rate limits or service disruptions would impact core analysis.','Mitigation: Local LLM alternatives, response caching',C.blue],
+      ['Syllabus Dependency','Topic classification accuracy depends on quality of syllabus topics provided. Poorly defined syllabi receive less accurate results.','Mitigation: Structured topic input, LLM fallback',C.muted],
+      ['Fixed Decay Constant','Weighted decay uses lambda = 0.3 that may not be optimal for all courses. Stable curricula might benefit from lower constants.','Mitigation: Configurable decay parameter',C.faint],
+    ];
+    for(var i=0;i<4;i++){
+      var x=0.6+(i%2)*6.2;
+      var y=2.0+Math.floor(i/2)*2.1;
+      card(s,x,y,5.9,1.8,lims[i][3]);
+      txt(s,x+0.15,y+0.1,5.5,0.25,lims[i][0],{fontSize:12,fontFace:BF,bold:true,color:C.text});
+      txt(s,x+0.15,y+0.45,5.5,0.7,lims[i][1],{fontSize:10,color:C.muted,lineSpacingMultiple:1.2});
+      txt(s,x+0.15,y+1.25,5.5,0.35,lims[i][2],{fontSize:9,color:C.faint,lineSpacingMultiple:1.1});
+    }
+    ft(s,'Source: SENTINEL-EXAM Project Report - Section 6.5 (Limitations and Challenges).');
+  })();
+
+  // ========== SLIDE 15: CONCLUSION ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'15','Conclusion','Contributions and Future Work');
+    ttl(s,'Summary and outlook','Contributions and','Future Work');
+    card(s,0.6,2.0,5.7,4.2);
+    tbold(s,0.85,2.1,5.2,0.25,'Key Contributions',C.accent);
+    var cont=[
+      '1. End-to-end system combining multi-format ingestion, LLM analysis, vector search, and interactive dashboards',
+      '2. Weighted decay algorithm for temporal trend analysis that accounts for curriculum changes',
+      '3. Zero-cost production-grade architecture using Vercel, Render, Supabase, and Groq Cloud',
+      '4. Automated Bloom Taxonomy classification integrated with topic extraction and trend analysis',
+      '5. RAG-powered study assistant enabling conversational querying of examination patterns',
+    ];
+    for(var i=0;i<cont.length;i++){
+      txt(s,0.85,2.5+i*0.6,5.2,0.5,cont[i],{fontSize:10,color:C.text,lineSpacingMultiple:1.15});
+    }
+    card(s,6.7,2.0,6,4.2,C.blue);
+    tbold(s,7.0,2.1,5.5,0.25,'Future Enhancements',C.blue);
+    var fut=[
+      'Automated Answer Grading - Extend RAG framework for formative assessment',
+      'Personalized Study Plans - ML-based recommendations based on identified weak areas',
+      'Mobile Application - React Native for improved accessibility during exam prep',
+      'Professor Dashboard - Enhanced analytics for question difficulty and coverage balance',
+      'Local LLM Deployment - Reduce API dependency and improve reliability at scale',
+    ];
+    for(var i=0;i<fut.length;i++){
+      txt(s,7.0,2.5+i*0.6,5.5,0.5,fut[i],{fontSize:10,color:C.text,lineSpacingMultiple:1.15});
+    }
+    ft(s,'Source: SENTINEL-EXAM Project Report - Chapter 7 (Conclusion and Future Work).');
+  })();
+
+  // ========== SLIDE 16: REFERENCES ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    sH(s,'16','References','Citations');
+    ttl(s,'Scholarly sources','Key','References');
+    var refs=[
+      ['[1]','Anderson, L.W. and Krathwohl, D.R. (2001). A taxonomy for learning. Longman.','Bloom revised'],
+      ['[2]','Baker, R.S. and Inventado, P.S. (2014). Educational data mining. In Learning analytics. Springer.','EDM foundations'],
+      ['[3]','Bloom, B.S. (1956). Taxonomy of educational objectives. Longmans, Green.','Taxonomy original'],
+      ['[4]','Kasneci, E. et al. (2023). ChatGPT and the future of education. Computers and Education, 104.','LLMs in education'],
+      ['[5]','Lewis, P. et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS.','RAG framework'],
+      ['[6]','Romero, C. and Ventura, S. (2007). Educational data mining: A survey. Expert Systems with Applications.','EDM survey'],
+      ['[7]','Singh, P. and Singh, S. (2020). Automated classification of questions based on Bloom taxonomy using NLP. JITE.','Bloom automation'],
+      ['[8]','Zhong, Q. et al. (2022). A RAG-based chatbot for educational question answering. Proc. EDM 2022.','Educational RAG'],
+    ];
+    var rrows=[[{text:'#',options:{fontSize:8,fontFace:MF,bold:true,color:C.accent}},{text:'Citation',options:{fontSize:8,fontFace:MF,bold:true,color:C.accent}},{text:'Topic',options:{fontSize:8,fontFace:MF,bold:true,color:C.accent}}]];
+    for(var i=0;i<refs.length;i++){
+      rrows.push([{text:refs[i][0],options:{fontSize:8,fontFace:MF,color:C.accent}},{text:refs[i][1],options:{fontSize:9,fontFace:BF,color:C.text}},{text:refs[i][2],options:{fontSize:8,fontFace:MF,color:C.faint}}]);
+    }
+    s.addTable(rrows,{x:0.6,y:2.0,w:12,colW:[0.5,9.5,2.0],border:{type:'solid',pt:0.5,color:C.border},margin:[3,5,3,5],rowH:[0.2,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4]});
+    ft(s,'Full bibliography available in the project report (Chapter 8).');
+  })();
+
+  // ========== SLIDE 17: THANK YOU ==========
+  (function(){
+    var s=pres.addSlide();s.background={fill:C.bg};
+    s.addShape(S.rect,{x:0,y:0,w:0.6,h:7.5,fill:{color:C.accent}});
+    s.addText('FINAL YEAR PROJECT DEFENSE',{x:0.85,y:0.3,w:6,h:0.3,fontSize:8,fontFace:MF,color:C.accent});
+    s.addText('Thank you',{x:0.85,y:1.0,w:6,h:0.3,fontSize:10,fontFace:MF,color:C.blue});
+    s.addText('Questions?',{x:0.85,y:1.5,w:11.5,h:1.2,fontSize:48,fontFace:HF,bold:true,color:C.text});
+    s.addText('Thank you for your attention. I welcome your questions and look forward to a productive discussion about the methodology, implementation, and future directions of the SENTINEL-EXAM project.',{x:0.85,y:2.8,w:10,h:0.8,fontSize:12,fontFace:BF,color:C.muted,lineSpacingMultiple:1.3});
+    var yi=6.2;
+    s.addShape(S.rect,{x:0.6,y:yi-0.1,w:12,h:0.01,fill:{color:C.border}});
+    s.addText('PROJECT',{x:0.6,y:yi+0.1,w:3.5,h:0.18,fontSize:6,fontFace:MF,color:C.accent});
+    s.addText('SENTINEL-EXAM\\nAI-Powered Exam Analytics',{x:0.6,y:yi+0.3,w:3.5,h:0.5,fontSize:11,fontFace:HF,bold:true,color:C.text});
+    s.addText('SUPERVISOR',{x:4.5,y:yi+0.1,w:3.5,h:0.18,fontSize:6,fontFace:MF,color:C.blue});
+    s.addText('Prof. Supervisor Name\\nDept. of Computer Engineering',{x:4.5,y:yi+0.3,w:3.5,h:0.5,fontSize:11,fontFace:HF,bold:true,color:C.text});
+    s.addText('CONTACT',{x:8.5,y:yi+0.1,w:4,h:0.18,fontSize:6,fontFace:MF,color:C.blue});
+    s.addText('Student Name\\nstudent@st.knust.edu.gh',{x:8.5,y:yi+0.3,w:4,h:0.5,fontSize:11,fontFace:HF,bold:true,color:C.text});
+  })();
+
+  pres.writeFile({ fileName: 'SENTINEL-EXAM-Presentation.pptx' });
+
+</script>
+</body>
+</html>

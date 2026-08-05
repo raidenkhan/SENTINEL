@@ -31,10 +31,11 @@ from fastapi_cache.decorator import cache
 async def startup():
     FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
 
-# Robust CORS for development
+# CORS: allow local dev origins plus any Hugging Face Space / custom domain.
+# Using a regex (not allow_origins="*") so it stays valid with allow_credentials=True.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origin_regex=".*",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],

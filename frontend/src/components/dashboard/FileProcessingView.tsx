@@ -11,9 +11,20 @@ type UploadedFile = {
     status: 'pending' | 'processing' | 'extracting' | 'analyzing' | 'indexing' | 'completed' | 'failed';
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: () => void }) {
     const [files, setFiles] = useState<UploadedFile[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
+
+    // Clear any active status polls when the component unmounts
+    useEffect(() => {
+        return () => {
+            intervalsRef.current.forEach(id => clearInterval(id));
+            intervalsRef.current = [];
+        };
+    }, []);
 
     const getProgress = (status: UploadedFile['status']) => {
         switch (status) {
@@ -40,8 +51,6 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
         formData.append("department", "Computer Engineering");
         formData.append("year", "2023");
         formData.append("semester", "2");
-
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         // Optimistic UI Update
         const tempId = Math.random().toString(36).substring(7);
@@ -75,25 +84,64 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
     };
 
     const pollStatus = async (upload_id: string) => {
+        let attempts = 0;
+        let consecutiveErrors = 0;
+        let finished = false;
+
+        // Terminal state handler — ignores any stale responses that arrive afterwards
+        const finish = (status: UploadedFile['status'], progress: number) => {
+            if (finished) return;
+            finished = true;
+            clearInterval(interval);
+            setFiles(prev => prev.map(f => f.id === upload_id ? { ...f, status, progress } : f));
+        };
+
         const interval = setInterval(async () => {
+            attempts += 1;
+
+            // Safety net: give up after ~6 minutes of polling
+            if (attempts > 120) {
+                finish('failed', 0);
+                return;
+            }
+
             try {
-                const res = await fetch(`http://localhost:8000/api/status/${upload_id}`);
-                if (res.ok) {
+                const res = await fetch(`${API_URL}/api/status/${upload_id}`);
+
+                if (!res.ok) {
+                    console.error(`Status check failed with ${res.status} for upload ${upload_id}`);
+                    consecutiveErrors += 1;
+                } else {
                     const data = await res.json();
+                    consecutiveErrors = 0;
 
                     if (data.status === 'completed') {
-                        setFiles(prev => prev.map(f => f.id === upload_id ? { ...f, status: 'completed', progress: 100 } : f));
-                        clearInterval(interval);
+                        finish('completed', 100);
                         if (onUploadComplete) onUploadComplete();
-                    } else {
-                        // Update intermediate status and progress
+                        return;
+                    }
+                    if (data.status === 'failed') {
+                        finish('failed', 0);
+                        return;
+                    }
+
+                    // Update intermediate status and progress (only if still active)
+                    if (!finished) {
                         setFiles(prev => prev.map(f => f.id === upload_id ? { ...f, status: data.status, progress: getProgress(data.status) } : f));
                     }
                 }
             } catch (err) {
                 console.error("Polling error", err);
+                consecutiveErrors += 1;
+            }
+
+            // If the status endpoint is unreachable, fail visibly instead of hanging at 50%
+            if (consecutiveErrors >= 5) {
+                finish('failed', 0);
             }
         }, 3000); // Poll every 3 seconds
+
+        intervalsRef.current.push(interval);
     };
 
     return (
