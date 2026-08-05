@@ -18,6 +18,12 @@ CREATE POLICY public_course_read ON courses
     TO authenticated
     USING (true);
 
+-- Allow the upload screen's add-course form to create courses
+CREATE POLICY public_course_insert ON courses
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
 -- 3. Policies for 'exam_papers' table
 -- Users can only access papers they uploaded. 
 CREATE POLICY user_paper_access ON exam_papers

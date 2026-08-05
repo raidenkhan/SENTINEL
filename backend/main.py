@@ -55,6 +55,12 @@ class ChatRequest(BaseModel):
     course_id: Optional[str] = None
     chat_history: Optional[List[Dict[str, str]]] = None
 
+class CourseCreate(BaseModel):
+    code: str
+    name: str
+    department: Optional[str] = None
+    level: Optional[int] = None
+
 # ---------------------------------------------------------
 # Utility Endpoints
 # ---------------------------------------------------------
@@ -179,6 +185,50 @@ def get_processing_status(upload_id: str):
         raise HTTPException(status_code=500, detail=f"Database error: {e.message}")
     except Exception as e:
         logger.error(f"Unexpected error in status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/courses")
+def list_courses():
+    """
+    Returns all courses available for the upload course selector.
+    """
+    try:
+        response = supabase_client.table('courses').select('id, code, name, department, level').order('code').execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Error listing courses: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/courses")
+def create_course(course: CourseCreate):
+    """
+    Creates a new course (used by the upload screen's add-course form).
+    """
+    try:
+        code = course.code.strip().upper()
+        name = course.name.strip()
+        if not code or not name:
+            raise HTTPException(status_code=400, detail="Course code and name are required.")
+
+        resp = supabase_client.table('courses').insert({
+            'code': code,
+            'name': name,
+            'department': course.department or None,
+            'level': course.level
+        }).execute()
+        return resp.data[0]
+    except APIError as e:
+        # PostgreSQL unique_violation (23505) — the code column is UNIQUE
+        if getattr(e, 'code', '') == '23505':
+            raise HTTPException(status_code=409, detail="A course with this code already exists.")
+        logger.error(f"Supabase API Error in create course: {e}")
+        raise HTTPException(status_code=500, detail=f"Database error: {e.message}")
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error in create course: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

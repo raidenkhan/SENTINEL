@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, CheckCircle2, FileText, MoreHorizontal, RefreshCw, UploadCloud, X } from "lucide-react";
+import { AlertCircle, BookOpen, CheckCircle2, FileText, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -15,7 +15,21 @@ type UploadedFile = {
     file?: File; // kept so failed uploads can be retried
 }
 
+type Course = {
+    id: string;
+    code: string;
+    name: string;
+    department?: string | null;
+    level?: number | null;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 2004 }, (_, i) => CURRENT_YEAR - i);
+const SEMESTERS = ["1", "2", "3"];
+const SELECT_CLASS = "w-full bg-[var(--card-bg)] border border-[var(--border)] rounded-sm px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-neon-crystal/40 transition-colors";
+const INPUT_CLASS = "w-full bg-[var(--card-bg)] border border-[var(--border)] rounded-sm px-2 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-neon-crystal/40 transition-colors";
 
 export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: () => void }) {
     const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -23,6 +37,77 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
     const fileInputRef = useRef<HTMLInputElement>(null);
     const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
     const retryingRef = useRef<Set<string>>(new Set());
+
+    // --- Course selector state ---
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [selectedCourseId, setSelectedCourseId] = useState("");
+    const [year, setYear] = useState<number>(CURRENT_YEAR);
+    const [semester, setSemester] = useState("1");
+    const [coursesError, setCoursesError] = useState("");
+    const [showAddCourse, setShowAddCourse] = useState(false);
+    const [newCourse, setNewCourse] = useState({ code: "", name: "", department: "", level: "" });
+    const [addingCourse, setAddingCourse] = useState(false);
+    const [addCourseError, setAddCourseError] = useState("");
+
+    // Load available courses for the selector
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/courses`);
+                if (!res.ok) throw new Error(`Status ${res.status}`);
+                const data: Course[] = await res.json();
+                if (cancelled) return;
+                setCourses(data);
+                // Preselect automatically when only one course exists
+                if (data.length === 1) setSelectedCourseId(data[0].id);
+            } catch (err) {
+                if (!cancelled) setCoursesError("Could not load courses. Is the backend running?");
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    const handleAddCourse = async () => {
+        const code = newCourse.code.trim();
+        const name = newCourse.name.trim();
+        if (!code || !name) {
+            setAddCourseError("Course code and name are required.");
+            return;
+        }
+        setAddingCourse(true);
+        setAddCourseError("");
+        try {
+            const res = await fetch(`${API_URL}/api/courses`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    code,
+                    name,
+                    department: newCourse.department.trim() || undefined,
+                    level: newCourse.level ? Number(newCourse.level) : undefined,
+                }),
+            });
+            const body = await res.json().catch(() => null);
+            if (!res.ok) {
+                setAddCourseError(body && typeof body.detail === "string" ? body.detail : `Failed to add course (${res.status})`);
+                return;
+            }
+            const created = body as Course | null;
+            if (!created || !created.id) {
+                setAddCourseError("Course was added but the server returned an unexpected response.");
+                return;
+            }
+            setCourses(prev => [...prev, created].sort((a, b) => a.code.localeCompare(b.code)));
+            setSelectedCourseId(created.id);
+            setShowAddCourse(false);
+            setNewCourse({ code: "", name: "", department: "", level: "" });
+        } catch (err) {
+            setAddCourseError("Could not reach the server. Check your connection.");
+        } finally {
+            setAddingCourse(false);
+        }
+    };
 
     // Clear any active status polls when the component unmounts
     useEffect(() => {
@@ -45,15 +130,17 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
     };
 
     const uploadFile = async (file: File) => {
-        // Dummy metadata for the MVP since we haven't built a course selector yet
+        // Real course metadata from the selector (no more hardcoded dummy)
+        const selectedCourse = courses.find(c => c.id === selectedCourseId);
+        if (!selectedCourse) return; // button is disabled without a course; belt-and-suspenders
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("course_id", "123e4567-e89b-12d3-a456-426614174000"); // Fake UUID for now or get from context
-        formData.append("course_code", "EE357");
-        formData.append("course_name", "Microprocessors");
-        formData.append("department", "Computer Engineering");
-        formData.append("year", "2023");
-        formData.append("semester", "2");
+        formData.append("course_id", selectedCourse.id);
+        formData.append("course_code", selectedCourse.code);
+        formData.append("course_name", selectedCourse.name);
+        formData.append("department", selectedCourse.department || "Engineering");
+        formData.append("year", String(year));
+        formData.append("semester", semester);
 
         // Optimistic UI Update
         const tempId = Math.random().toString(36).substring(7);
@@ -112,9 +199,10 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
         const interval = setInterval(async () => {
             attempts += 1;
 
-            // Safety net: give up after ~6 minutes of polling
-            if (attempts > 120) {
-                finish('failed', 0, "Processing timed out after 6 minutes. Please try again.");
+            // Safety net: give up after ~12 minutes. Chunked analysis + Groq's
+            // free-tier TPM pacing can legitimately take several minutes per paper.
+            if (attempts > 240) {
+                finish('failed', 0, "Processing timed out after 12 minutes. Please try again.");
                 return;
             }
 
@@ -165,37 +253,135 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[50%] bg-neon-crystal/5 blur-[120px] rounded-sm z-0 pointer-events-none" />
 
                 {/* Files List - Left side */}
-                <div className="w-full md:w-1/3 flex flex-col gap-4 z-10 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                    {files.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)] text-sm gap-2">
-                            <UploadCloud className="w-8 h-8 opacity-50" />
-                            <p>No papers analyzed yet.</p>
+                <div className="w-full md:w-1/3 flex flex-col gap-4 z-10">
+                    {/* Course selector */}
+                    <div className="p-4 rounded-sm border border-neon-crystal/20 bg-neon-crystal/5 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-mono uppercase tracking-wider text-neon-crystal/70 flex items-center gap-1.5">
+                                <BookOpen className="w-3.5 h-3.5" /> Course
+                            </label>
+                            <button
+                                onClick={() => setShowAddCourse(v => !v)}
+                                className="text-[10px] font-bold text-neon-crystal/80 hover:text-neon-crystal transition-colors flex items-center gap-1"
+                            >
+                                <Plus className="w-3 h-3" /> {showAddCourse ? "Cancel" : "Add course"}
+                            </button>
                         </div>
-                    ) : (
-                        files.map((file, idx) => {
-                            const retryFile = file.status === 'failed' ? file.file : undefined;
-                            return (
-                                <FileItem
-                                    key={file.id}
-                                    name={file.name}
-                                    progress={file.progress}
-                                    active={file.status === 'processing'}
-                                    status={file.status}
-                                    error={file.error}
-                                    failedStage={file.failedStage}
-                                    viewHref={file.status === 'completed' ? `/dashboard/papers/${file.id}` : undefined}
-                                    onRemove={() => setFiles(prev => prev.filter(f => f.id !== file.id))}
-                                    onRetry={retryFile ? () => {
-                                        // Guard against double-clicks starting two uploads
-                                        if (retryingRef.current.has(file.id)) return;
-                                        retryingRef.current.add(file.id);
-                                        setFiles(prev => prev.filter(f => f.id !== file.id));
-                                        uploadFile(retryFile).finally(() => retryingRef.current.delete(file.id));
-                                    } : undefined}
+
+                        {coursesError ? (
+                            <p className="text-[11px] text-red-400">{coursesError}</p>
+                        ) : courses.length === 0 ? (
+                            <p className="text-[11px] text-[var(--text-muted)]">No courses yet — add one below to upload.</p>
+                        ) : (
+                            <select
+                                value={selectedCourseId}
+                                onChange={e => setSelectedCourseId(e.target.value)}
+                                className={SELECT_CLASS}
+                            >
+                                <option value="" disabled>Select a course…</option>
+                                {courses.map(c => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.code} — {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Year</label>
+                                <select value={year} onChange={e => setYear(Number(e.target.value))} className={SELECT_CLASS}>
+                                    {YEARS.map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Semester</label>
+                                <select value={semester} onChange={e => setSemester(e.target.value)} className={SELECT_CLASS}>
+                                    {SEMESTERS.map(s => (
+                                        <option key={s} value={s}>{s}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {showAddCourse && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                transition={{ duration: 0.2 }}
+                                className="flex flex-col gap-2 pt-1 overflow-hidden"
+                            >
+                                <input
+                                    placeholder="Code (e.g. EE357)"
+                                    value={newCourse.code}
+                                    onChange={e => setNewCourse(p => ({ ...p, code: e.target.value }))}
+                                    className={INPUT_CLASS}
                                 />
-                            );
-                        })
-                    )}
+                                <input
+                                    placeholder="Name (e.g. Computer Architecture)"
+                                    value={newCourse.name}
+                                    onChange={e => setNewCourse(p => ({ ...p, name: e.target.value }))}
+                                    className={INPUT_CLASS}
+                                />
+                                <input
+                                    placeholder="Department (optional)"
+                                    value={newCourse.department}
+                                    onChange={e => setNewCourse(p => ({ ...p, department: e.target.value }))}
+                                    className={INPUT_CLASS}
+                                />
+                                <input
+                                    placeholder="Level (optional, e.g. 300)"
+                                    value={newCourse.level}
+                                    onChange={e => setNewCourse(p => ({ ...p, level: e.target.value }))}
+                                    className={INPUT_CLASS}
+                                />
+                                {addCourseError && <p className="text-[11px] text-red-400">{addCourseError}</p>}
+                                <button
+                                    onClick={handleAddCourse}
+                                    disabled={addingCourse}
+                                    className="px-3 py-1.5 rounded-sm bg-neon-crystal/10 text-neon-crystal border border-neon-crystal/30 font-bold text-[11px] hover:bg-neon-crystal/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {addingCourse ? "ADDING…" : "ADD COURSE"}
+                                </button>
+                            </motion.div>
+                        )}
+                    </div>
+
+                    {/* File queue (scrollable) */}
+                    <div className="flex flex-col gap-4 max-h-52 overflow-y-auto pr-2 custom-scrollbar">
+                        {files.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)] text-sm gap-2">
+                                <UploadCloud className="w-8 h-8 opacity-50" />
+                                <p>No papers analyzed yet.</p>
+                            </div>
+                        ) : (
+                            files.map((file, idx) => {
+                                const retryFile = file.status === 'failed' ? file.file : undefined;
+                                return (
+                                    <FileItem
+                                        key={file.id}
+                                        name={file.name}
+                                        progress={file.progress}
+                                        active={file.status === 'processing'}
+                                        status={file.status}
+                                        error={file.error}
+                                        failedStage={file.failedStage}
+                                        viewHref={file.status === 'completed' ? `/dashboard/papers/${file.id}` : undefined}
+                                        onRemove={() => setFiles(prev => prev.filter(f => f.id !== file.id))}
+                                        onRetry={retryFile ? () => {
+                                            // Guard against double-clicks starting two uploads
+                                            if (retryingRef.current.has(file.id)) return;
+                                            retryingRef.current.add(file.id);
+                                            setFiles(prev => prev.filter(f => f.id !== file.id));
+                                            uploadFile(retryFile).finally(() => retryingRef.current.delete(file.id));
+                                        } : undefined}
+                                    />
+                                );
+                            })
+                        )}
+                    </div>
 
                     <input
                         type="file"
@@ -207,7 +393,9 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="mt-auto px-6 py-3 rounded-sm bg-neon-crystal/10 text-neon-crystal border border-neon-crystal/30 font-bold text-sm hover:bg-neon-crystal/20 transition-all flex items-center justify-center gap-2 w-max shadow-neon-glow shrink-0"
+                        disabled={!selectedCourseId}
+                        title={!selectedCourseId ? "Select a course to upload" : "Upload"}
+                        className="mt-auto px-6 py-3 rounded-sm bg-neon-crystal/10 text-neon-crystal border border-neon-crystal/30 font-bold text-sm hover:bg-neon-crystal/20 transition-all flex items-center justify-center gap-2 w-max shadow-neon-glow shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-neon-crystal/10"
                     >
                         <span>UPLOAD PIPELINE</span>
                     </button>

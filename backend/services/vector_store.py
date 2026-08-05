@@ -15,13 +15,26 @@ def index_questions(questions: List[Any], paper_metadata: Dict[str, Any]):
     """
     logger.info(f"Indexing {len(questions)} questions into Supabase pgvector...")
     
-    rows = []
+    # Build all content strings first
+    contents = []
     for q in questions:
-        content = f"Question Text: {q.raw_text}\nTopic: {q.topic}\nSub-topic: {q.sub_topic}\nBloom's Level: {q.blooms_level}\nKeywords: {', '.join(q.keywords)}"
-        
-        # Generate embedding locally
-        embedding = embeddings_model.embed_query(content)
-        
+        contents.append(
+            f"Question Text: {q.raw_text}\nTopic: {q.topic}\nSub-topic: {q.sub_topic}\nBloom's Level: {q.blooms_level}\nKeywords: {', '.join(q.keywords)}"
+        )
+    
+    # Generate ALL embeddings in ONE batched call (model-level parallelism).
+    # Previously each question ran a separate embed_query() — a 40-question
+    # paper meant 40 sequential encode passes through the transformer.
+    # embed_documents batches them (batch_size=32 internally), which is
+    # several times faster on CPU.
+    try:
+        embeddings = embeddings_model.embed_documents(contents, batch_size=32)
+    except Exception as e:
+        logger.error(f"Batched embedding failed ({e}), falling back to per-question embedding...")
+        embeddings = [embeddings_model.embed_query(c) for c in contents]
+    
+    rows = []
+    for idx, q in enumerate(questions):
         metadata = {
             "topic": q.topic,
             "blooms_level": q.blooms_level,
@@ -33,9 +46,9 @@ def index_questions(questions: List[Any], paper_metadata: Dict[str, Any]):
             "question_id": str(q.question_id),
             "paper_id": paper_metadata.get("upload_id"),
             "course_id": paper_metadata.get("course_id"),
-            "content": content,
+            "content": contents[idx],
             "metadata": metadata,
-            "embedding": embedding
+            "embedding": embeddings[idx]
         })
     
     # Batch insert — one round trip instead of one HTTP request per question (N+1)
