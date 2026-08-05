@@ -1,12 +1,9 @@
-import asyncio
-from typing import Optional
-from services.pdf_extractor import extract_text_from_bytes, extract_diagrams_from_pdf
+from services.pdf_extractor import parse_pdf
 from services.llm_analyzer import process_exam_text
 from services.db import supabase_client
 from services.vector_store import index_questions
-import hashlib
 
-async def process_document_pipeline(
+def process_document_pipeline(
     file_bytes: bytes,
     file_name: str,
     course_id: str,
@@ -23,16 +20,21 @@ async def process_document_pipeline(
     - Sends to Groq for analysis
     - Saves structured questions to Supabase
     - Updates status to 'completed'
+
+    NOTE: This is intentionally a *sync* function (no async/await).
+    FastAPI/Starlette runs sync background tasks in a threadpool worker,
+    so the heavy CPU/network work (PyMuPDF, OCR, LLM, embeddings) no longer
+    blocks the event loop — otherwise every other request (status polls,
+    chat, paper list) freezes while a paper is processing.
     """
     print(f"Starting background processing for upload_id: {upload_id}")
     
     try:
         # 1. Update status to 'processing'
-        # 2. Extract Text & Diagrams
+        # 2. Extract Text & Diagrams (single-pass PDF parse)
         supabase_client.table('exam_papers').update({'processing_status': 'extracting'}).eq('id', upload_id).execute()
         print("Extracting text and diagrams from PDF...")
-        extracted_text = extract_text_from_bytes(file_bytes)
-        diagram_data = extract_diagrams_from_pdf(file_bytes)
+        extracted_text, diagram_data = parse_pdf(file_bytes)
         
         diagram_map = {} # local_id -> supabase_url
         
@@ -93,10 +95,11 @@ async def process_document_pipeline(
         }
         index_questions(analysis_result.questions, paper_metadata)
 
-        # 5. Store Questions into Supabase
+        # 5. Store Questions into Supabase — batched into ONE round trip.
+        #    Previously each question was a separate HTTPS request (N+1).
+        question_rows = []
         for q in analysis_result.questions:
-            # We insert each question individually or batch them. Batching is better.
-            question_data = {
+            question_rows.append({
                 'paper_id': upload_id,
                 'question_number': q.question_id,
                 'raw_text': q.raw_text, 
@@ -107,13 +110,20 @@ async def process_document_pipeline(
                 'weight': q.weight,
                 'keywords': q.keywords,
                 'diagram_url': diagram_map.get(q.diagram_id) if hasattr(q, 'diagram_id') and q.diagram_id else None
-            }
-            try:
-                supabase_client.table('questions').insert(question_data).execute()
-            except Exception as e:
-                print(f"Failed to insert question {q.question_id}: {e}")
+            })
 
-        # 5. Update parent exam_paper record to completed
+        if question_rows:
+            try:
+                supabase_client.table('questions').insert(question_rows).execute()
+            except Exception as e:
+                print(f"Batch insert failed ({e}), falling back to individual inserts...")
+                for row in question_rows:
+                    try:
+                        supabase_client.table('questions').insert(row).execute()
+                    except Exception as row_err:
+                        print(f"Failed to insert question {row['question_number']}: {row_err}")
+
+        # 6. Update parent exam_paper record to completed
         supabase_client.table('exam_papers').update({
             'processing_status': 'completed',
             # 'ocr_accuracy': could be calculated here

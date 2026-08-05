@@ -15,6 +15,7 @@ def index_questions(questions: List[Any], paper_metadata: Dict[str, Any]):
     """
     logger.info(f"Indexing {len(questions)} questions into Supabase pgvector...")
     
+    rows = []
     for q in questions:
         content = f"Question Text: {q.raw_text}\nTopic: {q.topic}\nSub-topic: {q.sub_topic}\nBloom's Level: {q.blooms_level}\nKeywords: {', '.join(q.keywords)}"
         
@@ -28,19 +29,26 @@ def index_questions(questions: List[Any], paper_metadata: Dict[str, Any]):
             "year": paper_metadata.get("year")
         }
         
-        data = {
+        rows.append({
             "question_id": str(q.question_id),
             "paper_id": paper_metadata.get("upload_id"),
             "course_id": paper_metadata.get("course_id"),
             "content": content,
             "metadata": metadata,
             "embedding": embedding
-        }
-        
+        })
+    
+    # Batch insert — one round trip instead of one HTTP request per question (N+1)
+    if rows:
         try:
-            supabase_client.table('question_embeddings').insert(data).execute()
+            supabase_client.table('question_embeddings').insert(rows).execute()
         except Exception as e:
-            logger.error(f"Failed to insert embedding for question {q.question_id}: {e}")
+            logger.error(f"Batch embedding insert failed ({e}), falling back to individual inserts...")
+            for data in rows:
+                try:
+                    supabase_client.table('question_embeddings').insert(data).execute()
+                except Exception as row_err:
+                    logger.error(f"Failed to insert embedding for question {data['question_id']}: {row_err}")
 
 def similarity_search(query: str, course_id: str = None, limit: int = 5):
     """
