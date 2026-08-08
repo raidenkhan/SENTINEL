@@ -2,7 +2,7 @@ import time
 import logging
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from core.config import settings
 
@@ -60,6 +60,7 @@ Critical Rules:
 - **Diagram Association**: If the input text includes "Available Visual Assets", carefully associate the correct Diagram ID with questions that refer to "the figure", "the diagram", "the circuit", etc.
 - If topic is ambiguous, choose the most specific match from the syllabus
 - Weight calculation: 0.3 for Remember/Understand, 0.6 for Apply/Analyze, 1.0 for Evaluate/Create
+- Respond with ONLY valid JSON matching the required schema.
 """
 
 prompt = PromptTemplate(
@@ -70,33 +71,51 @@ prompt = PromptTemplate(
 # ---------------------------------------------------------
 # LLM Initialization
 # ---------------------------------------------------------
+# DeepSeek exposes an OpenAI-compatible API, so we use ChatOpenAI
+# pointed at api.deepseek.com with the deepseek-chat model.
+# Primary key: DEEP_SEEK_API_KEY (legacy GROQ_API_KEY fallback).
 
-# Using llama-3.3-70b-versatile for high performance instruction following
-llm = ChatGroq(
+DEEPSEEK_API_KEY = settings.DEEP_SEEK_API_KEY or settings.GROQ_API_KEY
+if not DEEPSEEK_API_KEY:
+    raise RuntimeError(
+        "No LLM API key configured: set DEEP_SEEK_API_KEY (or legacy GROQ_API_KEY) in .env"
+    )
+if not settings.DEEP_SEEK_API_KEY and settings.GROQ_API_KEY:
+    # print() (not just logger) so it is always visible in HF Space logs
+    print(
+        "WARNING: DEEP_SEEK_API_KEY not set — falling back to GROQ_API_KEY. "
+        "A Groq key (gsk_...) will NOT authenticate against api.deepseek.com. "
+        "Set DEEP_SEEK_API_KEY in your environment/secrets."
+    )
+
+llm = ChatOpenAI(
     temperature=0.1,  # Low temperature for analytical consistency
-    model_name="llama-3.3-70b-versatile",
-    groq_api_key=settings.GROQ_API_KEY
+    model="deepseek-chat",
+    api_key=DEEPSEEK_API_KEY,
+    base_url="https://api.deepseek.com",
+    max_retries=2,  # client-level retry for transient network errors
 )
 
-# Bind the LLM to strictly output JSON matching our Pydantic schema
-structured_llm = llm.with_structured_output(ExamAnalysisResult)
+# Bind the LLM to strictly output JSON matching our Pydantic schema.
+# DeepSeek supports OpenAI-style tool/function calling, which LangChain
+# uses to enforce the schema (json_mode alone lets the model invent its
+# own key names — verified against the live API).
+structured_llm = llm.with_structured_output(ExamAnalysisResult, method="function_calling")
 
 chain = prompt | structured_llm
 
 # ---------------------------------------------------------
-# Free-Tier Budget Management
+# Rate-Limit / Budget Management
 # ---------------------------------------------------------
-# Groq's free tier caps llama-3.3-70b-versatile at 12,000 tokens/minute.
-# A single long paper can exceed that in one request (HTTP 413 "Payload Too
-# Large"), which is exactly what was killing uploads. We solve it by:
-#   1. Chunking the exam text into ~2k-token pieces (small enough per request)
-#   2. Pacing calls against a rolling 60s token budget so a burst of chunks
-#      never trips the per-minute cap
-#   3. Retrying with backoff if a rate-limit error slips through anyway
+# DeepSeek is pay-per-token (no tight free-tier TPM cap like Groq's 12k),
+# but it still rate-limits on bursts. We keep:
+#   1. Chunking long exam text so no single request is huge
+#   2. A generous rolling-budget pace to avoid 429 bursts
+#   3. Retry with backoff if a rate-limit error slips through
 
-CHUNK_SIZE = 8000    # characters per chunk (~2k tokens)
+CHUNK_SIZE = 16000   # characters per chunk (~4k tokens; well under context limits)
 CHUNK_OVERLAP = 600  # overlap so questions spanning a chunk boundary aren't lost
-TPM_LIMIT = 12000    # Groq free-tier tokens-per-minute for llama-3.3-70b-versatile
+TPM_LIMIT = 100000   # generous rolling budget — only trips on genuine bursts
 MAX_RETRIES = 3
 TOKENS_PER_CHAR = 0.25  # rough estimate: ~4 chars per token
 
@@ -121,7 +140,7 @@ class _TokenBudget:
                 return
             wait = max(1.0, 60 - elapsed + 1)
             logger.warning(
-                f"Groq TPM budget nearly exhausted ({self.used}/{self.limit}), "
+                f"LLM token budget nearly exhausted ({self.used}/{self.limit}), "
                 f"pausing {wait:.0f}s for the window to roll over..."
             )
             time.sleep(wait)
@@ -131,7 +150,7 @@ _budget = _TokenBudget()
 
 
 def _chunk_text(text: str) -> List[str]:
-    """Split long exam text into overlapping chunks sized for the free-tier budget."""
+    """Split long exam text into overlapping chunks sized for the request budget."""
     if len(text) <= CHUNK_SIZE:
         return [text]
     chunks = []
@@ -152,19 +171,29 @@ def _invoke_with_retry(inputs: dict) -> Optional[ExamAnalysisResult]:
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            return chain.invoke(inputs)
+            result = chain.invoke(inputs)
+            if result is None:
+                # with_structured_output can return None when the model makes
+                # no tool call — retry rather than silently dropping the chunk
+                raise RuntimeError("LLM returned no structured result (no tool call)")
+            return result
         except Exception as e:
             msg = str(e).lower()
-            is_rate_limit = any(
+            is_retryable = any(
                 marker in msg
-                for marker in ("413", "429", "rate_limit", "payload too large",
-                               "tokens per minute", "tpm", "too many requests")
+                for marker in ("429", "rate limit", "rate_limit", "too many requests",
+                               "tokens per minute", "tpm", "insufficient balance",
+                               "402", "connection", "timeout", "500", "502", "503", "504",
+                               "no structured result")
             )
-            if not is_rate_limit or attempt == MAX_RETRIES:
-                logger.error(f"LLM call failed after {attempt} attempt(s): {e}")
+            if not is_retryable or attempt == MAX_RETRIES:
+                if "no structured result" in str(e):
+                    logger.warning(f"LLM returned no structured result (attempt {attempt}/{MAX_RETRIES})")
+                else:
+                    logger.error(f"LLM call failed after {attempt} attempt(s): {e}")
                 return None
-            wait = 15 * attempt  # 15s, 30s, 45s — lets the TPM window roll over
-            logger.warning(f"Groq rate limited ({e}); backing off {wait}s and retrying...")
+            wait = 15 * attempt  # 15s, 30s, 45s — lets the rate window roll over
+            logger.warning(f"LLM rate limited ({e}); backing off {wait}s and retrying...")
             time.sleep(wait)
     return None
 
@@ -177,17 +206,17 @@ def process_exam_text(
     syllabus_topics: str
 ) -> Optional[ExamAnalysisResult]:
     """
-    Sends extracted exam text to Groq LLM to parse into structured JSON.
+    Sends extracted exam text to DeepSeek LLM to parse into structured JSON.
 
-    Long papers are chunked into multiple smaller calls (each well under the
-    free-tier TPM limit), paced to respect the per-minute token budget, and
-    the per-chunk results are merged into a single ExamAnalysisResult.
+    Long papers are chunked into smaller calls, paced to respect the rate
+    budget, and the per-chunk results are merged into a single
+    ExamAnalysisResult.
     """
     try:
-        print(f"Sending {len(exam_text)} characters to Groq LLM for analysis...")
+        print(f"Sending {len(exam_text)} characters to DeepSeek LLM for analysis...")
         chunks = _chunk_text(exam_text)
         if len(chunks) > 1:
-            print(f"Split into {len(chunks)} chunk(s) to stay under Groq's free-tier TPM limit.")
+            print(f"Split into {len(chunks)} chunk(s) to keep each request well-sized.")
 
         questions: List[Question] = []
         seen_raw: set = set()

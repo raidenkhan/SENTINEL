@@ -409,7 +409,7 @@ async def grade_student_answer(request: GradeRequest):
         response = llm.invoke(prompt)
         # Assuming llm.invoke returns a string that we need to clean/parse
         # In a real scenario, we'd use a structured output parser
-        return {"result": response.content} # LangChain ChatGroq returns content
+        return {"result": response.content} # LangChain ChatOpenAI (DeepSeek) returns content
         
     except Exception as e:
         logger.error(f"Error in grading: {e}")

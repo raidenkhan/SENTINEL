@@ -17,7 +17,7 @@ def process_document_pipeline(
     """
     Background task to process an uploaded PDF.
     - Extracts text
-    - Sends to Groq for analysis
+    - Sends to DeepSeek for analysis
     - Saves structured questions to Supabase
     - Updates status to 'completed'
 
