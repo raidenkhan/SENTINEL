@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { GlassCard } from "@/components/landing/GlassCard";
+import { StudyPlanMarkdown } from "@/components/dashboard/StudyPlanMarkdown";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,14 @@ interface PaperAnalytics {
     questions: Question[];
 }
 
+interface StudyPlan {
+    high_yield_topics?: string[];
+    complex_areas?: string[];
+    steps?: { title: string; description: string }[];
+    mock_strategy?: { frequency?: string; coverage?: string; types?: string; review?: string };
+    raw_text?: string;
+}
+
 export default function PaperDeepDivePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -50,20 +59,32 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
     const [gradingResult, setGradingResult] = useState<any>(null);
     const [isGrading, setIsGrading] = useState(false);
     const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-    const [studyPlan, setStudyPlan] = useState<string | null>(null);
+    const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
+    const [planError, setPlanError] = useState<string | null>(null);
 
     const handleGenerateStudyPlan = async () => {
         setIsGeneratingPlan(true);
+        setPlanError(null);
         try {
             const res = await fetch(`${API_URL}/api/chat/study-plan`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ paper_id: id })
             });
-            const resData = await res.json();
-            setStudyPlan(resData.plan);
+            const resData = await res.json().catch(() => null);
+            if (!res.ok) {
+                // Surface the backend's informative message (e.g. "No questions analyzed yet")
+                setPlanError(resData && typeof resData.detail === 'string'
+                    ? resData.detail
+                    : `Strategy generation failed (${res.status}). Try again.`);
+                return;
+            }
+            if (resData?.plan) {
+                setStudyPlan(resData.plan);
+            }
         } catch (e) {
             console.error(e);
+            setPlanError("Could not reach the server. Check your connection and try again.");
         } finally {
             setIsGeneratingPlan(false);
         }
@@ -116,14 +137,15 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                 {studyPlan && (
                     <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                         className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 dark:bg-obsidian-950/80 backdrop-blur-xl"
                     >
-                        <GlassCard className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-12 relative bg-white/95 dark:bg-obsidian-900/90 rounded-[2.5rem]">
+                        <GlassCard className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-12 relative bg-white/95 dark:bg-obsidian-900/90 rounded-2xl">
                             <button onClick={() => setStudyPlan(null)} className="absolute top-8 right-8 text-slate-400 hover:text-emerald-500 transition-colors p-2">
                                 <ChevronDown className="w-8 h-8 rotate-180" />
                             </button>
                             <div className="flex items-center gap-5 mb-10">
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-emerald">
+                                <div className="w-14 h-14 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald">
                                     <BrainCircuit className="w-8 h-8 text-white" />
                                 </div>
                                 <div>
@@ -131,10 +153,22 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-widest mt-1">Intelligence Core Active</p>
                                 </div>
                             </div>
-                            <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                                {studyPlan.split('\n').map((line, i) => <p key={i} className="mb-4">{line}</p>)}
-                            </div>
-                            <Button onClick={() => setStudyPlan(null)} className="w-full h-14 mt-10 rounded-2xl font-black">CLOSE SESSION</Button>
+                            <StudyPlanMarkdown
+                                doc={{
+                                    title: `${data.paper.courses.code} — ${data.paper.courses.name}`,
+                                    subtitle: "PAPER ADVISORY",
+                                    totalQuestions: data.stats.total_questions,
+                                    topics: topicData.map(t => ({ name: t.name, count: t.value })),
+                                    blooms: bloomsData.map(b => ({ name: b.name, count: b.value })),
+                                    highYield: studyPlan.high_yield_topics || [],
+                                    complex: studyPlan.complex_areas || [],
+                                    steps: studyPlan.steps || [],
+                                    mockStrategy: studyPlan.mock_strategy || {},
+                                    raw_text: studyPlan.raw_text,
+                                }}
+                                exportPrefix={`paper-advisory-${id}`}
+                            />
+                            <Button onClick={() => setStudyPlan(null)} className="w-full h-14 mt-10 rounded-xl font-black">CLOSE SESSION</Button>
                         </GlassCard>
                     </motion.div>
                 )}
@@ -159,18 +193,25 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 flex-wrap justify-end">
                     <Button 
                         onClick={handleGenerateStudyPlan}
                         disabled={isGeneratingPlan}
-                        className="rounded-xl h-12 px-8 font-black text-[10px]"
+                        className="rounded-lg h-12 px-8 font-black text-[10px]"
                     >
                         {isGeneratingPlan ? "ANALYZING..." : "GENERATE STRATEGY"}
                     </Button>
-                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">
-                        <Zap className="w-3.5 h-3.5" />
-                        SYNCED
-                    </div>
+                    {planError ? (
+                        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-[10px] font-black text-red-500 uppercase tracking-widest leading-none max-w-[220px]" title={planError}>
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{planError}</span>
+                        </div>
+                    ) : (
+                        <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">
+                            <Zap className="w-3.5 h-3.5" />
+                            SYNCED
+                        </div>
+                    )}
                 </div>
             </nav>
 
@@ -247,7 +288,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Cognitive Distribution</p>
                             </div>
                         </div>
-                        <div className="h-56 relative bg-slate-50 dark:bg-white/2 rounded-[2rem] border border-black/5 dark:border-white/5 p-4 flex items-center justify-center">
+                        <div className="h-56 relative bg-slate-50 dark:bg-white/2 rounded-xl border border-black/5 dark:border-white/5 p-4 flex items-center justify-center">
                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie data={bloomsData} innerRadius={60} outerRadius={80} paddingAngle={4} dataKey="value">
@@ -313,7 +354,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                     />
                                 </div>
                                 <div className="flex items-center gap-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-emerald group">
+                                    <div className="w-14 h-14 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald group">
                                         <GraduationCap className="w-8 h-8 text-white transition-transform group-hover:scale-110" />
                                     </div>
                                     <div>
@@ -321,7 +362,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest mt-1">Peer Assessment Logic Active</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedQuestion(null)} className="p-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl transition-all">
+                                <button onClick={() => setSelectedQuestion(null)} className="p-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-all">
                                     <ChevronRight className="w-8 h-8 text-slate-400" />
                                 </button>
                             </div>
@@ -333,7 +374,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Question Source</h3>
                                     </div>
                                     {selectedQuestion.diagram_url && (
-                                        <GlassCard className="mb-6 rounded-3xl overflow-hidden border-black/5 dark:border-white/10 bg-slate-50 dark:bg-black/40 p-4 group">
+                                        <GlassCard className="mb-6 rounded-xl overflow-hidden border-black/5 dark:border-white/10 bg-slate-50 dark:bg-black/40 p-4 group">
                                              <div className="relative">
                                                 <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
                                                 <img 
@@ -347,7 +388,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                             </div>
                                         </GlassCard>
                                     )}
-                                    <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-[2rem] italic text-base text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium">
+                                    <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-xl italic text-base text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium">
                                         "{selectedQuestion.raw_text}"
                                     </div>
                                 </section>
@@ -361,12 +402,12 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         value={userAnswer}
                                         onChange={(e) => setUserAnswer(e.target.value)}
                                         placeholder="Establish your answer pattern here..."
-                                        className="w-full h-56 bg-slate-50 dark:bg-white/2 border border-black/5 dark:border-white/5 rounded-[2rem] p-8 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium placeholder:text-slate-400"
+                                        className="w-full h-56 bg-slate-50 dark:bg-white/2 border border-black/5 dark:border-white/5 rounded-xl p-8 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium placeholder:text-slate-400"
                                     />
                                     <Button 
                                         onClick={handleGrade}
                                         disabled={isGrading || !userAnswer.trim()}
-                                        className="w-full h-16 rounded-[1.5rem] font-black text-base shadow-emerald"
+                                        className="w-full h-16 rounded-xl font-black text-base shadow-emerald"
                                     >
                                         {isGrading ? (
                                             <div className="flex items-center gap-3">
@@ -386,7 +427,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                     <motion.section 
                                         initial={{ opacity: 0, scale: 0.95, y: 20 }} 
                                         animate={{ opacity: 1, scale: 1, y: 0 }} 
-                                        className="bg-emerald-500/5 dark:bg-emerald-500/2 border border-emerald-500/20 p-10 rounded-[2.5rem] relative overflow-hidden"
+                                        className="bg-emerald-500/5 dark:bg-emerald-500/2 border border-emerald-500/20 p-10 rounded-2xl relative overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-8 opacity-10">
                                             <Cpu className="w-20 h-20 text-emerald-500" />
@@ -408,3 +449,4 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
         </div>
     );
 }
+

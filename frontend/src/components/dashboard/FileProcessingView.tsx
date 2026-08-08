@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertCircle, BookOpen, CheckCircle2, FileText, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from "lucide-react";
+import { AlertCircle, BookOpen, BrainCircuit, CheckCircle2, Database, FileText, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -531,20 +531,32 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                             initial={{ opacity: 0, scale: 0.92, y: 16 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 8 }}
-                            transition={{ type: "spring", damping: 26, stiffness: 300 }}
+                            transition={{ type: "spring", duration: 0.45, bounce: 0.15 }}
                             role="dialog"
                             aria-modal="true"
                             aria-label="Analysis complete"
-                            className="fixed z-[110] inset-0 m-auto w-[92vw] max-w-md max-h-[90vh] overflow-y-auto h-fit glass-card p-8 md:p-10 rounded-2xl border border-neon-crystal/30 shadow-neon-glow text-center"
+                            className="fixed z-[110] inset-0 m-auto w-[92vw] max-w-md max-h-[90vh] overflow-y-auto h-fit glass-card p-8 md:p-10 rounded-2xl border border-neon-crystal/30 text-center relative"
                         >
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.15, type: "spring", damping: 12, stiffness: 220 }}
-                                className="w-16 h-16 mx-auto rounded-full bg-neon-crystal/10 border border-neon-crystal/40 flex items-center justify-center shadow-neon-glow"
-                            >
-                                <CheckCircle2 className="w-8 h-8 text-neon-crystal" />
-                            </motion.div>
+                            {/* Top accent sweep */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-neon-crystal/70 to-transparent" />
+
+                            {/* Animated check badge: pulsing halo + spring pop */}
+                            <div className="relative w-20 h-20 mx-auto">
+                                <motion.div
+                                    initial={{ scale: 0.6, opacity: 0 }}
+                                    animate={{ scale: [0.6, 1.15, 1], opacity: 1 }}
+                                    transition={{ duration: 0.6, ease: "easeOut" }}
+                                    className="absolute inset-0 rounded-full bg-neon-crystal/10"
+                                />
+                                <motion.div
+                                    initial={{ scale: 0.85, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: 0.2, type: "spring", damping: 12, stiffness: 220 }}
+                                    className="absolute inset-2 rounded-full bg-neon-crystal/15 border border-neon-crystal/40 flex items-center justify-center"
+                                >
+                                    <CheckCircle2 className="w-9 h-9 text-neon-crystal" />
+                                </motion.div>
+                            </div>
 
                             <h2 className="mt-6 text-2xl font-black italic tracking-tighter uppercase text-[var(--text-primary)]">
                                 Analysis Complete
@@ -555,6 +567,28 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                             <p className="mt-1 text-xs text-[var(--text-muted)]">
                                 Scanned, structured &amp; indexed into the vault.
                             </p>
+
+                            {/* Staggered pipeline checklist */}
+                            <div className="mt-8 space-y-2.5 text-left">
+                                {[
+                                    { icon: FileText, label: "Text extracted from PDF" },
+                                    { icon: BookOpen, label: "Questions structured & tagged" },
+                                    { icon: BrainCircuit, label: "Bloom's level & topics classified" },
+                                    { icon: Database, label: "Indexed into the Nano-Vault" },
+                                ].map((item, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.35 + i * 0.06, duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+                                        className="flex items-center gap-3 px-4 py-3 rounded-md border border-neon-crystal/15 bg-neon-crystal/5"
+                                    >
+                                        <item.icon className="w-4 h-4 text-neon-crystal shrink-0" />
+                                        <span className="text-xs font-bold text-[var(--text-primary)]">{item.label}</span>
+                                        <CheckCircle2 className="w-4 h-4 text-neon-crystal/70 ml-auto shrink-0" />
+                                    </motion.div>
+                                ))}
+                            </div>
 
                             <div className="mt-8 flex flex-col gap-3">
                                 <Link

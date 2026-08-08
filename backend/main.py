@@ -496,9 +496,17 @@ async def generate_study_plan(request: StudyPlanRequest):
         if inspect.isawaitable(analytics_data):
             analytics_data = await analytics_data
 
-        topics = analytics_data.get("topic_frequencies", {})
-        blooms = analytics_data.get("blooms_distribution", {})
-        total_questions = analytics_data.get("total_questions_parsed", 0)
+        # Normalize analytics: paper analytics nests distributions under
+        # stats.{topic_distribution,blooms_distribution,total_questions}
+        # while course analytics uses the flat keys. Support both so the
+        # LLM always receives real data (this was feeding empty dicts before).
+        stats = analytics_data.get("stats") or {}
+        topics = analytics_data.get("topic_frequencies") or stats.get("topic_distribution") or {}
+        blooms = analytics_data.get("blooms_distribution") or stats.get("blooms_distribution") or {}
+        total_questions = analytics_data.get("total_questions_parsed") or stats.get("total_questions") or 0
+
+        if total_questions == 0:
+            raise HTTPException(status_code=422, detail="No questions analyzed yet — upload and analyze a paper first.")
         
         # Construct prompt for structured JSON response
         prompt = f"""
@@ -540,11 +548,18 @@ async def generate_study_plan(request: StudyPlanRequest):
                     content = content[4:]
                 content = content.strip()
             plan_data = json.loads(content)
-            return {"plan": plan_data}
+            # Ensure the contract the frontend expects is present
+            plan_data.setdefault("high_yield_topics", [])
+            plan_data.setdefault("complex_areas", [])
+            plan_data.setdefault("steps", [])
+            plan_data.setdefault("mock_strategy", {})
+            return {"plan": plan_data, "fallback": False}
         except json.JSONDecodeError:
             # Fallback to raw text if JSON parsing fails
             return {"plan": {"raw_text": content}, "fallback": True}
         
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Error generating study plan: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -94,7 +94,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        className="relative w-full max-w-[480px] glass-card bg-white/90 dark:bg-charcoal-900/60 shadow-2xl z-10 overflow-hidden rounded-[2rem] border-white/20 dark:border-white/10"
+                        className="relative w-full max-w-[480px] glass-card bg-white/90 dark:bg-charcoal-900/60 shadow-2xl z-10 overflow-hidden rounded-2xl border-white/20 dark:border-white/10"
                     >
                         {/* THE AI SCANNER VISUAL (Mini version for branding) */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl pointer-events-none" />
@@ -121,11 +121,11 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                             </div>
 
                             {/* Tabs (Modern Pill) */}
-                            <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-2xl mb-8">
+                            <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl mb-8">
                                 <button
                                     onClick={() => setIsLogin(true)}
                                     className={cn(
-                                        "flex-1 py-3 text-xs font-bold tracking-[0.1em] transition-all rounded-[14px]",
+                                        "flex-1 py-3 text-xs font-bold tracking-[0.1em] transition-all rounded-lg",
                                         isLogin ? "bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                                     )}
                                 >
@@ -134,7 +134,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                                 <button
                                     onClick={() => setIsLogin(false)}
                                     className={cn(
-                                        "flex-1 py-3 text-xs font-bold tracking-[0.1em] transition-all rounded-[14px]",
+                                        "flex-1 py-3 text-xs font-bold tracking-[0.1em] transition-all rounded-lg",
                                         !isLogin ? "bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                                     )}
                                 >
@@ -147,7 +147,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                                 {error && (
                                     <motion.div
                                         initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                                        className="mb-8 flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xs font-bold tracking-tight"
+                                        className="mb-8 flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-xs font-bold tracking-tight"
                                     >
                                         <AlertCircle className="w-4 h-4 shrink-0" />
                                         {error}
@@ -220,7 +220,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="w-full h-14 mt-4 flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-emerald active:scale-95 transition-all disabled:opacity-50"
+                                        className="w-full h-14 mt-4 flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-emerald active:scale-95 transition-all disabled:opacity-50"
                                     >
                                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                             <>
@@ -268,7 +268,7 @@ function InputField({
                 id={id}
                 type={type}
                 placeholder={placeholder}
-                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-5 py-3 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all font-semibold text-sm"
+                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-5 py-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all font-semibold text-sm"
                 {...props}
             />
         </div>
