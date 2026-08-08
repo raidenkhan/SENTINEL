@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertCircle, BookOpen, CheckCircle2, FileText, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -21,6 +21,7 @@ type Course = {
     name: string;
     department?: string | null;
     level?: number | null;
+    syllabus?: string | null;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -33,6 +34,12 @@ const INPUT_CLASS = "w-full bg-[var(--card-bg)] border border-[var(--border)] ro
 
 export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: () => void }) {
     const [files, setFiles] = useState<UploadedFile[]>([]);
+    const prefersReducedMotion = useReducedMotion();
+    // True while any upload is actually in flight (animations only show then)
+    const isBusy = files.some(f => ['pending', 'processing', 'extracting', 'analyzing', 'indexing'].includes(f.status));
+    const busyFile = files.find(f => ['pending', 'processing', 'extracting', 'analyzing', 'indexing'].includes(f.status));
+    // Users who prefer reduced motion get the calm standby even while busy
+    const showScan = isBusy && !prefersReducedMotion;
     const [completedPaper, setCompletedPaper] = useState<{ id: string; name: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
@@ -45,27 +52,35 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
     const [semester, setSemester] = useState("1");
     const [coursesError, setCoursesError] = useState("");
     const [showAddCourse, setShowAddCourse] = useState(false);
-    const [newCourse, setNewCourse] = useState({ code: "", name: "", department: "", level: "" });
+    const [newCourse, setNewCourse] = useState({ code: "", name: "", department: "", level: "", syllabus: "" });
     const [addingCourse, setAddingCourse] = useState(false);
     const [addCourseError, setAddCourseError] = useState("");
 
-    // Load available courses for the selector
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const res = await fetch(`${API_URL}/api/courses`);
-                if (!res.ok) throw new Error(`Status ${res.status}`);
-                const data: Course[] = await res.json();
-                if (cancelled) return;
-                setCourses(data);
+    // Load available courses for the selector (reused: mount, after add,
+    // after upload, and after a duplicate-code error so the list stays fresh)
+    const loadCourses = async (opts?: { selectCourseId?: string }) => {
+        try {
+            const res = await fetch(`${API_URL}/api/courses`);
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const data: Course[] = await res.json();
+            setCourses(data);
+            setCoursesError("");
+            if (opts?.selectCourseId && data.some(c => c.id === opts.selectCourseId)) {
+                setSelectedCourseId(opts.selectCourseId);
+            } else if (data.length === 1) {
                 // Preselect automatically when only one course exists
-                if (data.length === 1) setSelectedCourseId(data[0].id);
-            } catch (err) {
-                if (!cancelled) setCoursesError("Could not load courses. Is the backend running?");
+                setSelectedCourseId(data[0].id);
             }
-        })();
-        return () => { cancelled = true; };
+            return data;
+        } catch (err) {
+            setCoursesError("Could not load courses. Is the backend running?");
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        loadCourses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleAddCourse = async () => {
@@ -86,11 +101,26 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                     name,
                     department: newCourse.department.trim() || undefined,
                     level: newCourse.level ? Number(newCourse.level) : undefined,
+                    syllabus: newCourse.syllabus.trim() || undefined,
                 }),
             });
             const body = await res.json().catch(() => null);
             if (!res.ok) {
-                setAddCourseError(body && typeof body.detail === "string" ? body.detail : `Failed to add course (${res.status})`);
+                if (res.status === 409) {
+                    // Duplicate code: the course ALREADY exists (it just didn't
+                    // show in the list — e.g. auto-created by a previous upload).
+                    // Refetch and auto-select it instead of leaving the user stuck.
+                    const data = await loadCourses({ selectCourseId: undefined });
+                    const existing = data?.find(c => c.code.toLowerCase() === code.toLowerCase());
+                    if (existing) {
+                        setSelectedCourseId(existing.id);
+                        setAddCourseError(`${existing.code} already exists — selected it for you.`);
+                    } else {
+                        setAddCourseError(body && typeof body.detail === "string" ? body.detail : `Failed to add course (${res.status})`);
+                    }
+                } else {
+                    setAddCourseError(body && typeof body.detail === "string" ? body.detail : `Failed to add course (${res.status})`);
+                }
                 return;
             }
             const created = body as Course | null;
@@ -98,10 +128,10 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                 setAddCourseError("Course was added but the server returned an unexpected response.");
                 return;
             }
-            setCourses(prev => [...prev, created].sort((a, b) => a.code.localeCompare(b.code)));
-            setSelectedCourseId(created.id);
+            // Refetch the authoritative list (catches normalized codes, ordering)
+            await loadCourses({ selectCourseId: created.id });
             setShowAddCourse(false);
-            setNewCourse({ code: "", name: "", department: "", level: "" });
+            setNewCourse({ code: "", name: "", department: "", level: "", syllabus: "" });
         } catch (err) {
             setAddCourseError("Could not reach the server. Check your connection.");
         } finally {
@@ -199,8 +229,8 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
         const interval = setInterval(async () => {
             attempts += 1;
 
-            // Safety net: give up after ~12 minutes. Chunked analysis + Groq's
-            // free-tier TPM pacing can legitimately take several minutes per paper.
+            // Safety net: give up after ~12 minutes. Chunked analysis can
+            // legitimately take several minutes per paper.
             if (attempts > 240) {
                 finish('failed', 0, "Processing timed out after 12 minutes. Please try again.");
                 return;
@@ -220,6 +250,9 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                         finish('completed', 100);
                         // Show the clean success modal
                         setCompletedPaper({ id: upload_id, name: fileName });
+                        // The pipeline may have auto-created/matched a course while
+                        // processing — refresh the selector so it stays in sync.
+                        loadCourses();
                         if (onUploadComplete) onUploadComplete();
                         return;
                     }
@@ -337,6 +370,13 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                                     onChange={e => setNewCourse(p => ({ ...p, level: e.target.value }))}
                                     className={INPUT_CLASS}
                                 />
+                                <textarea
+                                    placeholder="Syllabus / topics (optional, comma-separated) — helps AI analysis"
+                                    value={newCourse.syllabus}
+                                    onChange={e => setNewCourse(p => ({ ...p, syllabus: e.target.value }))}
+                                    rows={2}
+                                    className={`${INPUT_CLASS} resize-none`}
+                                />
                                 {addCourseError && <p className="text-[11px] text-red-400">{addCourseError}</p>}
                                 <button
                                     onClick={handleAddCourse}
@@ -401,46 +441,78 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                     </button>
                 </div>
 
-                {/* Waveform / Scanning Animation - Right Side */}
-                <div className="w-full md:w-2/3 h-64 md:h-auto rounded-sm border border-[var(--foreground)]/5 bg-[var(--card-bg)]/40 relative flex items-center justify-center overflow-hidden z-10 backdrop-blur-md shadow-[inset_0_0_50px_var(--shadow-color)]">
-                    {/* ECG Line */}
-                    <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="rgba(57,255,20,0)" />
-                                <stop offset="80%" stopColor="rgba(57,255,20,1)" />
-                                <stop offset="100%" stopColor="rgba(57,255,20,0)" />
-                            </linearGradient>
-                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="8" result="blur" />
-                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                            </filter>
-                        </defs>
-
-                        <path d="M 0,100 L 550,100" stroke="url(#neonGradient)" strokeWidth="4" fill="none" filter="url(#glow)" className="opacity-50" />
-
-                        <motion.path
-                            d="M 550,100 L 570,100 L 585,40 L 605,160 L 625,20 L 640,140 L 655,100 L 800,100"
-                            stroke="url(#neonGradient)"
-                            strokeWidth="4"
-                            fill="none"
-                            filter="url(#glow)"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        />
-                    </svg>
-
-                    {/* Scan Line overlay */}
-                    <motion.div
-                        className="absolute top-0 bottom-0 w-1 bg-neon-crystal shadow-[0_0_20px_4px_rgba(57,255,20,0.6)] z-20"
-                        animate={{ left: ["0%", "100%", "0%"] }}
-                        transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
-                    />
-
-                    <span className="absolute top-8 right-8 text-xs font-mono text-neon-crystal/50">7Rx</span>
-                    <span className="absolute bottom-8 right-16 text-xs font-mono text-neon-crystal/50">Err</span>
-                    <span className="absolute top-1/2 right-4 -translate-y-1/2 text-xs font-mono text-neon-crystal/50">Em</span>
+                {/* Radar Scan / Standby Panel - Right Side */}
+                <div className="w-full md:w-2/3 h-64 md:h-auto min-h-64 rounded-sm border border-[var(--foreground)]/5 bg-[var(--card-bg)]/40 relative flex items-center justify-center overflow-hidden z-10 backdrop-blur-md shadow-[inset_0_0_50px_var(--shadow-color)]">
+                    {showScan ? (
+                        /* ---- ACTIVE SCAN: animated radar sweep ---- */
+                        <div className="relative w-56 h-56 md:w-72 md:h-72">
+                            {/* Range rings */}
+                            {[100, 72, 44, 20].map((size, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute rounded-full border border-emerald-500/20"
+                                    style={{ inset: `${(100 - size) / 2}%` }}
+                                />
+                            ))}
+                            {/* Sweep wedge (rotating) — full conic wedge, no mask */}
+                            <motion.div
+                                className="absolute inset-0 rounded-full"
+                                style={{
+                                    background: "conic-gradient(from 0deg, rgba(16,185,129,0.4) 0deg, rgba(16,185,129,0.1) 40deg, transparent 55deg)",
+                                }}
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 2.4, ease: "linear", repeat: Infinity }}
+                            />
+                            {/* Center dot */}
+                            <motion.div
+                                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_16px_4px_rgba(16,185,129,0.55)]"
+                                animate={{ scale: [1, 1.35, 1], opacity: [0.7, 1, 0.7] }}
+                                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                            {/* Blip appearing along the sweep (decoy target) */}
+                            <motion.div
+                                className="absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-emerald-300"
+                                animate={{ left: ["50%", "86%", "28%"], top: ["50%", "22%", "68%"] }}
+                                transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+                                style={{ filter: "drop-shadow(0 0 6px rgba(16,185,129,0.9))" }}
+                            />
+                            {/* Status text overlay */}
+                            <div className="absolute inset-x-0 -bottom-2 flex flex-col items-center gap-1">
+                                <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-500 animate-pulse">
+                                    {busyFile?.status === 'extracting' ? 'EXTRACTING' :
+                                     busyFile?.status === 'analyzing' ? 'ANALYZING' :
+                                     busyFile?.status === 'indexing' ? 'INDEXING' : 'SCANNING'}
+                                </span>
+                                <span className="text-[9px] font-mono text-[var(--text-muted)] max-w-[80%] truncate">
+                                    {busyFile?.name}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        /* ---- STANDBY: calm, static — no animation ---- */
+                        <div className="relative flex flex-col items-center gap-5">
+                            <div className="relative w-44 h-44">
+                                {/* Faint static rings — no motion */}
+                                {[100, 70, 40].map((size, i) => (
+                                    <div
+                                        key={i}
+                                        className="absolute rounded-full border border-emerald-500/10"
+                                        style={{ inset: `${(100 - size) / 2}%` }}
+                                    />
+                                ))}
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-emerald-500/60" />
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border border-emerald-500/15" />
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-[var(--text-muted)]">
+                                    {isBusy ? 'Processing' : 'Standby'}
+                                </span>
+                                <span className="text-xs text-[var(--text-muted)]">
+                                    {isBusy ? 'Analysis running — see progress in the queue' : 'Upload a paper to begin analysis'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

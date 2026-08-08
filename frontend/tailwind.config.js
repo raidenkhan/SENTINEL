@@ -16,7 +16,7 @@ module.exports = {
         'emerald-glow': '#34d399',
         'indigo-neon': '#6366f1',
         'indigo-glow': '#818cf8',
-        'neon-crystal': '#39FF14',
+        'neon-crystal': '#10b981', // emerald-500: visible on light + dark (was lime #39FF14)
         'neon-blue': '#2563EB',
         'hero-bg': 'hsl(0 0% 8%)',
         'nav-button': 'hsl(0 0% 18%)',

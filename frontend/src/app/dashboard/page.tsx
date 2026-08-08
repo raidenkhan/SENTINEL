@@ -31,10 +31,13 @@ export default function DashboardPage() {
     );
     const activeCourseId = papers && papers.length > 0 ? papers[0].course_id : null;
 
-    // 2. Fetch analytics conditionally
+    // 2. Fetch analytics conditionally — keepPreviousData means the charts keep
+    //    showing the last course's data while the new one loads, so switching
+    //    tabs never flashes an empty state.
     const { data: analyticsData } = useSWR(
         activeCourseId ? `${API_URL}/api/analytics/${activeCourseId}` : null,
-        fetcher
+        fetcher,
+        { keepPreviousData: true, dedupingInterval: 15000 }
     );
 
     return (

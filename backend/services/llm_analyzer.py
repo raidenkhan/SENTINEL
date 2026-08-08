@@ -33,6 +33,16 @@ class ExamAnalysisResult(BaseModel):
     questions: List[Question]
     summary: str = Field(description="2-sentence pedagogical trend observation")
 
+class DetectedCourse(BaseModel):
+    """Course info identified from the paper's own header/front-matter."""
+    code: str = Field(description="The course code, e.g., EE357, MATH101, CS205")
+    name: str = Field(description="The full course name, e.g., Computer Architecture")
+    department: Optional[str] = Field(default=None, description="Department or faculty, e.g., Computer Engineering")
+    level: Optional[int] = Field(default=None, description="Course level (100-400)")
+    confidence: str = Field(default="high", description="high, medium, or low")
+    reason: Optional[str] = Field(default=None, description="One short sentence justifying the detection")
+
+
 # ---------------------------------------------------------
 # Prompt Definition
 # ---------------------------------------------------------
@@ -71,21 +81,15 @@ prompt = PromptTemplate(
 # ---------------------------------------------------------
 # LLM Initialization
 # ---------------------------------------------------------
-# DeepSeek exposes an OpenAI-compatible API, so we use ChatOpenAI
+# DeepSeek is the sole LLM provider (both parsing and chatbot).
+# It exposes an OpenAI-compatible API, so we use ChatOpenAI
 # pointed at api.deepseek.com with the deepseek-chat model.
-# Primary key: DEEP_SEEK_API_KEY (legacy GROQ_API_KEY fallback).
 
-DEEPSEEK_API_KEY = settings.DEEP_SEEK_API_KEY or settings.GROQ_API_KEY
+DEEPSEEK_API_KEY = settings.DEEP_SEEK_API_KEY
 if not DEEPSEEK_API_KEY:
     raise RuntimeError(
-        "No LLM API key configured: set DEEP_SEEK_API_KEY (or legacy GROQ_API_KEY) in .env"
-    )
-if not settings.DEEP_SEEK_API_KEY and settings.GROQ_API_KEY:
-    # print() (not just logger) so it is always visible in HF Space logs
-    print(
-        "WARNING: DEEP_SEEK_API_KEY not set — falling back to GROQ_API_KEY. "
-        "A Groq key (gsk_...) will NOT authenticate against api.deepseek.com. "
-        "Set DEEP_SEEK_API_KEY in your environment/secrets."
+        "No LLM API key configured: set DEEP_SEEK_API_KEY in .env or the "
+        "HF Space secrets (DEEP_SEEK_API_KEY)."
     )
 
 llm = ChatOpenAI(
@@ -103,6 +107,62 @@ llm = ChatOpenAI(
 structured_llm = llm.with_structured_output(ExamAnalysisResult, method="function_calling")
 
 chain = prompt | structured_llm
+
+# ---------------------------------------------------------
+# Course Detection (auto-categorization)
+# ---------------------------------------------------------
+# Reads the paper's own header to identify the course, so uploads get
+# tagged to the correct course even if the dropdown selection was wrong
+# or missing. Returns a DetectedCourse or None on failure.
+
+COURSE_DETECT_PROMPT = PromptTemplate(
+    template="""
+You are a document classifier for an academic exam-paper archive.
+
+Read the exam header below and identify the COURSE this paper belongs to.
+Use only information explicitly present in the text (course code, course name,
+department, faculty, university, year of study, etc.).
+
+If a course code and/or course name is clearly visible, return it with confidence
+"high". If only a partial hint exists (e.g. a department name but no code), return
+what you can with confidence "medium". If the text is just a body of questions
+with no header information, return confidence "low" with your best guess.
+
+Exam Header Text:
+{exam_header}
+
+Return a JSON object with keys: code, name, department, level, confidence, reason.
+""",
+    input_variables=["exam_header"],
+)
+
+structured_course_detector = llm.with_structured_output(DetectedCourse, method="function_calling")
+course_detect_chain = COURSE_DETECT_PROMPT | structured_course_detector
+
+
+def detect_course(exam_text: str) -> Optional[DetectedCourse]:
+    """
+    Identifies the course from the paper's own header/front-matter.
+
+    Uses the first ~3000 characters of the extracted text (the header), so it's
+    a single cheap call. Returns None if the call fails.
+    """
+    try:
+        header = exam_text[:3000].strip()
+        if not header:
+            return None
+        print("Detecting course from paper header...")
+        result = course_detect_chain.invoke({"exam_header": header})
+        if result is None:
+            print("Course detection returned no structured result.")
+            return None
+        print(f"Detected course: {result.code or '?'} - {result.name or '?'} "
+              f"(confidence: {result.confidence})")
+        return result
+    except Exception as e:
+        print(f"Course detection failed: {e}")
+        return None
+
 
 # ---------------------------------------------------------
 # Rate-Limit / Budget Management

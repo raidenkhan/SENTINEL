@@ -8,11 +8,9 @@ class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_KEY: str
     
-    # DeepSeek Configuration for LLM (OpenAI-compatible API)
-    # Primary: DEEP_SEEK_API_KEY. Legacy GROQ_API_KEY kept as fallback
-    # so a stale secret name on the HF Space doesn't crash startup.
-    DEEP_SEEK_API_KEY: str = ""
-    GROQ_API_KEY: str = ""
+    # DeepSeek Configuration for LLM (OpenAI-compatible API).
+    # DeepSeek is the sole LLM provider for both parsing and the chatbot.
+    DEEP_SEEK_API_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Users, TrendingUp, Globe, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import useSWR from "swr";
+
+// Throws on non-2xx so SWR's error path fires (the shared fetcher doesn't),
+// making a raw 500 show the error state instead of an empty list.
+const throwingFetcher = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    return res.json();
+};
 
 interface Trend {
     topic: string;
@@ -14,31 +22,28 @@ interface CommunityStats {
     active_subjects: number;
 }
 
-export function CommunityInsights() {
-    const [trends, setTrends] = useState<Trend[]>([]);
-    const [stats, setStats] = useState<CommunityStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+interface CommunityTrendsResponse {
+    trending_topics: Trend[];
+    stats: CommunityStats | null;
+    error?: string;
+}
 
+export function CommunityInsights() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-    useEffect(() => {
-        async function fetchCommunityData() {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            try {
-                const res = await fetch(`${API_URL}/api/community/trends`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setTrends(data.trending_topics);
-                    setStats(data.stats);
-                }
-            } catch (err) {
-                console.error("Failed to fetch community trends", err);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchCommunityData();
-    }, [API_URL]);
+    // SWR: fetches once in the background, caches, dedupes, and revalidates
+    // silently — so switching to this tab never triggers a full reload.
+    const { data, error, isLoading } = useSWR<CommunityTrendsResponse>(
+        `${API_URL}/api/community/trends`,
+        throwingFetcher,
+        { revalidateOnFocus: true, dedupingInterval: 60000 }
+    );
+
+    const trends = data?.trending_topics ?? [];
+    const stats = data?.stats ?? null;
+    // Backend returns 200 with { trending_topics: [], error } on failure;
+    // throwingFetcher additionally surfaces raw 5xx via SWR's error.
+    const hasError = Boolean(data?.error) || Boolean(error);
 
     if (isLoading) {
         return (
@@ -47,6 +52,16 @@ export function CommunityInsights() {
                     <div className="w-8 h-8 border-2 border-neon-blue border-t-transparent rounded-full animate-spin" />
                     <p className="text-xs text-slate-500">Syncing with Community Brain...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (hasError) {
+        return (
+            <div className="glass-card p-6 h-full flex flex-col items-center justify-center gap-2 text-center">
+                <Globe className="w-8 h-8 text-red-400" />
+                <p className="text-xs text-red-400">Could not load community insights.</p>
+                <p className="text-[10px] text-[var(--text-muted)]">The backend may be unavailable — try again shortly.</p>
             </div>
         );
     }

@@ -60,6 +60,7 @@ class CourseCreate(BaseModel):
     name: str
     department: Optional[str] = None
     level: Optional[int] = None
+    syllabus: Optional[str] = None
 
 # ---------------------------------------------------------
 # Utility Endpoints
@@ -192,9 +193,21 @@ def get_processing_status(upload_id: str):
 def list_courses():
     """
     Returns all courses available for the upload course selector.
+
+    Resilient: if the optional `syllabus` column hasn't been migrated into the
+    DB yet, falls back to selecting without it so the dropdown never breaks.
     """
     try:
-        response = supabase_client.table('courses').select('id, code, name, department, level').order('code').execute()
+        try:
+            response = supabase_client.table('courses').select('id, code, name, department, level, syllabus').order('code').execute()
+        except APIError as e:
+            # Column not migrated yet (42703) — degrade gracefully.
+            # Other errors (network, auth) propagate to the handler below.
+            if getattr(e, 'code', '') == '42703':
+                logger.warning("courses.syllabus column missing — selecting without it")
+                response = supabase_client.table('courses').select('id, code, name, department, level').order('code').execute()
+            else:
+                raise
         return response.data
     except Exception as e:
         logger.error(f"Error listing courses: {e}")
@@ -212,12 +225,23 @@ def create_course(course: CourseCreate):
         if not code or not name:
             raise HTTPException(status_code=400, detail="Course code and name are required.")
 
-        resp = supabase_client.table('courses').insert({
+        row = {
             'code': code,
             'name': name,
             'department': course.department or None,
-            'level': course.level
-        }).execute()
+            'level': course.level,
+        }
+        try:
+            # Try with syllabus first (works once the migration has been run)
+            resp = supabase_client.table('courses').insert({**row, 'syllabus': course.syllabus or None}).execute()
+        except APIError as e:
+            # Column not migrated yet (42703) — insert without it.
+            # Duplicate (23505) intentionally propagates to the handler below.
+            if getattr(e, 'code', '') == '42703':
+                logger.warning("courses.syllabus column missing — inserting without it")
+                resp = supabase_client.table('courses').insert(row).execute()
+            else:
+                raise
         return resp.data[0]
     except APIError as e:
         # PostgreSQL unique_violation (23505) — the code column is UNIQUE
@@ -293,6 +317,42 @@ def delete_exam_paper(paper_id: str):
     except Exception as e:
         logger.error(f"Error deleting paper: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/reclassify")
+async def reclassify_papers(background_tasks: BackgroundTasks, paper_id: Optional[str] = None):
+    """
+    Re-runs AI course detection on existing papers to fix mis-categorization
+    (e.g. everything tagged to a single default course). Pass paper_id to
+    reclassify one paper, or omit it to reclassify all papers in the vault.
+    Runs in the background; returns immediately.
+    """
+    try:
+        from services.pipeline import reclassify_paper
+
+        if paper_id:
+            ids = [paper_id]
+        else:
+            resp = supabase_client.table('exam_papers').select('id').execute()
+            ids = [p['id'] for p in resp.data]
+
+        if not ids:
+            return {"queued": 0, "message": "No papers to reclassify."}
+
+        background_tasks.add_task(_run_reclassify_batch, ids)
+        return {"queued": len(ids), "message": f"Re-categorizing {len(ids)} paper(s) in the background."}
+    except Exception as e:
+        logger.error(f"Error queueing reclassify: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _run_reclassify_batch(ids: list):
+    """Sync helper so FastAPI runs it in the threadpool, not the event loop."""
+    from services.pipeline import reclassify_paper
+    results = []
+    for pid in ids:
+        results.append(reclassify_paper(pid))
+        print(f"Reclassify batch: {sum(1 for r in results if r['status'] == 'reclassified')}/{len(results)} reclassified")
+
 
 @app.delete("/api/admin/papers/{paper_id}")
 def admin_delete_paper(paper_id: str):

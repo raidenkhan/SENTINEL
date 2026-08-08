@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS courses (
     name TEXT NOT NULL,
     department VARCHAR(100),
     level INT,
+    syllabus TEXT, -- course syllabus/topics used to guide LLM analysis
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
