@@ -252,18 +252,18 @@ export default function GlobalAnalyticsPage() {
     const isInsufficient = totalQuestions < MIN_QUESTIONS_FOR_INSIGHTS;
 
     return (
-        <div className="space-y-12 relative pb-20">
+        <div className="space-y-10 md:space-y-12 relative pb-20">
             <AnimatePresence>
                 {parsedPlan && (
                     <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 dark:bg-charcoal-950/80 backdrop-blur-xl overflow-y-auto py-8"
+                        className="fixed inset-0 z-[250] flex items-start justify-center p-4 bg-black/60 dark:bg-charcoal-950/80 backdrop-blur-xl overflow-y-auto py-8"
                     >
                         <motion.div 
                             initial={{ opacity: 0, y: 20, scale: 0.97 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
-                            className="w-full max-w-5xl"
+                            className="w-full max-w-5xl my-auto"
                         >
                             <div className="flex flex-col gap-6">
                                 <div className="flex items-center justify-between">
@@ -326,7 +326,7 @@ export default function GlobalAnalyticsPage() {
                 )}
             </AnimatePresence>
 
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 pb-4">
                 <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                         <Activity className="w-3.5 h-3.5 text-emerald-500" />
@@ -384,7 +384,7 @@ export default function GlobalAnalyticsPage() {
                 <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-4 p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl"
+                    className="flex flex-wrap items-center gap-4 p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl"
                 >
                     <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
                     <div>
@@ -402,15 +402,15 @@ export default function GlobalAnalyticsPage() {
                 </motion.div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 <StatMetric label="Questions" value={totalQuestions} icon={Activity} color="#10b981" />
                 <StatMetric label="Topics Found" value={Object.keys(analytics?.topic_frequencies || {}).length} icon={TrendingUp} color="#6366f1" />
                 <StatMetric label="Your Papers" value={userPaperCount} icon={FileText} color="#f59e0b" />
                 <StatMetric label="Community" value={communityPaperCount} icon={Users} color="#8b5cf6" />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <GlassCard className="lg:col-span-8 p-6 space-y-6" style={{
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <GlassCard className="md:col-span-8 p-6 space-y-6" style={{
                     background: "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, var(--card-bg) 50%, rgba(16, 185, 129, 0.03) 100%)",
                     borderColor: "rgba(16, 185, 129, 0.12)",
                 }}>
@@ -462,7 +462,7 @@ export default function GlobalAnalyticsPage() {
                     </div>
                 </GlassCard>
 
-                <GlassCard className="lg:col-span-4 p-6" style={{
+                <GlassCard className="md:col-span-4 p-6" style={{
                     background: "linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, var(--card-bg) 50%, rgba(99, 102, 241, 0.03) 100%)",
                     borderColor: "rgba(99, 102, 241, 0.12)",
                 }}>
@@ -478,9 +478,9 @@ export default function GlobalAnalyticsPage() {
                             </div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={performanceData}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="72%" data={performanceData}>
                                     <PolarGrid stroke="rgba(148, 163, 184, 0.1)" />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 'bold' }} />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 8, fontWeight: 'bold' }} />
                                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                                     <Radar name="Mastery" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.4} />
                                 </RadarChart>
@@ -490,7 +490,7 @@ export default function GlobalAnalyticsPage() {
                 </GlassCard>
             </div>
 
-            <GlassCard className="p-8 border-black/5 dark:border-white/10 bg-gradient-to-br from-emerald-500/10 to-transparent flex flex-col md:flex-row items-center gap-8">
+            <GlassCard className="p-6 md:p-8 border-black/5 dark:border-white/10 bg-gradient-to-br from-emerald-500/10 to-transparent flex flex-col md:flex-row items-center gap-6 md:gap-8">
                 <div className="flex-1 space-y-4">
                     <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald">
                         <Sparkles className="w-6 h-6 text-white" />
@@ -527,16 +527,16 @@ function StatMetric({ label, value, icon: Icon, color }: any) {
     const colorKey = color === "#10b981" ? "emerald" : color === "#6366f1" ? "indigo" : color === "#f59e0b" ? "amber" : "violet";
     
     return (
-        <GlassCard glow={colorKey} className="p-4">
-            <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded flex items-center justify-center border border-[var(--border)]" style={{ backgroundColor: `${color}15` }}>
-                    <Icon className="w-5 h-5" style={{ color }} />
+        <GlassCard glow={colorKey} className="p-3.5 sm:p-4 min-w-0">
+            <div className="flex items-center justify-between mb-2.5 sm:mb-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded flex items-center justify-center border border-[var(--border)]" style={{ backgroundColor: `${color}15` }}>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color }} />
                 </div>
             </div>
             
-            <div className="space-y-1">
-                <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">{label}</div>
-                <div className="text-2xl font-semibold text-[var(--text-primary)]">{value?.toLocaleString() || 0}</div>
+            <div className="space-y-1 min-w-0">
+                <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider truncate">{label}</div>
+                <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] leading-none truncate" title={String(value?.toLocaleString() ?? 0)}>{value?.toLocaleString() || 0}</div>
             </div>
         </GlassCard>
     );

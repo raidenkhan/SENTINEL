@@ -221,24 +221,24 @@ export function StudyPlanMarkdown({ doc, className, showExport = true, exportPre
     return (
         <div className={className}>
             {showExport && (
-                <div className="flex flex-wrap items-center gap-2 mb-6">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 mb-6">
                     <button
                         onClick={handleCopy}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.97] transition-all"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.97] transition-all"
                     >
                         {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                         {copied ? "Copied" : "Copy MD"}
                     </button>
                     <button
                         onClick={handleDownloadMd}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.97] transition-all"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.97] transition-all"
                     >
                         <FileText className="w-3.5 h-3.5" /> .md
                     </button>
                     <button
                         onClick={handlePng}
                         disabled={busy !== null}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/25 text-indigo-500 hover:bg-indigo-500/20 active:scale-[0.97] transition-all disabled:opacity-50"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/25 text-indigo-500 hover:bg-indigo-500/20 active:scale-[0.97] transition-all disabled:opacity-50"
                     >
                         {busy === "png" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileImage className="w-3.5 h-3.5" />}
                         PNG
@@ -246,12 +246,12 @@ export function StudyPlanMarkdown({ doc, className, showExport = true, exportPre
                     <button
                         onClick={handlePdf}
                         disabled={busy !== null}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/25 text-indigo-500 hover:bg-indigo-500/20 active:scale-[0.97] transition-all disabled:opacity-50"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/25 text-indigo-500 hover:bg-indigo-500/20 active:scale-[0.97] transition-all disabled:opacity-50"
                     >
                         {busy === "pdf" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                         PDF
                     </button>
-                    <span className="ml-auto hidden md:block text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+                    <span className="ml-auto hidden sm:block text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
                         Markdown export
                     </span>
                 </div>

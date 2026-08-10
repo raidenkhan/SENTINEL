@@ -5,13 +5,14 @@ import { Bell, Search, User, LogOut, ChevronDown, Activity, Sparkles, ExternalLi
 import { ThemeToggle } from "./ThemeToggle";
 import { supabase } from "@/lib/supabase";
 import { useRouter, usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function TopNav() {
     const [user, setUser] = useState<any>(null);
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const shouldReduceMotion = useReducedMotion();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -23,27 +24,43 @@ export function TopNav() {
         return "Terminal";
     };
 
+    // Load the signed-in user once
     useEffect(() => {
         supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
             if (user) {
                 setUser(user);
             }
         });
+    }, []);
 
-        const handleClickOutside = (event: MouseEvent) => {
+    // Close on outside press (mouse + touch) and on Escape
+    useEffect(() => {
+        if (!showDropdown) return;
+
+        const handlePressOutside = (event: MouseEvent | TouchEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setShowDropdown(false);
             }
         };
+        const handleKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setShowDropdown(false);
+        };
 
-        if (showDropdown) {
-          document.addEventListener("mousedown", handleClickOutside);
-        }
-
+        document.addEventListener("mousedown", handlePressOutside);
+        document.addEventListener("touchstart", handlePressOutside);
+        document.addEventListener("keydown", handleKey);
         return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("mousedown", handlePressOutside);
+            document.removeEventListener("touchstart", handlePressOutside);
+            document.removeEventListener("keydown", handleKey);
         };
     }, [showDropdown]);
+
+    // Always close when navigating to another route — the dropdown lives in the
+    // persistent dashboard layout, so it would otherwise stay open after clicks
+    useEffect(() => {
+        setShowDropdown(false);
+    }, [pathname]);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -84,6 +101,8 @@ export function TopNav() {
                     
                     <button 
                         onClick={() => setShowDropdown(!showDropdown)}
+                        aria-haspopup="menu"
+                        aria-expanded={showDropdown}
                         className="flex items-center gap-3 pl-1 pr-3 py-1 bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl hover:border-emerald-500/30 transition-all duration-300"
                     >
                          <div className="w-9 h-9 rounded-xl bg-emerald-500 shadow-emerald flex items-center justify-center text-white font-black text-sm">
@@ -99,10 +118,13 @@ export function TopNav() {
                     <AnimatePresence>
                         {showDropdown && (
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute right-0 top-14 w-64 glass-card bg-white/90 dark:bg-charcoal-900/90 backdrop-blur-2xl p-2 z-[110] shadow-2xl rounded-2xl border-black/5 dark:border-white/10"
+                                role="menu"
+                                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}
+                                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                                transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                style={{ transformOrigin: "top right" }}
+                                className="absolute right-0 top-14 w-64 bg-white dark:bg-charcoal-900 border border-black/10 dark:border-white/10 p-2 z-[110] shadow-2xl rounded-xl"
                             >
                                 <div className="px-4 py-4 mb-1">
                                     <div className="flex items-center gap-2 mb-3">
@@ -113,8 +135,8 @@ export function TopNav() {
                                 </div>
 
                                 <div className="space-y-0.5">
-                                    <DropdownItem icon={<User className="w-4 h-4" />} label="Neural Identity" onClick={() => router.push("/dashboard/settings")} />
-                                    <DropdownItem icon={<ExternalLink className="w-4 h-4" />} label="Knowledge Portal" onClick={() => router.push("/")} />
+                                    <DropdownItem icon={<User className="w-4 h-4" />} label="Neural Identity" onClick={() => { setShowDropdown(false); router.push("/dashboard/settings"); }} />
+                                    <DropdownItem icon={<ExternalLink className="w-4 h-4" />} label="Knowledge Portal" onClick={() => { setShowDropdown(false); router.push("/"); }} />
                                     
                                     <div className="my-2 h-px bg-black/5 dark:bg-white/5 mx-2" />
                                     
@@ -138,6 +160,7 @@ export function TopNav() {
 function DropdownItem({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
     <button 
+      role="menuitem"
       onClick={onClick}
       className="w-full text-left px-4 py-3 rounded-xl text-[10px] font-black tracking-widest text-slate-500 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/5 transition-all flex items-center gap-3 uppercase italic"
     >

@@ -138,9 +138,9 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                     <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                        className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 dark:bg-obsidian-950/80 backdrop-blur-xl"
+                        className="fixed inset-0 z-[250] flex items-start justify-center p-4 bg-black/60 dark:bg-obsidian-950/80 backdrop-blur-xl"
                     >
-                        <GlassCard className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-12 relative bg-white/95 dark:bg-obsidian-900/90 rounded-2xl">
+                        <GlassCard className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 md:p-12 my-auto relative bg-white/95 dark:bg-obsidian-900/90 rounded-2xl">
                             <button onClick={() => setStudyPlan(null)} className="absolute top-8 right-8 text-slate-400 hover:text-emerald-500 transition-colors p-2">
                                 <ChevronDown className="w-8 h-8 rotate-180" />
                             </button>
