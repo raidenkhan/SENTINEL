@@ -80,27 +80,29 @@ export default function DashboardPage() {
                 </section>
 
                 {/* Middle Section - Chart & Sidebar Panel */}
-                <section className="flex flex-col lg:flex-row gap-6 w-full">
-                    <div className={`w-full lg:w-2/3 ${activeMobileTab === 'overview' ? 'block' : 'hidden'} md:block`}>
+                <section className="flex flex-col md:flex-row gap-6 w-full">
+                    <div className={`w-full md:w-2/3 ${activeMobileTab === 'overview' ? 'block' : 'hidden'} md:block`}>
                         <TrendsChart data={analyticsData?.trends} />
                     </div>
-                    <div className={`w-full lg:w-1/3 ${activeMobileTab === 'overview' ? 'block' : 'hidden'} md:block`}>
+                    <div className={`w-full md:w-1/3 ${activeMobileTab === 'overview' ? 'block' : 'hidden'} md:block`}>
                         <HighYieldTopics insights={analyticsData?.topic_insights} />
                     </div>
                 </section>
 
-                {/* Bottom Section - Heatmap, Blooms, and Chat (FR7/FR8/FR10 features) */}
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-                    <div className={`lg:col-span-1 ${activeMobileTab === 'topics' ? 'block' : 'hidden'} md:block`}>
+                {/* Bottom Section - Heatmap, Blooms, and Chat (FR7/FR8/FR10 features)
+                    Mobile tile grid: Heatmap + Blooms pair side-by-side on the Topics tab;
+                    Community and Assistant show alone so they keep full width (col-span-2) */}
+                <section className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    <div className={`col-span-1 min-w-0 ${activeMobileTab === 'topics' ? 'block' : 'hidden'} md:block`}>
                         <TopicHeatmap data={analyticsData?.heatmap} years={analyticsData?.years} />
                     </div>
-                    <div className={`lg:col-span-1 ${activeMobileTab === 'topics' ? 'block' : 'hidden'} md:block`}>
+                    <div className={`col-span-1 min-w-0 ${activeMobileTab === 'topics' ? 'block' : 'hidden'} md:block`}>
                         <BloomsDistribution data={analyticsData?.blooms_distribution} />
                     </div>
-                    <div className={`lg:col-span-1 ${activeMobileTab === 'community' ? 'block' : 'hidden'} md:block`}>
+                    <div className={`col-span-2 lg:col-span-1 min-w-0 ${activeMobileTab === 'community' ? 'block' : 'hidden'} md:block`}>
                         <CommunityInsights />
                     </div>
-                    <div className={`lg:col-span-1 ${activeMobileTab === 'assistant' ? 'block' : 'hidden'} md:block`}>
+                    <div className={`col-span-2 lg:col-span-1 min-w-0 ${activeMobileTab === 'assistant' ? 'block' : 'hidden'} md:block`}>
                         <StudyAssistantChat />
                     </div>
                 </section>

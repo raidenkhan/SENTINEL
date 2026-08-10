@@ -55,8 +55,8 @@ export function BloomsDistribution({ data }: { data?: Record<string, number> }) 
                             data={chartData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
+                            innerRadius="45%"
+                            outerRadius="65%"
                             paddingAngle={5}
                             dataKey="value"
                             stroke="var(--border)"
@@ -79,7 +79,7 @@ export function BloomsDistribution({ data }: { data?: Record<string, number> }) 
                             verticalAlign="bottom"
                             height={36}
                             iconType="circle"
-                            wrapperStyle={{ fontSize: '12px', color: 'var(--text-muted)' }}
+                            wrapperStyle={{ fontSize: '10px', color: 'var(--text-muted)' }}
                         />
                     </PieChart>
                 </ResponsiveContainer>
