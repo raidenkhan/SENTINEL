@@ -20,14 +20,8 @@ import { useRouter } from "next/navigation";
 type DataState = "loading" | "empty" | "processing" | "insufficient" | "ready";
 
 const MIN_QUESTIONS_FOR_INSIGHTS = 5;
-
-const performanceData = [
-    { subject: 'Memory', A: 85, fullMark: 100 },
-    { subject: 'CPU', A: 70, fullMark: 100 },
-    { subject: 'Concurrency', A: 90, fullMark: 100 },
-    { subject: 'Files', A: 65, fullMark: 100 },
-    { subject: 'Virtualization', A: 80, fullMark: 100 },
-];
+const MAX_RADAR_TOPICS = 6;
+const MIN_RADAR_TOPICS = 3;
 
 type ParsedPlan = {
     topics: { name: string; count: number; priority: 'high' | 'medium' | 'low' }[];
@@ -84,6 +78,7 @@ export default function GlobalAnalyticsPage() {
     const [planError, setPlanError] = useState<string | null>(null);
     const [analytics, setAnalytics] = useState<any>(null);
     const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+    const [activeCourseLabel, setActiveCourseLabel] = useState<string | null>(null);
     const [communityFallback, setCommunityFallback] = useState(false);
     const [userPaperCount, setUserPaperCount] = useState(0);
     const [communityPaperCount, setCommunityPaperCount] = useState(0);
@@ -106,6 +101,12 @@ export default function GlobalAnalyticsPage() {
 
                 const courseId = papers[0].course_id;
                 setActiveCourseId(courseId);
+
+                // Surface the real course for the radar header (falls back to code/name/id)
+                const course = papers[0]?.courses;
+                setActiveCourseLabel(
+                    (course?.code ? `${course.code} · ` : "") + (course?.name || courseId)
+                );
 
                 const res = await fetch(`${API_URL}/api/analytics/${courseId}`);
                 const data = await res.json();
@@ -197,6 +198,23 @@ export default function GlobalAnalyticsPage() {
         }
         return studyPlan;
     }, [studyPlan, rawPlan, analytics]);
+
+    // Mastery radar reflects the ACTUAL course: top topics by question frequency,
+    // normalized to 0-100 so the polygon shape shows topic balance.
+    // Long LLM-extracted topic names are truncated for the 8px axis labels;
+    // scaling is relative to the top topic so a course's spread is readable.
+    const radarData = useMemo(() => {
+        const freqs = (analytics?.topic_frequencies || {}) as Record<string, number>;
+        const entries = Object.entries(freqs)
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .slice(0, MAX_RADAR_TOPICS);
+        const maxCount = Math.max(1, ...entries.map(([, c]) => Number(c)));
+        return entries.map(([topic, count]) => ({
+            subject: topic.length > 16 ? topic.slice(0, 15).trim() + "…" : topic,
+            A: Math.round((Number(count) / maxCount) * 100),
+            fullMark: 100,
+        }));
+    }, [analytics]);
 
     if (dataState === "loading") {
         return (
@@ -468,7 +486,9 @@ export default function GlobalAnalyticsPage() {
                 }}>
                     <div className="space-y-4 mb-6">
                         <h2 className="text-xl font-black italic text-slate-900 dark:text-white uppercase tracking-tight">Mastery Radar</h2>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Topic Balance</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            {activeCourseLabel ? `${activeCourseLabel} · ` : ""}Topic Balance
+                        </p>
                     </div>
 
                     <div className="h-48 w-full flex items-center justify-center">
@@ -476,9 +496,13 @@ export default function GlobalAnalyticsPage() {
                             <div className="text-slate-500 text-xs text-center">
                                 Need {MIN_QUESTIONS_FOR_INSIGHTS}+ questions for radar analysis
                             </div>
+                        ) : radarData.length < MIN_RADAR_TOPICS ? (
+                            <div className="text-slate-500 text-xs text-center max-w-[220px]">
+                                More topic variety needed — upload papers from different units to map your topic balance.
+                            </div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="72%" data={performanceData}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarData}>
                                     <PolarGrid stroke="rgba(148, 163, 184, 0.1)" />
                                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 8, fontWeight: 'bold' }} />
                                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
