@@ -8,8 +8,9 @@ import {
   BrainCircuit, FileText, Check, CheckCircle2, FileImage
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/landing/ThemeToggle";
 import { AuthModal } from "@/components/auth/AuthModal";
+import ShaderBackground from "@/components/landing/ShaderBackground";
+import { ThemeToggle } from "@/components/landing/ThemeToggle";
 
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 const SPRING_MENU = { type: "spring" as const, duration: 0.45, bounce: 0.1 };
@@ -70,7 +71,7 @@ function HeroScan({ prefersReducedMotion }: { prefersReducedMotion: boolean | nu
 
   return (
     <div className="relative">
-      <div className="rounded-3xl border backdrop-blur-2xl p-7 shadow-2xl overflow-hidden bg-white/70 dark:bg-white/[0.03] border-slate-900/[0.07] dark:border-white/[0.07] shadow-slate-900/10 dark:shadow-black/40">
+      <div className="rounded-3xl border backdrop-blur-2xl p-7 shadow-2xl overflow-hidden bg-white/70 dark:bg-[#0a0a0b]/50 border-slate-900/[0.07] dark:border-white/[0.07] shadow-slate-900/10 dark:shadow-black/40">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -267,13 +268,17 @@ export default function LandingPage() {
 
   return (
     <main className={`relative min-h-screen overflow-x-hidden selection:bg-emerald-500/30 ${isDark ? 'dark' : 'light'}`}>
-      {/* ── AURORA BACKGROUND — slow drift, transform-only, reduced-motion safe ── */}
+      {/* ── BACKGROUND — mint water-plane shader (one palette, both modes) + legibility scrims ── */}
       <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden>
         <div className={`absolute inset-0 transition-colors duration-500 ${isDark ? 'bg-[#050505]' : 'bg-[#fafafa]'}`} />
-        <div className="absolute inset-0 bg-grid opacity-[0.12] dark:opacity-[0.10]" />
-        <div className={`absolute -top-[30%] right-[-12%] w-[70%] aspect-square rounded-full blur-[110px] animate-aurora-a ${isDark ? 'bg-emerald-500/[0.09]' : 'bg-emerald-500/[0.07]'}`} />
-        <div className={`absolute -bottom-[30%] left-[-10%] w-[60%] aspect-square rounded-full blur-[120px] animate-aurora-b ${isDark ? 'bg-indigo-500/[0.08]' : 'bg-indigo-500/[0.06]'}`} />
-        <div className="absolute top-[10%] left-[30%] w-[30%] aspect-square rounded-full blur-[140px] animate-aurora-b bg-emerald-400/[0.04]" />
+        <ShaderBackground isDark={isDark} />
+        <div className="absolute inset-0 bg-grid opacity-[0.05] dark:opacity-[0.07]" />
+        {/* top scrim — nav + headline stay on solid page color */}
+        <div className={`absolute inset-x-0 top-0 h-[48vh] bg-gradient-to-b ${isDark ? 'from-[#050505] via-[#050505]/55 to-transparent' : 'from-[#fafafa] via-[#fafafa]/55 to-transparent'}`} />
+        {/* left scrim — hero text column stays crisp in light mode */}
+        <div className={`absolute left-0 top-0 h-[72vh] w-[52%] bg-gradient-to-r ${isDark ? 'from-[#050505]/80 via-[#050505]/35 to-transparent' : 'from-[#fafafa]/75 via-[#fafafa]/30 to-transparent'}`} />
+        {/* bottom scrim — footer text stays readable */}
+        <div className={`absolute inset-x-0 bottom-0 h-[22vh] bg-gradient-to-t ${isDark ? 'from-[#050505] to-transparent' : 'from-[#fafafa] to-transparent'}`} />
       </div>
 
       {/* ── TRANSLUCENT NAV ── */}

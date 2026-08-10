@@ -242,18 +242,6 @@
   animation: fade-in 0.5s ease-out forwards;
 }
 
-/* Slow ambient aurora drift — GPU-friendly transform-only, killed by prefers-reduced-motion */
-@keyframes aurora-a {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(5%, -4%, 0) scale(1.12); }
-}
-@keyframes aurora-b {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1.08); }
-  50% { transform: translate3d(-6%, 5%, 0) scale(0.94); }
-}
-.animate-aurora-a { animation: aurora-a 28s ease-in-out infinite; }
-.animate-aurora-b { animation: aurora-b 34s ease-in-out infinite; }
-
 /* Course-code marquee strip */
 @keyframes marquee {
   to { transform: translateX(-50%); }
