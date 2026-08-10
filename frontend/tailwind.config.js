@@ -23,6 +23,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        'serif-accent': ['Instrument Serif', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
     },

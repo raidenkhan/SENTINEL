@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Sora } from "next/font/google";
+import { Inter, JetBrains_Mono, Space_Grotesk, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -14,10 +14,21 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
-const sora = Sora({
+// Distinctive display face — engineered, geometric grotesque that carries the
+// SENTINEL brand voice (radar, neural, precision). Body stays on Inter (Apple's
+// "system font body + custom display" pattern).
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-display",
+});
+
+// Editorial italic used for single accent words ("Exam.", "plan.") — the
+// "one word in a different voice" trick.
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-serif-accent",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

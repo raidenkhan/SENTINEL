@@ -130,7 +130,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                                         exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -6 }}
                                         transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                                     >
-                                        <h2 className="text-[1.7rem] leading-[1.1] font-bold tracking-[-0.02em] text-slate-900 dark:text-white">
+                                        <h2 className="font-display text-[1.7rem] leading-[1.1] font-bold tracking-[-0.02em] text-slate-900 dark:text-white">
                                             {isLogin ? "Welcome back." : "Create your account."}
                                         </h2>
                                         <p className="text-sm font-medium leading-relaxed mt-2 text-slate-500 dark:text-slate-400">

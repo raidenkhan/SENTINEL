@@ -285,10 +285,9 @@ export default function LandingPage() {
       <header className="sticky top-0 z-[100]">
         <nav className={`h-16 px-6 md:px-10 flex items-center justify-between border-b backdrop-blur-2xl backdrop-saturate-150 ${
           isDark ? 'border-white/[0.06] bg-[#050505]/55' : 'border-slate-900/[0.06] bg-white/60'
-        }`}>
-          <a href="#" className="flex items-center gap-3 group" aria-label="SENTINEL home">
+        }`}>            <a href="#" className="flex items-center gap-3 group" aria-label="SENTINEL home">
             <div className="w-2.5 h-6 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] group-hover:scale-y-125 transition-transform duration-500" />
-            <span className={`text-xl font-black tracking-tighter uppercase italic ${isDark ? 'text-white' : 'text-slate-900'}`}>SENTINEL</span>
+            <span className={`font-display text-xl font-bold tracking-tighter uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>SENTINEL</span>
           </a>
 
           <div className="hidden md:flex items-center gap-8">
@@ -300,7 +299,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-4">
             <ThemeToggle />
             <Button variant="ghost" className={`text-xs font-bold ${isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`} onClick={() => setIsAuthOpen(true)}>LOGIN</Button>
-            <Button variant="primary" className="text-xs font-bold px-5 py-2.5 rounded-full" onClick={() => setIsAuthOpen(true)}>GET STARTED</Button>
+            <Button variant="primary" className="text-xs font-bold px-4 py-2 rounded-lg" onClick={() => setIsAuthOpen(true)}>GET STARTED</Button>
           </div>
 
           <button className={`md:hidden ${isDark ? 'text-white' : 'text-slate-900'}`} onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
@@ -327,7 +326,7 @@ export default function LandingPage() {
               }`}
             >
               <div className={`flex justify-between items-center mb-12 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                <span className="text-lg font-black italic tracking-widest">SENTINEL</span>
+                <span className="font-display text-lg font-bold tracking-tight uppercase">SENTINEL</span>
                 <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu"><X className="w-6 h-6" /></button>
               </div>
               <div className="flex flex-col gap-6">
@@ -358,10 +357,10 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: EASE_OUT, delay: 0.05 }}
-              className={`text-[clamp(3.25rem,9vw,7rem)] font-black leading-[0.9] tracking-[-0.03em] uppercase italic ${isDark ? 'text-white' : 'text-slate-900'}`}
+              className={`font-display text-[clamp(2.75rem,9vw,7rem)] font-bold leading-[0.9] tracking-[-0.035em] uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}
             >
               Master<br />Every<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-400">Exam.</span>
+              <span className="font-serif-accent italic font-normal lowercase text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-400">Exam.</span>
             </motion.h1>
 
             <motion.p
@@ -379,12 +378,12 @@ export default function LandingPage() {
               transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.22 }}
               className="flex flex-col sm:flex-row gap-4 pt-2"
             >
-              <Button variant="primary" className="px-10 py-5 text-base font-bold rounded-full" onClick={() => setIsAuthOpen(true)}>
+              <Button variant="primary" className="px-6 sm:px-10 py-3 sm:py-5 text-sm sm:text-base font-bold tracking-normal rounded-xl" onClick={() => setIsAuthOpen(true)}>
                 Start Scanning — Free
               </Button>
               <Button variant="outline" onClick={() => {
                 document.getElementById('how')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-              }} className={`px-10 py-5 text-base font-bold rounded-full group ${
+              }} className={`px-6 sm:px-10 py-3 sm:py-5 text-sm sm:text-base font-bold tracking-normal rounded-xl group ${
                 isDark
                   ? 'border-white/15 text-white hover:bg-white/5 hover:border-white/25'
                   : 'border-slate-300 text-slate-900 hover:bg-slate-100 hover:border-slate-400'
@@ -400,13 +399,13 @@ export default function LandingPage() {
               className={`flex gap-12 pt-8 border-t ${isDark ? 'border-white/[0.07]' : 'border-slate-200'}`}
             >
               <div>
-                <div className={`text-2xl md:text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <div className={`font-display text-2xl md:text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   <CountUp to={46.2} decimals={1} suffix="K" />
                 </div>
                 <div className={`text-[10px] font-bold uppercase tracking-[0.18em] mt-1 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Files Indexed</div>
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-black tracking-tight text-emerald-500">
+                <div className="font-display text-2xl md:text-3xl font-bold tracking-tight text-emerald-500">
                   <CountUp to={98.4} decimals={1} suffix="%" />
                 </div>
                 <div className={`text-[10px] font-bold uppercase tracking-[0.18em] mt-1 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>Pattern Sync</div>
@@ -445,8 +444,8 @@ export default function LandingPage() {
         <section id="how" className="py-16 md:py-28 mb-8 md:mb-16">
           <motion.div {...enter(0)} className="text-center mb-16 max-w-3xl mx-auto">
             <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500 mb-5">Three steps</div>
-            <h2 className={`text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-[0.95] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              From PDF to <span className="text-emerald-500">plan.</span>
+            <h2 className={`font-display text-3xl md:text-6xl font-bold uppercase tracking-tighter leading-[0.95] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              From PDF to <span className="font-serif-accent italic font-normal text-emerald-500 lowercase">plan.</span>
             </h2>
           </motion.div>
 
@@ -489,7 +488,7 @@ export default function LandingPage() {
                     }`}>{s.step}</span>
                   </div>
                   <div className="space-y-2">
-                    <h3 className={`text-lg font-black uppercase italic tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.title}</h3>
+                    <h3 className={`font-display text-lg font-bold uppercase tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.title}</h3>
                     <p className={`text-sm font-medium leading-relaxed ${isDark ? 'text-white/45' : 'text-slate-500'}`}>{s.desc}</p>
                   </div>
                 </div>
@@ -502,8 +501,8 @@ export default function LandingPage() {
         <section id="features" className="py-20 md:py-32 mb-8 md:mb-16">
           <motion.div {...enter(0)} className="text-center mb-16 md:mb-24 max-w-3xl mx-auto">
             <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500 mb-5">Capabilities</div>
-            <h2 className={`text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-[0.95] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Smarter, Faster, <span className="text-emerald-500">Stronger.</span>
+            <h2 className={`font-display text-3xl md:text-6xl font-bold uppercase tracking-tighter leading-[0.95] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Smarter, Faster, <span className="font-serif-accent italic font-normal text-emerald-500 lowercase">Stronger.</span>
             </h2>
             <p className={`text-base md:text-lg font-medium mt-6 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
               Everything SENTINEL extracts from a single exam paper — in under a minute.
@@ -522,7 +521,7 @@ export default function LandingPage() {
                   <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
                     <Upload className="w-6 h-6" />
                   </div>
-                  <h3 className={`text-2xl md:text-3xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Unified Engine</h3>
+                  <h3 className={`font-display text-2xl md:text-3xl font-bold uppercase tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Unified Engine</h3>
                   <p className={`font-medium text-base leading-relaxed ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Drop in any past paper — PDF, scan, or photo. OCR extracts every question, formula, and diagram with high-fidelity character recognition.</p>
                   <div className="flex gap-2 pt-1">
                     {["PDF", "SCAN", "PHOTO"].map((t) => (
@@ -542,7 +541,7 @@ export default function LandingPage() {
                   <Zap className="w-6 h-6" />
                 </div>
                 <div className="space-y-4">
-                  <h3 className={`text-xl md:text-2xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>AI Pulse</h3>
+                  <h3 className={`font-display text-xl md:text-2xl font-bold uppercase tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>AI Pulse</h3>
                   <p className={`font-medium leading-relaxed text-sm ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Instant pattern recognition across a decade of KNUST exams.</p>
                   <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border border-indigo-400/20 bg-indigo-400/10 text-indigo-400">10 YEARS OF DATA</span>
                 </div>
@@ -558,7 +557,7 @@ export default function LandingPage() {
                   <Target className="w-6 h-6" />
                 </div>
                 <div className="space-y-4">
-                  <h3 className={`text-xl md:text-2xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Focus Point</h3>
+                  <h3 className={`font-display text-xl md:text-2xl font-bold uppercase tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Focus Point</h3>
                   <p className={`font-medium leading-relaxed text-sm ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Every topic ranked by probability of appearing on your next paper.</p>
                   <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border border-amber-400/20 bg-amber-400/10 text-amber-400">PROBABILITY SCORE</span>
                 </div>
@@ -571,9 +570,9 @@ export default function LandingPage() {
                 isDark ? 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.05]' : 'bg-white/70 border-slate-900/[0.07] hover:bg-white/90'
               }`}>
                 <div className="space-y-6">
-                  <h3 className={`text-2xl md:text-3xl font-black uppercase italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Predictive Analytics</h3>
+                  <h3 className={`font-display text-2xl md:text-3xl font-bold uppercase tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>Predictive Analytics</h3>
                   <p className={`font-medium text-base leading-relaxed ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Bloom's distribution, year-over-year trends, and your knowledge gaps — one dashboard, no guesswork.</p>
-                  <Button variant="outline" className={`w-fit rounded-full px-6 py-2 ${isDark ? 'border-white/15 text-white hover:bg-white/5' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`}>View Model Details</Button>
+                  <Button variant="outline" className={`w-fit rounded-lg px-5 py-2 text-xs sm:text-sm ${isDark ? 'border-white/15 text-white hover:bg-white/5' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`}>View Model Details</Button>
                 </div>
                 <div className="space-y-4">
                   {[60, 85, 45, 95].map((w, i) => (
@@ -599,7 +598,7 @@ export default function LandingPage() {
             <div className="lg:col-span-1">
               <motion.div {...enter(0)}>
                 <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500 mb-5">Under the hood</div>
-                <h2 className={`text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-[0.95] mb-8 ${isDark ? 'text-white' : 'text-slate-900'}`}>The Stack<br /><span className="text-emerald-500">Behind It.</span></h2>
+                <h2 className={`font-display text-3xl md:text-6xl font-bold uppercase tracking-tighter leading-[0.95] mb-8 ${isDark ? 'text-white' : 'text-slate-900'}`}>The Stack<br /><span className="font-serif-accent italic font-normal text-emerald-500 lowercase">Behind It.</span></h2>
                 <p className={`text-base font-medium leading-relaxed ${isDark ? 'text-white/40' : 'text-slate-500'}`}>SENTINEL isn't just a UI — it's a massive distributed vector engine designed to scale with your academic career.</p>
               </motion.div>
             </div>
@@ -624,7 +623,7 @@ export default function LandingPage() {
                   <div className="w-11 h-11 text-emerald-500 mb-5 bg-emerald-500/10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
                     <tech.icon className="w-5 h-5" />
                   </div>
-                  <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{tech.title}</h3>
+                  <h3 className={`font-display text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{tech.title}</h3>
                   <p className={`text-sm font-medium leading-relaxed ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{tech.desc}</p>
                 </motion.div>
               ))}
@@ -643,17 +642,17 @@ export default function LandingPage() {
                 <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-400">Free for KNUST students</span>
               </div>
-              <h2 className={`text-4xl md:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Ready to master<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-400">your next exam?</span>
+              <h2 className={`font-display text-3xl md:text-7xl font-bold uppercase tracking-tighter leading-[0.9] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Ready to master<br /><span className="font-serif-accent italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-400 lowercase">your next exam?</span>
               </h2>
               <p className={`text-base md:text-lg font-medium mt-6 max-w-xl mx-auto ${isDark ? 'text-white/45' : 'text-slate-500'}`}>
                 The past papers are already out there. SENTINEL turns them into your study plan in under a minute.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-                <Button variant="primary" className="px-12 py-5 text-base font-bold rounded-full" onClick={() => setIsAuthOpen(true)}>
+                <Button variant="primary" className="px-6 sm:px-12 py-3 sm:py-5 text-sm sm:text-base font-bold tracking-normal rounded-xl" onClick={() => setIsAuthOpen(true)}>
                   Start Scanning — Free
                 </Button>
-                <Button variant="outline" className={`px-10 py-5 text-base font-bold rounded-full ${isDark ? 'border-white/15 text-white hover:bg-white/5' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`} onClick={() => setIsAuthOpen(true)}>
+                <Button variant="outline" className={`px-6 sm:px-10 py-3 sm:py-5 text-sm sm:text-base font-bold tracking-normal rounded-xl ${isDark ? 'border-white/15 text-white hover:bg-white/5' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`} onClick={() => setIsAuthOpen(true)}>
                   Create Account
                 </Button>
               </div>
@@ -665,7 +664,7 @@ export default function LandingPage() {
         <footer className={`w-full pt-16 md:pt-24 pb-12 md:pb-20 border-t ${isDark ? 'border-white/[0.06]' : 'border-slate-200'}`}>
           <div className="grid md:grid-cols-4 gap-12 md:gap-16 mb-16">
             <div className="col-span-1 space-y-5">
-              <span className={`text-xl font-black tracking-tight uppercase italic ${isDark ? 'text-white' : 'text-slate-900'}`}>SENTINEL.</span>
+              <span className={`font-display text-xl font-bold tracking-tight uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>SENTINEL.</span>
               <p className={`font-medium leading-relaxed text-xs ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
                 Precision examination tools for the future of engineering. Built for KNUST Students by the SENTINEL Network.
               </p>
