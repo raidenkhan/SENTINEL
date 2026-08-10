@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, Loader2, AlertCircle, Sparkles, Cpu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -13,6 +13,7 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
     const [error, setError] = useState("");
     const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
     const [selectedMajor, setSelectedMajor] = useState("");
+    const prefersReducedMotion = useReducedMotion();
     const router = useRouter();
 
     const handleAuth = async (e: React.FormEvent) => {
@@ -90,10 +91,10 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 
                     {/* Modal Container */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
+                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+                        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
+                        transition={prefersReducedMotion ? { duration: 0.2 } : { type: "spring", duration: 0.4, bounce: 0 }}
                         className="relative w-full max-w-[480px] glass-card bg-white/90 dark:bg-charcoal-900/60 shadow-2xl z-10 overflow-hidden rounded-2xl border-white/20 dark:border-white/10"
                     >
                         {/* THE AI SCANNER VISUAL (Mini version for branding) */}
@@ -109,15 +110,34 @@ export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                         </button>
 
                         <div className="p-10">
-                            {/* Header Branding */}
-                            <div className="flex items-center gap-3 mb-12">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald">
-                                    <Cpu className="w-6 h-6 text-white" />
+                            {/* Header — Apple hierarchy: brand eyebrow → statement title → muted subtitle */}
+                            <div className="mb-10">
+                                <div className="flex items-center gap-3 mb-7">
+                                    <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-emerald">
+                                        <Cpu className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-black italic text-slate-900 dark:text-white uppercase tracking-tight leading-none">SENTINEL</span>
+                                        <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mt-0.5">Secure Neural Link</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">SENTINEL_AUTH</h2>
-                                    <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Secure Neural Link</p>
-                                </div>
+
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={isLogin ? "login-title" : "register-title"}
+                                        initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -6 }}
+                                        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                                    >
+                                        <h2 className="text-[1.7rem] leading-[1.1] font-bold tracking-[-0.02em] text-slate-900 dark:text-white">
+                                            {isLogin ? "Welcome back." : "Create your account."}
+                                        </h2>
+                                        <p className="text-sm font-medium leading-relaxed mt-2 text-slate-500 dark:text-slate-400">
+                                            {isLogin ? "Log in to continue your exam intelligence." : "Join the network and start scanning in seconds."}
+                                        </p>
+                                    </motion.div>
+                                </AnimatePresence>
                             </div>
 
                             {/* Tabs (Modern Pill) */}
