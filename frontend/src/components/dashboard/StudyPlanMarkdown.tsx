@@ -3,6 +3,9 @@
 import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { Check, Copy, Download, FileImage, FileText, Loader2 } from "lucide-react";
 
 // ---------------------------------------------------------------
@@ -221,7 +224,8 @@ export function StudyPlanMarkdown({ doc, className, showExport = true, exportPre
     return (
         <div className={className}>
             {showExport && (
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 mb-6">
+                <div className="sticky top-0 z-20 mb-5 rounded-xl bg-[var(--nav-bg)] backdrop-blur-2xl border border-black/5 dark:border-white/10 px-3 py-2.5 shadow-lg shadow-black/5">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
                     <button
                         onClick={handleCopy}
                         className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.97] transition-all"
@@ -255,27 +259,61 @@ export function StudyPlanMarkdown({ doc, className, showExport = true, exportPre
                         Markdown export
                     </span>
                 </div>
+                </div>
             )}
 
             {/* Captured element — solid bg so PNG/PDF exports look clean in both themes */}
             <div
                 ref={docRef}
-                className="bg-white dark:bg-[#0d0d0f] rounded-2xl border border-black/5 dark:border-white/10 p-6 md:p-8 overflow-hidden"
+                className="bg-[#fbfbf8] dark:bg-[#141418] rounded-2xl border border-black/5 dark:border-white/10 p-6 md:p-10"
             >
-                <div className="prose-sm md:prose max-w-none prose-slate dark:prose-invert prose-emerald prose-headings:font-black prose-headings:tracking-tight prose-blockquote:not-italic prose-table:text-xs">
+                <div className="prose-sm md:prose max-w-none prose-slate dark:prose-invert prose-emerald prose-headings:font-black prose-headings:tracking-tight prose-blockquote:not-italic prose-table:text-xs prose-li:marker:text-emerald-500/70 prose-code:before:content-none prose-code:after:content-none prose-strong:text-[var(--text-primary)]">
                     <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
                         components={{
+                            h1: ({ children }) => (
+                                <h1 className="text-2xl md:text-3xl font-black italic tracking-tighter uppercase leading-tight text-[var(--text-primary)] mb-6 flex items-center gap-4">
+                                    <span className="w-2 h-8 bg-emerald-500 rounded-full shrink-0" />
+                                    {children}
+                                </h1>
+                            ),
                             h2: ({ children }) => (
                                 <h2 className="text-base font-black uppercase tracking-widest text-[var(--text-primary)] mt-8 mb-4 flex items-center gap-3">
                                     {children}
                                     <span className="flex-1 h-px bg-emerald-500/25" />
                                 </h2>
                             ),
+                            h3: ({ children }) => (
+                                <h3 className="text-sm font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 mt-6 mb-3 flex items-center gap-2">
+                                    <span className="w-1 h-3.5 bg-emerald-500/60 rounded-full" />
+                                    {children}
+                                </h3>
+                            ),
+                            p: ({ children }) => (
+                                <p className="leading-relaxed text-[var(--text-primary)]">{children}</p>
+                            ),
                             blockquote: ({ children }) => (
                                 <blockquote className="my-4 px-4 py-3 rounded-lg border-l-4 border-emerald-500/50 bg-emerald-500/5 text-sm text-[var(--text-muted)]">
                                     {children}
                                 </blockquote>
+                            ),
+                            code: ({ className, children }) => {
+                                // Fenced blocks carry a `language-*` class, but plain ``` blocks don't —
+                                // a newline inside `children` reliably means block code in markdown source.
+                                const isBlock = /language-/.test(className ?? "") || String(children).includes("\n");
+                                return isBlock ? (
+                                    <code className={className}>{children}</code>
+                                ) : (
+                                    <code className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/15 rounded-md px-1.5 py-0.5 font-mono text-[0.85em]">
+                                        {children}
+                                    </code>
+                                );
+                            },
+                            pre: ({ children }) => (
+                                <pre className="!bg-[#101014] !text-slate-100 rounded-xl border border-black/10 dark:border-white/10 p-4 overflow-x-auto text-xs leading-relaxed !my-5">
+                                    {children}
+                                </pre>
                             ),
                             table: ({ children }) => (
                                 <div className="my-5 overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
@@ -292,6 +330,13 @@ export function StudyPlanMarkdown({ doc, className, showExport = true, exportPre
                                     {children}
                                 </td>
                             ),
+                            ul: ({ children }) => (
+                                <ul className="space-y-1.5 pl-5">{children}</ul>
+                            ),
+                            ol: ({ children }) => (
+                                <ol className="space-y-1.5 pl-5">{children}</ol>
+                            ),
+                            hr: () => <hr className="my-8 border-black/10 dark:border-white/10" />,
                             a: ({ children, href }) => (
                                 <a href={href} target="_blank" rel="noreferrer" className="text-emerald-600 dark:text-emerald-400 underline decoration-emerald-500/40 underline-offset-2 hover:decoration-emerald-500">
                                     {children}

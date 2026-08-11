@@ -485,7 +485,15 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         </div>
                                     )}
                                     {aiAnswer && (
-                                        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                                                    <Sparkles className="w-3 h-3" /> Syllabus-aware
+                                                </span>
+                                                <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                    {data.paper.courses.code} · related questions embedded
+                                                </span>
+                                            </div>
                                             <StudyPlanMarkdown
                                                 doc={{
                                                     title: `${data.paper.courses.code} — ${data.paper.courses.name}`,

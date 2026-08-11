@@ -12,6 +12,10 @@ module.exports = {
         'charcoal-950': '#121212',
         'charcoal-900': '#1E1E1E',
         'charcoal-800': '#2A2A2A',
+        // Obsidian-inspired dark surfaces for panels/overlays
+        'obsidian-950': '#101014',
+        'obsidian-900': '#191a1f',
+        'obsidian-800': '#23242b',
         'emerald-neon': '#10b981',
         'emerald-glow': '#34d399',
         'indigo-neon': '#6366f1',
@@ -29,5 +33,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 }

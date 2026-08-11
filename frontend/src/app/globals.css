@@ -121,6 +121,21 @@
   }
 }
 
+/* KaTeX — keep long display equations scrollable inside the markdown card */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35rem 0;
+}
+
+.katex {
+  font-size: 1.05em;
+}
+
+.katex-display > .katex {
+  font-size: 1.15em;
+}
+
 :root {
   --background: #050505;
   --foreground: #E0E0E0;
