@@ -46,6 +46,16 @@ interface StudyPlan {
     raw_text?: string;
 }
 
+// One accent color per Bloom's level so the feed reads at a glance.
+const BLOOM_STYLES: Record<string, { badge: string; chip: string; bar: string }> = {
+    Remember:   { badge: "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400",  chip: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25",   bar: "bg-emerald-500" },
+    Understand: { badge: "bg-sky-500/10 border-sky-500/25 text-sky-600 dark:text-sky-400",               chip: "text-sky-600 dark:text-sky-400 bg-sky-500/10 border-sky-500/25",               bar: "bg-sky-500" },
+    Apply:      { badge: "bg-indigo-500/10 border-indigo-500/25 text-indigo-600 dark:text-indigo-400",   chip: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/25",       bar: "bg-indigo-500" },
+    Analyze:    { badge: "bg-violet-500/10 border-violet-500/25 text-violet-600 dark:text-violet-400",   chip: "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/25",       bar: "bg-violet-500" },
+    Evaluate:   { badge: "bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400",       chip: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/25",           bar: "bg-amber-500" },
+    Create:     { badge: "bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-400",           chip: "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/25",               bar: "bg-rose-500" },
+};
+
 export default function PaperDeepDivePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -61,6 +71,41 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
     const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
     const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
     const [planError, setPlanError] = useState<string | null>(null);
+
+    const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+    const [isAnswering, setIsAnswering] = useState(false);
+    const [answerError, setAnswerError] = useState<string | null>(null);
+
+    const handleAiAnswer = async () => {
+        if (!selectedQuestion) return;
+        setIsAnswering(true);
+        setAnswerError(null);
+        setAiAnswer(null);
+        try {
+            const res = await fetch(`${API_URL}/api/chat/answer`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question_id: selectedQuestion.id, paper_id: id })
+            });
+            const resData = await res.json().catch(() => null);
+            if (!res.ok) {
+                setAnswerError(resData && typeof resData.detail === "string"
+                    ? resData.detail
+                    : `AI explain failed (${res.status}). Try again.`);
+                return;
+            }
+            if (!resData?.answer?.trim()) {
+                setAnswerError("The AI returned an empty response. Try again.");
+                return;
+            }
+            setAiAnswer(resData.answer);
+        } catch (e) {
+            console.error(e);
+            setAnswerError("Could not reach the server. Check your connection and try again.");
+        } finally {
+            setIsAnswering(false);
+        }
+    };
 
     const handleGenerateStudyPlan = async () => {
         setIsGeneratingPlan(true);
@@ -226,52 +271,70 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 pb-20">
-                            {data.questions.map((q, i) => (
-                                <motion.button
-                                    key={q.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    onClick={() => {
-                                        setSelectedQuestion(q);
-                                        setGradingResult(null);
-                                        setUserAnswer("");
-                                    }}
-                                    className="w-full text-left focus:outline-none"
-                                >
-                                    <GlassCard className={cn(
-                                        "p-6 flex items-start gap-6 border-black/5 dark:border-white/10 group hover:border-emerald-500/30 transition-all duration-300",
-                                        selectedQuestion?.id === q.id ? "bg-emerald-500/10 border-emerald-500/40" : ""
-                                    )}>
-                                        <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/10 flex flex-col items-center justify-center transition-all group-hover:scale-105 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20">
-                                            <span className="text-[9px] font-black text-slate-400 group-hover:text-emerald-500 leading-none mb-1">UNIT</span>
-                                            <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{q.question_number}</span>
-                                        </div>
+                        <div className="grid grid-cols-1 gap-4 pb-20">
+                            {data.questions.map((q, i) => {
+                                const bloom = BLOOM_STYLES[q.blooms_level] ?? BLOOM_STYLES.Remember;
+                                return (
+                                    <motion.button
+                                        key={q.id}
+                                        initial={{ opacity: 0, y: 16 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.04, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                        onClick={() => {
+                                            setSelectedQuestion(q);
+                                            setGradingResult(null);
+                                            setUserAnswer("");
+                                            setAiAnswer(null);
+                                            setAnswerError(null);
+                                        }}
+                                        className="w-full text-left focus:outline-none group"
+                                    >
+                                        <GlassCard className={cn(
+                                            "relative overflow-hidden p-5 md:p-6 flex items-start gap-5 border-black/5 dark:border-white/10 transition-all duration-300",
+                                            "hover:-translate-y-0.5 hover:border-emerald-500/30",
+                                            selectedQuestion?.id === q.id ? "bg-emerald-500/[0.06] border-emerald-500/40" : ""
+                                        )}>
+                                            {/* Bloom-colored accent bar */}
+                                            <span className={cn("absolute left-0 top-0 bottom-0 w-1 opacity-70 group-hover:opacity-100 transition-opacity", bloom.bar)} />
 
-                                        <div className="flex-1 space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
-                                                    {q.blooms_level}
-                                                </span>
-                                                {q.is_calculation_heavy && (
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded-full border border-indigo-500/20">
-                                                        CALCULATION
-                                                    </span>
-                                                )}
-                                                <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-600 uppercase ml-auto">{q.topic}</span>
+                                            <div className={cn(
+                                                "flex-shrink-0 w-12 h-12 rounded-xl border flex flex-col items-center justify-center transition-all duration-300 group-hover:scale-105",
+                                                bloom.badge
+                                            )}>
+                                                <span className="text-[8px] font-black opacity-70 leading-none mb-0.5 uppercase">Q</span>
+                                                <span className="text-base font-display font-bold leading-none">{String(q.question_number).replace(/^Q/i, "")}</span>
                                             </div>
-                                            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 italic line-clamp-3 leading-relaxed">
-                                                "{q.raw_text}"
-                                            </p>
-                                        </div>
-                                        <ChevronRight className={cn(
-                                            "flex-shrink-0 w-5 h-5 text-slate-400 mt-6 transition-all",
-                                            selectedQuestion?.id === q.id ? "rotate-90 text-emerald-500 scale-110" : "group-hover:translate-x-1 group-hover:text-emerald-500"
-                                        )} />
-                                    </GlassCard>
-                                </motion.button>
-                            ))}
+
+                                            <div className="flex-1 min-w-0 space-y-2.5">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border", bloom.chip)}>
+                                                        {q.blooms_level}
+                                                    </span>
+                                                    {q.is_calculation_heavy && (
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded-full border border-indigo-500/20">
+                                                            CALCULATION
+                                                        </span>
+                                                    )}
+                                                    {q.diagram_url && (
+                                                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-500/10 px-2 py-1 rounded-full border border-sky-500/20">
+                                                            <ImageIcon className="w-3 h-3" /> DIAGRAM
+                                                        </span>
+                                                    )}
+                                                    <span className="ml-auto text-[9px] font-mono font-bold text-slate-400 dark:text-slate-600 uppercase truncate max-w-[45%]">{q.topic}</span>
+                                                </div>
+                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3">
+                                                    {q.raw_text}
+                                                </p>
+                                            </div>
+
+                                            <ChevronRight className={cn(
+                                                "flex-shrink-0 w-5 h-5 text-slate-400 mt-5 transition-all",
+                                                selectedQuestion?.id === q.id ? "rotate-90 text-emerald-500 scale-110" : "group-hover:translate-x-1 group-hover:text-emerald-500"
+                                            )} />
+                                        </GlassCard>
+                                    </motion.button>
+                                );
+                            })}
                         </div>
                     </div>
                 </main>
@@ -391,6 +454,55 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                     <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-xl italic text-base text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium">
                                         "{selectedQuestion.raw_text}"
                                     </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+                                        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">AI Model Answer</h3>
+                                    </div>
+                                    <Button
+                                        onClick={handleAiAnswer}
+                                        disabled={isAnswering}
+                                        className="w-full h-14 rounded-xl font-black text-sm shadow-emerald"
+                                    >
+                                        {isAnswering ? (
+                                            <div className="flex items-center gap-3">
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                DECRYPTING MODEL ANSWER...
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-3">
+                                                <Sparkles className="w-5 h-5" />
+                                                EXPLAIN WITH AI
+                                            </div>
+                                        )}
+                                    </Button>
+                                    {answerError && (
+                                        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-[10px] font-black text-red-500 uppercase tracking-widest leading-relaxed">
+                                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                            <span>{answerError}</span>
+                                        </div>
+                                    )}
+                                    {aiAnswer && (
+                                        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                            <StudyPlanMarkdown
+                                                doc={{
+                                                    title: `${data.paper.courses.code} — ${data.paper.courses.name}`,
+                                                    subtitle: "AI MODEL ANSWER",
+                                                    totalQuestions: 0,
+                                                    topics: [],
+                                                    blooms: [],
+                                                    highYield: [],
+                                                    complex: [],
+                                                    steps: [],
+                                                    mockStrategy: {},
+                                                    raw_text: aiAnswer,
+                                                }}
+                                                exportPrefix={`answer-${selectedQuestion.question_number.replace(/[^a-zA-Z0-9]/g, "-")}`}
+                                            />
+                                        </div>
+                                    )}
                                 </section>
 
                                 <section className="space-y-6">

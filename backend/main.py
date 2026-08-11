@@ -428,6 +428,10 @@ class GradeRequest(BaseModel):
     question_id: str
     user_answer: str
 
+class AnswerRequest(BaseModel):
+    question_id: str
+    paper_id: Optional[str] = None
+
 class StudyPlanRequest(BaseModel):
     paper_id: Optional[str] = None
     course_id: Optional[str] = None
@@ -473,6 +477,72 @@ async def grade_student_answer(request: GradeRequest):
         
     except Exception as e:
         logger.error(f"Error in grading: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/chat/answer")
+async def answer_question(request: AnswerRequest):
+    """
+    AI model answer + explanation for a specific question.
+    Returns Obsidian-style markdown (GFM tables) so the frontend can render
+    it exactly like the study plan, with the same export tooling.
+    """
+    try:
+        question_res = supabase_client.table('questions').select('*').eq('id', request.question_id).single().execute()
+        if not question_res.data:
+            raise HTTPException(status_code=404, detail="Question not found")
+        q = question_res.data
+
+        context_line = ""
+        if request.paper_id:
+            try:
+                paper_res = supabase_client.table('exam_papers').select('*, courses(code, name)').eq('id', request.paper_id).maybe_single().execute()
+                if paper_res.data:
+                    c = (paper_res.data.get('courses') or {})
+                    context_line = f"Course: {c.get('code', '')} - {c.get('name', '')} · Year: {paper_res.data.get('year', '')}"
+            except Exception:
+                # Optional context only — a stale/missing paper must not kill the answer.
+                pass
+
+        prompt = f"""
+        Role: You are an expert engineering professor and model-answer writer.
+        Task: Provide a complete model answer and clear explanation for the exam question below.
+
+        {context_line}
+
+        Question: {q.get('raw_text', '')}
+        Topic: {q.get('topic', '')}
+        Sub-topic: {q.get('sub_topic', '')}
+        Bloom's Level: {q.get('blooms_level', '')}
+        Keywords: {', '.join(q.get('keywords') or [])}
+
+        Return ONLY valid Markdown (Obsidian-compatible, GitHub-flavored tables) with EXACTLY this structure:
+
+        ## Model Answer
+        <full, correct answer as an engineering student should write it>
+
+        ## Step-by-Step Explanation
+        <numbered breakdown of the reasoning, equations, or approach>
+
+        ## Marking Scheme
+        | Criterion | Points | Notes |
+        |-----------|--------|-------|
+        <rows mapping what earns marks>
+
+        ## Common Mistakes
+        - <bullet list of frequent errors and how to avoid them>
+
+        ## Key Takeaways
+        - <bullet list of the core concept to remember>
+        """
+
+        response = llm.invoke(prompt)
+        return {"answer": response.content}
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Error in answer: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -682,7 +752,8 @@ def get_course_analytics(course_id: str):
 
 
 @app.get("/api/community/trends")
-@cache(expire=60)
+# NOTE: intentionally NOT @cache'd — an empty or error response would otherwise
+# be cached for the TTL and every user would see zeros until it expires.
 def get_community_trends():
     """
     Returns global trending topics across all courses and uploads.

@@ -22,7 +22,7 @@ export function Sidebar() {
 <div className="w-10 h-10 rounded bg-emerald-500 flex items-center justify-center relative overflow-hidden shadow-emerald group-hover:scale-110 transition-transform duration-500">
                            <ShieldCheck className="w-6 h-6 text-white" />
                        </div>
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full border-2 border-[var(--sidebar-bg)] shadow-indigo-500/50" />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-neon-crystal rounded-full border-2 border-[var(--sidebar-bg)] shadow-[0_0_12px_rgba(16,185,129,0.6)]" />
                     </div>
                     <span className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter hidden md:block uppercase leading-none">
                         SENTINEL<span className="text-emerald-500">.</span>
@@ -71,22 +71,22 @@ export function Sidebar() {
 
             {/* Bottom Section */}
             <div className="px-4 md:px-8 space-y-6">
-                <div className="flex items-center justify-between gap-2 p-2 bg-slate-100 dark:bg-white/5 rounded hidden md:flex">
+                <div className="flex items-center justify-between gap-2 p-2 bg-[var(--card-bg)] border border-[var(--border)] rounded hidden md:flex">
                     <ThemeToggle />
-                    <div className="flex flex-col text-[8px] font-bold text-slate-500 mr-2 uppercase tracking-tight">
+                    <div className="flex flex-col text-[8px] font-bold text-[var(--text-muted)] mr-2 uppercase tracking-tight">
                         <span>Mode</span>
-                        <span className="text-emerald-500">Active</span>
+                        <span className="text-neon-crystal">Active</span>
                     </div>
                 </div>
 
-                <div className="mt-6 p-4 rounded bg-indigo-50 dark:bg-indigo-500/5 border border-indigo-200 dark:border-indigo-500/10 hidden md:block">
-                    <div className="flex flex-col gap-1.5 text-[8px] font-medium uppercase tracking-widest text-slate-600 dark:text-slate-400">
-                        <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-500 font-bold mb-1">
+                <div className="mt-6 p-4 rounded bg-emerald-500/[0.04] border border-emerald-500/15 hidden md:block">
+                    <div className="flex flex-col gap-1.5 text-[8px] font-medium uppercase tracking-widest text-[var(--text-muted)]">
+                        <div className="flex items-center gap-1.5 text-neon-crystal font-bold mb-1">
                             <Activity className="w-3 h-3" />
                             NETWORK LIVE
                         </div>
-                        <span className="opacity-60">Auth: SECURE_LINK</span>
-                        <span className="opacity-60">Dist: NODE_KNUST_01</span>
+                        <span className="opacity-70">Auth: SECURE_LINK</span>
+                        <span className="opacity-70">Dist: NODE_KNUST_01</span>
                     </div>
                 </div>
             </div>
@@ -101,13 +101,13 @@ function NavItem({ icon: Icon, label, active, href }: { icon: any; label: string
             className={cn(
                 "flex items-center gap-4 px-4 py-3.5 rounded transition-all duration-300 group relative",
                 active
-                    ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)]"
             )}
         >
             <Icon className={cn(
                 "w-5 h-5 mx-auto md:mx-0 transition-all duration-500",
-                active ? "text-emerald-600 dark:text-emerald-500 scale-110" : "text-slate-400 dark:text-slate-500 group-hover:text-emerald-500 group-hover:scale-110"
+                active ? "text-emerald-600 dark:text-emerald-500 scale-110" : "text-[var(--text-muted)]/80 group-hover:text-emerald-500 group-hover:scale-110"
             )} />
             <span className="text-xs font-medium hidden md:block">{label}</span>
             

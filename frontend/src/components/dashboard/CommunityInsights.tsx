@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, TrendingUp, Globe, ArrowRight } from "lucide-react";
+import { Users, TrendingUp, Globe, ArrowRight, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import useSWR from "swr";
 
@@ -33,10 +33,10 @@ export function CommunityInsights() {
 
     // SWR: fetches once in the background, caches, dedupes, and revalidates
     // silently — so switching to this tab never triggers a full reload.
-    const { data, error, isLoading } = useSWR<CommunityTrendsResponse>(
+    const { data, error, isLoading, mutate } = useSWR<CommunityTrendsResponse>(
         `${API_URL}/api/community/trends`,
         throwingFetcher,
-        { revalidateOnFocus: true, dedupingInterval: 60000 }
+        { revalidateOnFocus: true, dedupingInterval: 15000 }
     );
 
     const trends = data?.trending_topics ?? [];
@@ -62,6 +62,12 @@ export function CommunityInsights() {
                 <Globe className="w-8 h-8 text-red-400" />
                 <p className="text-xs text-red-400">Could not load community insights.</p>
                 <p className="text-[10px] text-[var(--text-muted)]">The backend may be unavailable — try again shortly.</p>
+                <button
+                    onClick={() => mutate()}
+                    className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-neon-crystal hover:text-white transition-colors"
+                >
+                    <RefreshCw className="w-3 h-3" /> RETRY
+                </button>
             </div>
         );
     }
