@@ -350,7 +350,7 @@ export default function GlobalAnalyticsPage() {
                         <Activity className="w-3.5 h-3.5 text-emerald-500" />
                         <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">Analytics</span>
                     </div>
-                    <h1 className="text-3xl font-semibold text-[var(--text-primary)]">
+                    <h1 className="text-[clamp(1.5rem,4vw,1.875rem)] font-semibold text-[var(--text-primary)]">
                         Academic <span className="text-emerald-500">Analytics</span>
                     </h1>
                     <p className="text-[var(--text-muted)] text-sm max-w-xl">

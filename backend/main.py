@@ -1,7 +1,7 @@
 import os
 import hashlib
 import logging
-from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, BackgroundTasks, UploadFile, File, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict
@@ -87,7 +87,8 @@ async def upload_exam_paper(
     course_name: str = Form(...),
     department: str = Form(...),
     year: int = Form(...),
-    semester: str = Form(...)
+    semester: str = Form(...),
+    user_id: Optional[str] = Form(None)  # supplied by the frontend from the Supabase session
 ):
     """
     Handles PDF upload. Validates format, checks MD5 duplication, 
@@ -136,7 +137,7 @@ async def upload_exam_paper(
             'file_url': file_url,
             'file_hash': file_hash,
             'processing_status': 'pending',
-            'user_id': None  # TODO: Extract from auth token when auth is fully implemented
+            'user_id': user_id or None
         }
 
         insert_response = supabase_client.table('exam_papers').insert(paper_data).execute()
@@ -288,11 +289,15 @@ def get_paper_details(paper_id: str):
 
 
 @app.delete("/api/papers/{paper_id}")
-def delete_exam_paper(paper_id: str):
+def delete_exam_paper(paper_id: str, user_id: Optional[str] = Query(None)):
     """
     Deletes an exam paper and its associated questions.
-    Only the original uploader can delete their paper.
-    Admins can delete any paper via /api/admin/papers/{id}
+    Only the original uploader can delete their paper; the frontend passes
+    the signed-in user's id so ownership can be verified.
+
+    Legacy/community papers (user_id NULL) remain deletable by anyone to
+    preserve current behavior; owned papers require a matching user_id.
+    Admins can delete any paper via /api/admin/papers/{id}.
     """
     try:
         paper_res = supabase_client.table('exam_papers').select('user_id, course_id').eq('id', paper_id).single().execute()
@@ -302,7 +307,7 @@ def delete_exam_paper(paper_id: str):
         
         paper_owner = paper_res.data.get('user_id')
         
-        if paper_owner is not None:
+        if paper_owner is not None and paper_owner != user_id:
             raise HTTPException(
                 status_code=403, 
                 detail="You can only delete papers you uploaded."

@@ -33,6 +33,7 @@ interface Paper {
 export default function PapersPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterYear, setFilterYear] = useState<string>("All Years");
+    const [ownerFilter, setOwnerFilter] = useState<"all" | "mine" | "community">("all");
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -49,7 +50,8 @@ export default function PapersPage() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this paper and all its analyzed data?")) return;
         try {
-            const res = await fetch(`${API_URL}/api/papers/${id}`, { method: "DELETE" });
+            // Pass the signed-in user so the backend can verify ownership
+            const res = await fetch(`${API_URL}/api/papers/${id}?user_id=${currentUserId ?? ""}`, { method: "DELETE" });
             if (res.status === 403) {
                 const data = await res.json();
                 alert(data.detail || "You can only delete papers you uploaded.");
@@ -66,8 +68,14 @@ export default function PapersPage() {
             p.courses?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.courses?.code.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesYear = filterYear === "All Years" || p.year.toString() === filterYear;
-        return matchesSearch && matchesYear;
+        // "mine" = papers tagged with the signed-in user; "community" = everything else
+        const matchesOwner =
+            ownerFilter === "all" ||
+            (ownerFilter === "mine" ? p.user_id === currentUserId : p.user_id !== currentUserId);
+        return matchesSearch && matchesYear && matchesOwner;
     });
+
+    const mineCount = currentUserId ? papers.filter(p => p.user_id === currentUserId).length : 0;
 
     const years = ["All Years", ...Array.from(new Set(papers.map(p => p.year.toString()))).sort().reverse()];
 
@@ -80,7 +88,7 @@ export default function PapersPage() {
                         <Binary className="w-3.5 h-3.5 text-emerald-500" />
                         <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-600 dark:text-emerald-400 uppercase">Archive Management</span>
                     </div>
-                    <h1 className="text-5xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none">
+                    <h1 className="text-[clamp(2rem,6vw,3rem)] font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none">
                         Document <span className="text-emerald-500 shadow-emerald">Vault</span>
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">
@@ -114,7 +122,27 @@ export default function PapersPage() {
                     />
                 </div>
 
-                <div className="flex gap-3 w-full md:w-auto">
+                <div className="flex gap-3 w-full md:w-auto items-center">
+                    {/* Ownership filter — highlight my papers vs community papers */}
+                    <div className="flex rounded-xl bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-1 gap-1 w-full md:w-auto">
+                        {([
+                            { id: "all", label: "All" },
+                            { id: "mine", label: `Mine (${mineCount})` },
+                            { id: "community", label: "Community" },
+                        ] as const).map(opt => (
+                            <button
+                                key={opt.id}
+                                onClick={() => setOwnerFilter(opt.id)}
+                                className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                                    ownerFilter === opt.id
+                                        ? "bg-emerald-500 text-white shadow-emerald"
+                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
                     <div className="relative group w-full md:w-48">
                         <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <select
@@ -175,19 +203,27 @@ function PaperCard({ paper, index, onDelete, isOwner }: { paper: Paper; index: n
             transition={{ delay: index * 0.03 }}
             className="group relative h-[180px]"
         >
-            <div className="h-full flex flex-col p-4 border border-[var(--border)] bg-[var(--card-bg)] hover:border-emerald-500/30 transition-colors">
+            <div className={cn("h-full flex flex-col p-4 border bg-[var(--card-bg)] transition-colors",
+                isOwner ? "border-emerald-500/40 hover:border-emerald-500/60" : "border-[var(--border)] hover:border-emerald-500/30")}>
                 <div className="flex-1 flex flex-col justify-between">
                     <div className="flex items-start justify-between gap-3">
-                        <div className={cn(
-                            "flex items-center gap-2 px-2 py-1 rounded text-[10px] font-medium",
-                            isCompleted ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" :
-                            isProcessing ? "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-500" :
-                            "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-500"
-                        )}>
-                            {isCompleted && <CheckCircle2 className="w-3 h-3" />}
-                            {isProcessing && <Loader2 className="w-3 h-3 animate-spin" />}
-                            {isFailed && <AlertCircle className="w-3 h-3" />}
-                            <span className="hidden sm:inline">{paper.processing_status}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className={cn(
+                                "flex items-center gap-2 px-2 py-1 rounded text-[10px] font-medium",
+                                isCompleted ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" :
+                                isProcessing ? "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-500" :
+                                "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-500"
+                            )}>
+                                {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                                {isProcessing && <Loader2 className="w-3 h-3 animate-spin" />}
+                                {isFailed && <AlertCircle className="w-3 h-3" />}
+                                <span className="hidden sm:inline">{paper.processing_status}</span>
+                            </div>
+                            {isOwner && (
+                                <span className="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                                    Yours
+                                </span>
+                            )}
                         </div>
                         <div className="text-[9px] font-mono text-[var(--text-muted)]">
                            {paper.id.split('-')[0].toUpperCase()}

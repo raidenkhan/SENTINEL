@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertCircle, BookOpen, BrainCircuit, CheckCircle2, Database, FileText, MoreHorizontal, Plus, RefreshCw, UploadCloud, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 type UploadedFile = {
     id: string;
@@ -147,6 +148,16 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
         };
     }, []);
 
+    // Close the success modal with Escape, not just backdrop/button clicks
+    useEffect(() => {
+        if (!completedPaper) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setCompletedPaper(null);
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [completedPaper]);
+
     const getProgress = (status: UploadedFile['status']) => {
         switch (status) {
             case 'pending': return 10;
@@ -171,6 +182,11 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
         formData.append("department", selectedCourse.department || "Engineering");
         formData.append("year", String(year));
         formData.append("semester", semester);
+
+        // Tag the paper with the signed-in user so the vault can separate
+        // "My papers" from community ones (backend stores None when absent).
+        const { data: { user } } = await supabase.auth.getUser();
+        formData.append("user_id", user?.id || "");
 
         // Optimistic UI Update
         const tempId = Math.random().toString(36).substring(7);
@@ -519,13 +535,17 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
             {/* Success Modal — shown when a paper finishes processing */}
             <AnimatePresence>
                 {completedPaper && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                    <motion.div
+                        key="analysis-complete"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6"
+                    >
+                        {/* Backdrop — click anywhere outside the card to dismiss */}
+                        <div
+                            className="absolute inset-0 bg-black/70 backdrop-blur-xl"
                             onClick={() => setCompletedPaper(null)}
-                            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl"
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.92, y: 16 }}
@@ -535,8 +555,16 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                             role="dialog"
                             aria-modal="true"
                             aria-label="Analysis complete"
-                            className="fixed z-[110] inset-0 m-auto w-[92vw] max-w-md max-h-[90vh] overflow-y-auto h-fit glass-card p-8 md:p-10 rounded-2xl border border-neon-crystal/30 text-center relative"
+                            className="relative w-full max-w-md max-h-[85vh] overflow-y-auto custom-scrollbar glass-card p-6 md:p-10 rounded-2xl border border-neon-crystal/30 text-center"
                         >
+                            {/* Close button — always visible, even when the content scrolls */}
+                            <button
+                                onClick={() => setCompletedPaper(null)}
+                                aria-label="Close"
+                                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors z-10"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                             {/* Top accent sweep */}
                             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-neon-crystal/70 to-transparent" />
 
@@ -606,7 +634,7 @@ export function FileProcessingView({ onUploadComplete }: { onUploadComplete?: ()
                                 </button>
                             </div>
                         </motion.div>
-                    </>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </>

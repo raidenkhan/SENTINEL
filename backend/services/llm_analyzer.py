@@ -1,6 +1,8 @@
 import time
 import logging
+import threading
 from typing import List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -181,29 +183,35 @@ TOKENS_PER_CHAR = 0.25  # rough estimate: ~4 chars per token
 
 
 class _TokenBudget:
-    """Paces LLM calls so a rolling 60-second window never exceeds the TPM cap."""
+    """Paces LLM calls so a rolling 60-second window never exceeds the TPM cap.
+
+    Thread-safe: chunk analysis runs on a thread pool, so every acquire is
+    guarded by a lock (the bookkeeping is a read-modify-write on shared state).
+    """
 
     def __init__(self, limit: int = TPM_LIMIT):
         self.limit = limit
         self.used = 0
         self.window_start = time.monotonic()
+        self._lock = threading.Lock()
 
     def acquire(self, est_tokens: int) -> None:
-        while True:
-            now = time.monotonic()
-            elapsed = now - self.window_start
-            if elapsed >= 60:
-                self.window_start = now
-                self.used = 0
-            if self.used + est_tokens <= self.limit:
-                self.used += est_tokens
-                return
-            wait = max(1.0, 60 - elapsed + 1)
-            logger.warning(
-                f"LLM token budget nearly exhausted ({self.used}/{self.limit}), "
-                f"pausing {wait:.0f}s for the window to roll over..."
-            )
-            time.sleep(wait)
+        with self._lock:
+            while True:
+                now = time.monotonic()
+                elapsed = now - self.window_start
+                if elapsed >= 60:
+                    self.window_start = now
+                    self.used = 0
+                if self.used + est_tokens <= self.limit:
+                    self.used += est_tokens
+                    return
+                wait = max(1.0, 60 - elapsed + 1)
+                logger.warning(
+                    f"LLM token budget nearly exhausted ({self.used}/{self.limit}), "
+                    f"pausing {wait:.0f}s for the window to roll over..."
+                )
+                time.sleep(wait)
 
 
 _budget = _TokenBudget()
@@ -284,34 +292,53 @@ def process_exam_text(
         detected_topics: set = set()
         summaries: List[str] = []
 
-        for i, chunk in enumerate(chunks, 1):
-            if len(chunks) > 1:
-                print(f"  Analyzing chunk {i}/{len(chunks)} ({len(chunk)} chars)...")
-            result = _invoke_with_retry({
-                "exam_text": chunk,
-                "course_code": course_code,
-                "course_name": course_name,
-                "department": department,
-                "syllabus_topics": syllabus_topics
-            })
-            if result is None:
-                continue  # salvage whatever other chunks produce
+        base_inputs = {
+            "course_code": course_code,
+            "course_name": course_name,
+            "department": department,
+            "syllabus_topics": syllabus_topics
+        }
 
-            if result.questions:
-                for q in result.questions:
-                    key = q.raw_text.strip()[:200]
-                    if key in seen_raw:
-                        continue  # dedupe questions caught in chunk overlaps
-                    seen_raw.add(key)
-                    questions.append(q)
+        # Analyze chunks in parallel (2 concurrent calls) — the LLM latency of
+        # each chunk (30-60s) is the pipeline's biggest cost, and chunk calls
+        # are independent. Sequential runs made a 3-chunk paper take ~3x as
+        # long. DeepSeek is pay-per-token with a generous burst allowance, so
+        # 2 in flight stays well inside the budget while nearly halving wall time.
+        def _analyze(chunk: str):
+            return _invoke_with_retry(dict(base_inputs, exam_text=chunk))
 
-            if result.course_metadata:
-                detected_topics.update(result.course_metadata.detected_topics)
-                if course_meta is None:
-                    course_meta = result.course_metadata
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = {
+                pool.submit(_analyze, chunk): i
+                for i, chunk in enumerate(chunks, 1)
+            }
+            for fut in as_completed(futures):
+                i = futures[fut]
+                if len(chunks) > 1:
+                    print(f"  Chunk {i}/{len(chunks)} finished.")
+                try:
+                    result = fut.result()
+                except Exception as e:
+                    print(f"  Chunk {i}/{len(chunks)} failed: {e}")
+                    continue  # salvage whatever other chunks produce
+                if result is None:
+                    continue
 
-            if result.summary:
-                summaries.append(result.summary)
+                if result.questions:
+                    for q in result.questions:
+                        key = q.raw_text.strip()[:200]
+                        if key in seen_raw:
+                            continue  # dedupe questions caught in chunk overlaps
+                        seen_raw.add(key)
+                        questions.append(q)
+
+                if result.course_metadata:
+                    detected_topics.update(result.course_metadata.detected_topics)
+                    if course_meta is None:
+                        course_meta = result.course_metadata
+
+                if result.summary:
+                    summaries.append(result.summary)
 
         if not questions:
             print("LLM analysis returned no questions (all chunks failed or were empty).")

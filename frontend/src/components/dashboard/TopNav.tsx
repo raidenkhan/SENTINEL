@@ -77,7 +77,7 @@ export function TopNav() {
                     <Activity className="w-3 h-3 text-emerald-500 animate-pulse" />
                     <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Sentinel Core Active</span>
                 </div>
-                <h1 className="text-3xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none">
+                <h1 className="text-[clamp(1.5rem,4vw,1.875rem)] font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none">
                     {getTitle()}
                 </h1>
             </div>

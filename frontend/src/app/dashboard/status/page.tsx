@@ -149,7 +149,7 @@ export default function StatusPage() {
                         </div>
                         <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded uppercase tracking-widest">Admin Only</span>
                     </div>
-                    <h1 className="text-3xl font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">
+                    <h1 className="text-[clamp(1.5rem,4vw,1.875rem)] font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">
                         Engine Status
                     </h1>
                     <p className="text-sm text-slate-500">System health and monitoring dashboard</p>

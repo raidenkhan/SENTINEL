@@ -194,7 +194,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                     <BrainCircuit className="w-8 h-8 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">PAPER_ADVISORY</h2>
+                                    <h2 className="text-[clamp(1.5rem,4vw,1.875rem)] font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">PAPER_ADVISORY</h2>
                                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-widest mt-1">Intelligence Core Active</p>
                                 </div>
                             </div>
@@ -421,7 +421,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         <GraduationCap className="w-8 h-8 text-white transition-transform group-hover:scale-110" />
                                     </div>
                                     <div>
-                                        <h2 className="text-3xl font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">SENTINEL_LABS</h2>
+                                        <h2 className="text-[clamp(1.5rem,4vw,1.875rem)] font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">SENTINEL_LABS</h2>
                                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest mt-1">Peer Assessment Logic Active</p>
                                     </div>
                                 </div>

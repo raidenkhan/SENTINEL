@@ -80,7 +80,7 @@ export default function SettingsPage() {
                     <Shield className="w-4 h-4 text-emerald-500" />
                     Neural Identity Configuration
                 </div>
-                <h1 className="text-3xl font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">
+                <h1 className="text-[clamp(1.5rem,4vw,1.875rem)] font-black italic text-slate-900 dark:text-white uppercase tracking-tighter">
                     Account Settings
                 </h1>
                 <p className="text-sm text-slate-500">Manage your profile and preferences</p>
