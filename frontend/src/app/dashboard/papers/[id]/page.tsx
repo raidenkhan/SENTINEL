@@ -220,29 +220,29 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
             </AnimatePresence>
 
             {/* Premium Header/Navigation */}
-            <nav className="flex items-center justify-between px-10 py-6 border-b border-black/5 dark:border-white/5 bg-[var(--nav-bg)] backdrop-blur-3xl z-40">
-                <div className="flex items-center gap-6">
-                    <Link href="/dashboard/papers" className="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-black/5 dark:hover:border-white/10 group">
+            <nav className="flex items-center justify-between gap-4 px-4 md:px-10 py-4 md:py-6 border-b border-black/5 dark:border-white/5 bg-[var(--nav-bg)] backdrop-blur-3xl z-40">
+                <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                    <Link href="/dashboard/papers" className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-black/5 dark:hover:border-white/10 group">
                         <ChevronLeft className="w-5 h-5 text-slate-500 group-hover:text-emerald-500" />
                     </Link>
-                    <div className="h-10 w-px bg-black/5 dark:bg-white/10" />
-                    <div className="flex flex-col">
+                    <div className="h-10 w-px bg-black/5 dark:bg-white/10 hidden sm:block" />
+                    <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             <span>{data.paper.courses.code}</span>
-                            <ChevronRight className="w-2 h-2" />
+                            <ChevronRight className="w-2 h-2 flex-shrink-0" />
                             <span className="text-emerald-500">{data.paper.year} SCAN</span>
                         </div>
-                        <h1 className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-none mt-1">
+                        <h1 className="text-lg md:text-xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase leading-tight mt-1 truncate">
                             {data.paper.courses.name}
                         </h1>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6 flex-wrap justify-end">
+                <div className="flex items-center gap-3 md:gap-6 flex-wrap justify-end shrink-0">
                     <Button 
                         onClick={handleGenerateStudyPlan}
                         disabled={isGeneratingPlan}
-                        className="rounded-lg h-12 px-8 font-black text-[10px]"
+                        className="rounded-lg h-10 px-5 md:px-6 font-black text-[10px]"
                     >
                         {isGeneratingPlan ? "ANALYZING..." : "GENERATE STRATEGY"}
                     </Button>
@@ -262,11 +262,11 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
 
             <div className="flex flex-1 overflow-hidden relative">
                 {/* Scrollable Question Feed */}
-                <main className="flex-1 overflow-y-auto p-10 custom-scrollbar scroll-smooth">
-                    <div className="max-w-4xl mx-auto space-y-10">
+                <main className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar scroll-smooth">
+                    <div className="max-w-4xl mx-auto space-y-6 md:space-y-10">
                         <div className="flex items-center justify-between pb-4 border-b border-black/5 dark:border-white/5">
                             <div>
-                                <h2 className="text-2xl font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">UNITS_HUB</h2>
+                                <h2 className="text-[clamp(1.5rem,4vw,1.75rem)] font-black italic text-slate-900 dark:text-white tracking-tighter uppercase leading-none">UNITS_HUB</h2>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Found {data.questions.length} logical entities</p>
                             </div>
                         </div>
@@ -290,7 +290,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         className="w-full text-left focus:outline-none group"
                                     >
                                         <GlassCard className={cn(
-                                            "relative overflow-hidden p-5 md:p-6 flex items-start gap-5 border-black/5 dark:border-white/10 transition-all duration-300",
+                                            "relative overflow-hidden p-6 md:p-7 flex items-start gap-4 md:gap-5 border-black/5 dark:border-white/10 transition-all duration-300",
                                             "hover:-translate-y-0.5 hover:border-emerald-500/30",
                                             selectedQuestion?.id === q.id ? "bg-emerald-500/[0.06] border-emerald-500/40" : ""
                                         )}>
@@ -305,26 +305,31 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                                 <span className="text-base font-display font-bold leading-none">{String(q.question_number).replace(/^Q/i, "")}</span>
                                             </div>
 
-                                            <div className="flex-1 min-w-0 space-y-2.5">
+                                            <div className="flex-1 min-w-0 space-y-3">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border", bloom.chip)}>
+                                                    <span className={cn("text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border", bloom.chip)}>
                                                         {q.blooms_level}
                                                     </span>
                                                     {q.is_calculation_heavy && (
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded-full border border-indigo-500/20">
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
                                                             CALCULATION
                                                         </span>
                                                     )}
                                                     {q.diagram_url && (
-                                                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-500/10 px-2 py-1 rounded-full border border-sky-500/20">
+                                                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-500/20">
                                                             <ImageIcon className="w-3 h-3" /> DIAGRAM
                                                         </span>
                                                     )}
-                                                    <span className="ml-auto text-[9px] font-mono font-bold text-slate-400 dark:text-slate-600 uppercase truncate max-w-[45%]">{q.topic}</span>
                                                 </div>
-                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3">
+                                                <p className="text-sm md:text-[15px] font-medium text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3 break-words">
                                                     {q.raw_text}
                                                 </p>
+                                                <div className="flex items-center justify-between gap-4 pt-2.5 border-t border-black/5 dark:border-white/5">
+                                                    <span className="text-[9px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase truncate">{q.topic}</span>
+                                                    {q.sub_topic && (
+                                                        <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-600 uppercase truncate">{q.sub_topic}</span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <ChevronRight className={cn(
@@ -340,7 +345,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                 </main>
 
                 {/* Right Side: Quick Analytics Pane */}
-                <aside className="hidden lg:flex flex-col w-[380px] border-l border-black/5 dark:border-white/5 bg-[var(--nav-bg)] p-10 space-y-12 overflow-y-auto custom-scrollbar">
+                <aside className="hidden lg:flex flex-col w-[380px] border-l border-black/5 dark:border-white/5 bg-[var(--nav-bg)] p-6 md:p-8 space-y-10 overflow-y-auto custom-scrollbar">
                     <section>
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-indigo-500/5">
@@ -408,7 +413,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                             className="fixed top-0 right-0 w-full md:w-[680px] h-full bg-white dark:bg-obsidian-900 border-l border-black/5 dark:border-white/10 z-[70] flex flex-col shadow-24 overflow-hidden"
                         >
                             {/* Scanning Header */}
-                            <div className="p-8 border-b border-black/5 dark:border-white/5 flex items-center justify-between relative bg-slate-50 dark:bg-white/2">
+                            <div className="p-5 md:p-8 border-b border-black/5 dark:border-white/5 flex items-center justify-between relative bg-slate-50 dark:bg-white/2">
                                 <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/20 overflow-hidden">
                                     <motion.div 
                                         animate={{ x: ["-100%", "100%"] }} 
@@ -430,7 +435,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto p-5 md:p-10 space-y-10 custom-scrollbar">
                                 <section className="space-y-6">
                                     <div className="flex items-center gap-3">
                                         <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
@@ -451,8 +456,8 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                             </div>
                                         </GlassCard>
                                     )}
-                                    <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-xl italic text-base text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium">
-                                        "{selectedQuestion.raw_text}"
+                                    <div className="bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 p-6 md:p-8 rounded-xl text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm font-medium break-words">
+                                        {selectedQuestion.raw_text}
                                     </div>
                                 </section>
 
@@ -522,7 +527,7 @@ export default function PaperDeepDivePage({ params }: { params: Promise<{ id: st
                                         value={userAnswer}
                                         onChange={(e) => setUserAnswer(e.target.value)}
                                         placeholder="Establish your answer pattern here..."
-                                        className="w-full h-56 bg-slate-50 dark:bg-white/2 border border-black/5 dark:border-white/5 rounded-xl p-8 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium placeholder:text-slate-400"
+                                        className="w-full h-56 bg-slate-50 dark:bg-white/2 border border-black/5 dark:border-white/5 rounded-xl p-5 md:p-8 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium placeholder:text-slate-400"
                                     />
                                     <Button 
                                         onClick={handleGrade}
